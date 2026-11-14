@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#f5f7fc">
+<title>주동목 | 운영자</title>
+<style>
+:root{--blue:#235BFA;--navy:#172341;--muted:#71809b;--border:#e1e7f1;--surface:#f4f7fd;--green:#087b55}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#f2f5fb;color:var(--navy);font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','Segoe UI',sans-serif;font-size:16px;letter-spacing:-.025em}
+[hidden]{display:none!important}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #a6bdfc;outline-offset:2px}
+.shell{max-width:1000px;margin:0 auto;padding:24px 18px 65px}
+header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:8px 0 28px}
+.brand{font-size:23px;font-weight:850;letter-spacing:-.07em}.brand span{color:var(--blue);font-size:12px;margin-left:7px;letter-spacing:0}
+.pale{color:var(--muted)}.top-actions{display:flex;gap:8px;align-items:center}
+.btn{border:1px solid var(--border);background:white;color:var(--navy);font-weight:700;border-radius:9px;padding:11px 16px;min-height:44px}
+.btn.primary{border-color:var(--blue);background:var(--blue);color:#fff}.btn:disabled{opacity:.55;cursor:default}
+.login{max-width:420px;margin:9vh auto 0;background:#fff;padding:35px 29px;border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 50px #182e5c0b}
+.login h1{font-size:26px;margin:0 0 7px;letter-spacing:-.06em}.login p{font-size:14px;line-height:1.6;color:var(--muted);margin:0 0 25px}
+label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}
+input{display:block;width:100%;border-radius:9px;border:1px solid #cad3e3;background:#fff;padding:13px 12px;margin-bottom:17px;min-height:49px}
+.login .btn{width:100%;font-size:16px}.alert{color:#b42a36;font-size:14px;line-height:1.6;margin-top:12px;min-height:20px}.hint{font-size:13px;color:var(--muted);margin:14px 0 0;line-height:1.5}
+.headrow{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:0 0 20px}.headrow h1{font-size:28px;letter-spacing:-.06em;margin:0}.headrow small{color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:21px 20px}
+.stat .num{font-weight:850;font-size:34px;letter-spacing:-.06em}.stat .name{margin-top:8px;color:var(--muted);font-size:14px;font-weight:650}
+.cols{display:grid;grid-template-columns:1.1fr .9fr;gap:15px}
+.panel{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}.panel-head{display:flex;align-items:center;justify-content:space-between;padding:21px 22px;border-bottom:1px solid #eff2f7}.panel-head h2{font-size:19px;letter-spacing:-.04em;margin:0}.panel-head small{color:var(--muted)}
+.entry{padding:16px 22px;border-bottom:1px solid #eff2f7}.entry:last-child{border-bottom:0}.entry-top{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:8px}
+.entry strong{font-size:16px;line-height:1.5;display:block;overflow-wrap:anywhere}.entry p{margin:6px 0 0;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;color:#344461}
+.pill{font-size:12px;display:inline-block;border-radius:5px;padding:4px 8px;background:#edf2fc;color:#3958a1;font-weight:700}.pill.good{background:#e5f6ed;color:var(--green)}
+.empty{padding:28px 22px;color:var(--muted);font-size:14px}.error{border:1px solid #f6c3c6;border-radius:9px;padding:13px 15px;color:#a52632;background:#fff3f5;margin:0 0 15px}
+.footer{padding:21px 1px 0;color:var(--muted);font-size:13px;line-height:1.6}
+@media(max-width:750px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cols{grid-template-columns:1fr}.stat{padding:17px}.stat .num{font-size:30px}.shell{padding:17px 12px 40px}.panel-head,.entry{padding-left:16px;padding-right:16px}.headrow h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header><div class="brand">주동목 <span>ADMIN</span></div><div class="top-actions" id="top-actions" hidden><button type="button" class="btn" id="refresh">새로고침</button><button type="button" class="btn" id="logout">로그아웃</button></div></header>
+<section id="login" class="login"><h1>운영자 로그인</h1><p>주동목의 학습 현황과 피드백은 권한이 있는 계정만 볼 수 있어요.</p><form id="login-form"><label for="email">이메일</label><input type="email" id="email" autocomplete="username" required placeholder="운영자 이메일"><label for="password">비밀번호</label><input type="password" id="password" autocomplete="current-password" required placeholder="운영자 비밀번호"><button class="btn primary" id="login-btn" type="submit">로그인</button></form><div id="login-error" class="alert" role="status"></div><p class="hint">Supabase 대시보드 비밀번호와는 별도로 생성한 주동목 관리자 계정을 사용하세요.</p></section>
+<section id="dashboard" hidden>
+<div class="headrow"><h1>운영 현황</h1><small id="updated-at">데이터 확인 중</small></div>
+<div id="data-error" hidden class="error"></div>
+<div class="stats"><div class="stat"><div class="num" id="count-records">—</div><div class="name">누적 문장 완료 기록</div></div><div class="stat"><div class="num" id="count-sessions">—</div><div class="name">전체 연습 시도</div></div><div class="stat"><div class="num" id="count-completed">—</div><div class="name">완료된 연습 시도</div></div><div class="stat"><div class="num" id="count-feedback">—</div><div class="name">누적 피드백</div></div></div>
+<div class="cols"><section class="panel"><div class="panel-head"><h2>최근 피드백</h2><small>최신 15건</small></div><div id="feedback-list" class="empty">불러오는 중...</div></section><section class="panel"><div class="panel-head"><h2>최근 연습</h2><small>최신 20건</small></div><div id="sessions-list" class="empty">불러오는 중...</div></section></div>
+<p class="footer">기록된 연습·완료 데이터 기준으로 집계합니다. 단순 방문자는 포함되지 않습니다. 시작만 하고 완료되지 않은 시도가 반드시 학습 포기를 뜻하지는 않습니다. 이 화면은 자동 푸시 알림 기능을 포함하지 않습니다.</p>
+</section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{'use strict';
+const URL='https://plgaumvzuoiiisbzwcei.supabase.co';
+const KEY='sb_publishable_xZB3mERXFTB-wl1BRSMhsg_Zc31XeyL';
+const $=id=>document.getElementById(id);
+const client=window.supabase?.createClient(URL,KEY,{auth:{storageKey:'judongmok:admin:auth:v1',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+const setText=(id,value)=>{const n=$(id);if(n)n.textContent=String(value)};
+const dateText=x=>{if(!x)return '—';try{return new Date(x).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch{return '—'}};
+const labelRating={easy:'쉬웠어요',good:'적당해요',hard:'어려웠어요'};
+const labelStatus={started:'진행 중 / 미완료',completed:'완료',interrupted:'중단 기록'};
+const showLogin=()=>{$('login').hidden=false;$('dashboard').hidden=true;$('top-actions').hidden=true};
+const showDashboard=()=>{$('login').hidden=true;$('dashboard').hidden=false;$('top-actions').hidden=false};
+const el=(tag,klass,text)=>{const n=document.createElement(tag);if(klass)n.className=klass;if(text!==undefined)n.textContent=String(text);return n};
+const empty=(n,message)=>{n.replaceChildren(el('div','empty',message));n.className=''};
+function item(list,topLeft,topRight,title,msg,pill){const e=el('article','entry');const top=el('div','entry-top');top.append(el('span','',topLeft),el('span','',topRight));e.append(top);const strong=el('strong','',title);e.append(strong);if(pill){strong.append(' ',el('span',pill==='completed'?'pill good':'pill',labelStatus[pill]||pill))}if(msg)e.append(el('p','',msg));list.append(e)}
+async function authorized(){
+ if(!client)throw new Error('로그인 도구를 불러오지 못했어요. 인터넷을 확인해주세요.');
+ const {data:{user},error}=await client.auth.getUser();
+ if(error||!user)return false;
+ const {data,error:policyError}=await client.from('admin_members').select('user_id').eq('user_id',user.id).maybeSingle();
+ if(policyError)throw new Error('관리자 권한 확인 실패: '+policyError.message);
+ return !!data;
+}
+async function loadDashboard(){
+ $('refresh').disabled=true;$('data-error').hidden=true;
+ try{
+  const [a,b,c,d,feedback,sessions]=await Promise.all([
+   client.from('learning_records').select('id',{head:true,count:'exact'}),
+   client.from('practice_sessions').select('id',{head:true,count:'exact'}),
+   client.from('practice_sessions').select('id',{head:true,count:'exact'}).eq('status','completed'),
+   client.from('feedback').select('id',{head:true,count:'exact'}),
+   client.from('feedback').select('id,lesson_day,category,rating,message,created_at').order('created_at',{ascending:false}).limit(15),
+   client.from('practice_sessions').select('id,lesson_day,lesson_type,status,mistakes,last_step,last_activity_at').order('last_activity_at',{ascending:false}).limit(20)
+  ]);
+  for(const res of [a,b,c,d,feedback,sessions])if(res.error)throw res.error;
+  for(const [id,v] of [['count-records',a.count],['count-sessions',b.count],['count-completed',c.count],['count-feedback',d.count]])setText(id,Number(v||0).toLocaleString('ko-KR'));
+  setText('updated-at',dateText(new Date())+' 갱신');
+  const fl=$('feedback-list');fl.replaceChildren();fl.className='';
+  if(!feedback.data?.length)empty(fl,'아직 접수된 피드백이 없어요.');
+  else feedback.data.forEach(x=>item(fl,`Day ${x.lesson_day||'—'}`,dateText(x.created_at),labelRating[x.rating]||x.category||'기타 의견',x.message||''));
+  const sl=$('sessions-list');sl.replaceChildren();sl.className='';
+  if(!sessions.data?.length)empty(sl,'아직 연습 기록이 없어요.');
+  else sessions.data.forEach(x=>item(sl,`Day ${x.lesson_day||'—'} · ${x.lesson_type==='be'?'be동사':'일반동사'}`,dateText(x.last_activity_at),`오답 ${x.mistakes??0}회 · 마지막 ${x.last_step||'—'}`,null,x.status));
+ }catch(e){$('data-error').hidden=false;setText('data-error','데이터를 불러오지 못했어요: '+(e.message||e));}
+ finally{$('refresh').disabled=false}
+}
+async function enter(){
+ const ok=await authorized();
+ if(ok){showDashboard();await loadDashboard();return}
+ showLogin();setText('login-error','');
+}
+$('login-form').addEventListener('submit',async e=>{
+ e.preventDefault();const btn=$('login-btn');btn.disabled=true;setText('login-error','');
+ try{
+  if(!client)throw new Error('로그인 도구를 불러올 수 없어요.');
+  const {error}=await client.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+  if(error)throw error;
+  if(!await authorized()){await client.auth.signOut();throw new Error('이 계정에 주동목 관리자 권한이 없어요. SQL의 admin_members 등록을 확인해주세요.')}
+  $('password').value='';showDashboard();await loadDashboard();
+ }catch(err){setText('login-error',err.message||'로그인에 실패했어요.');}
+ finally{btn.disabled=false}
+});
+$('logout').addEventListener('click',async()=>{try{await client.auth.signOut()}finally{showLogin()}});
+$('refresh').addEventListener('click',()=>{void loadDashboard()});
+(async()=>{try{await enter()}catch(e){showLogin();setText('login-error',e.message||'연결에 실패했어요')}})();
+})();
+</script>
+</body>
+</html>

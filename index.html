@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#ffffff"><meta name="description" content="주어, 동사부터 매일 두 문장. 7일 영어 문장 조립 연습."><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icons/icon-192.png"><title>주동목 — 매일 영어 두 문장</title><style>
+:root{color-scheme:light;--blue:#235BFA;--blue-dark:#1245D4;--navy:#121D36;--muted:#76829A;--border:#DFE6F1;--pale:#F2F6FF;--surface:#F7F9FD;--success:#0D9B70;--wrong:#C7464A}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;height:100%}
+body{margin:0;min-height:100vh;background:#f0f3fa;font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','Segoe UI',sans-serif;color:var(--navy);font-size:18px;letter-spacing:-.04em}
+button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #88AAFF;outline-offset:3px}button:disabled{cursor:default}
+.screen{background:#fff;max-width:535px;min-height:100dvh;margin:0 auto;position:relative;box-shadow:0 26px 75px rgba(21,36,77,.09);display:flex;flex-direction:column}
+.header{height:77px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;border-bottom:1px solid #F0F3F8;flex-shrink:0}
+.logo{font-weight:900;letter-spacing:-.07em;font-size:26px;display:flex;align-items:center;gap:9px}
+.logo-mark{display:grid;grid-template-columns:repeat(3,6px);gap:3px;align-items:end;height:20px;width:26px;transform:rotate(-9deg)}
+.logo-mark i{display:block;width:6px;height:11px;background:var(--blue);border-radius:2px}.logo-mark i:nth-child(2){height:20px}.logo-mark i:nth-child(3){height:15px}
+.top-action{border:0;background:transparent;color:#8994A9;font-size:15px;font-weight:700;padding:12px 3px}
+main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
+.progress-wrap{padding-top:25px}
+.progress-heading{display:flex;justify-content:space-between;align-items:center;color:#7B869B;font-size:14px;font-weight:700;letter-spacing:0}
+.progress-heading b{color:var(--blue);font-size:15px}
+.progress-bar{display:flex;gap:7px;margin-top:13px}
+.progress-segment{height:7px;border-radius:8px;flex:1;background:#E6EBF3;overflow:hidden}
+.progress-segment span{display:block;height:100%;width:0;background:var(--blue);border-radius:8px;transition:width .34s cubic-bezier(.15,.65,.3,1)}
+.hero{padding-top:47px}
+.hero-label{font-size:14px;color:var(--blue);font-weight:850;letter-spacing:.02em;margin-bottom:15px}
+.hero h1{font-size:clamp(28px,6.5vw,35px);line-height:1.46;letter-spacing:-.065em;margin:0;font-weight:850;word-break:keep-all;color:#111A30}
+.board{margin-top:34px;background:var(--pale);border:1px solid #E4ECFF;border-radius:15px;padding:21px 19px 19px;min-height:145px}
+.board-heading{font-size:13px;font-weight:800;color:#6C83BB;letter-spacing:0;margin-bottom:16px}
+.slots{display:flex;gap:7px;flex-wrap:wrap;align-items:flex-start}
+.slot{min-width:73px;border:1px solid #D4DEF7;background:#fff;border-radius:9px;padding:10px 11px 11px;transition:background .2s,border .2s,transform .18s}
+.slot-label{font-size:12px;font-weight:700;color:#98A4BC;letter-spacing:0;margin-bottom:5px;line-height:1}
+.slot-word{font-size:23px;letter-spacing:-.025em;font-weight:850;line-height:1.2;white-space:nowrap;color:#C0CADD}
+.slot.filled{border-color:#BBCFFF;background:white;animation:pop .22s ease-out both}
+.slot.filled .slot-word{color:var(--blue)}
+.slot.extra{background:#E8F0FF;border-color:#B8CFFF}.slot.extra .slot-word{font-size:17px}
+.question-area{margin-top:38px;min-width:0}
+.step-info{display:flex;align-items:center;gap:8px;font-size:14px;color:#71819A;font-weight:750;letter-spacing:0;margin-bottom:10px}
+.step-dot{width:7px;height:7px;border-radius:50%;background:var(--blue)}
+.question-area h2{font-size:28px;letter-spacing:-.065em;line-height:1.32;font-weight:850;margin:0 0 24px;word-break:keep-all}
+.answers{display:grid;gap:12px}
+.answer{min-height:84px;width:100%;border:1.5px solid #E1E7F1;border-radius:12px;background:#fff;padding:15px 17px;text-align:left;display:flex;align-items:center;gap:15px;color:var(--navy);transition:background .15s,border .15s,transform .12s,box-shadow .15s}
+.answer:hover{border-color:#97B3FA;background:#FBFCFF;box-shadow:0 5px 20px rgba(24,72,179,.055)}
+.answer:active{transform:scale(.991)}
+.answer-no{border:1px solid #DCE4F1;background:#F8FAFD;color:#7D8BA4;font-size:14px;font-weight:850;width:33px;height:33px;border-radius:8px;flex:none;display:grid;place-items:center;letter-spacing:0}
+.answer-content{display:flex;min-width:0;flex:1;flex-direction:column;gap:4px}
+.answer-name{font-size:24px;font-weight:850;letter-spacing:-.045em;line-height:1.1;overflow-wrap:anywhere}
+.answer-meaning{font-size:15px;font-weight:650;color:#8590A4;line-height:1.25}
+.answer svg{color:#CBD5E4;flex-shrink:0}
+.answer.correct{background:#EEF9F5;border-color:#49BB91}.answer.correct .answer-no{background:var(--success);border-color:var(--success);color:white}.answer.correct .answer-name{color:#066F50}
+.answer.wrong{border-color:#E99A9C;background:#FFF7F7}.answer.wrong .answer-no{color:var(--wrong);border-color:#E99A9C}
+.feedback{min-height:33px;margin-top:14px;font-size:16px;font-weight:750;color:var(--success);line-height:1.4}
+.feedback.wrong{color:var(--wrong)}
+.skip{border:0;background:transparent;color:#77859B;font-size:16px;font-weight:750;text-decoration:underline;text-underline-offset:4px;display:block;margin:18px auto 0;padding:9px 15px}
+.bottom-note{font-size:13px;color:#A1A9B7;text-align:center;padding:17px 16px 23px;flex-shrink:0;letter-spacing:0}
+.done{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:520px;position:relative;padding:28px 0 10px}
+.success-icon{margin:0 auto 21px;border-radius:50%;height:78px;width:78px;display:grid;place-items:center;background:#EAF8F2;color:var(--success);position:relative;animation:pop .38s both}
+.success-icon:after{position:absolute;content:"";width:94px;height:94px;border:1.5px solid #BEEBD5;border-radius:50%;animation:ring .6s both}
+.done-kicker{text-align:center;color:var(--success);font-size:15px;font-weight:850;margin:0 0 9px;letter-spacing:.02em}
+.done h2{font-size:34px;letter-spacing:-.07em;text-align:center;margin:0 0 36px;font-weight:850;line-height:1.3}
+.result{border-radius:15px;background:var(--blue);color:white;padding:30px 28px;box-shadow:0 15px 30px rgba(35,91,250,.16);overflow-wrap:anywhere;position:relative}
+.result::after{content:'';position:absolute;border:1px solid rgba(255,255,255,.12);width:185px;height:185px;border-radius:50%;right:-85px;top:-112px}
+.result .minor{font-size:13px;color:#D9E4FF;font-weight:750;letter-spacing:.07em;margin-bottom:14px}
+.result .big-sentence{font-size:clamp(29px,5.6vw,39px);font-weight:800;line-height:1.45;letter-spacing:-.045em}
+.result .big-sentence em{font-style:normal;color:#D0F4FF}
+.translation{font-size:16px;line-height:1.5;color:#76849B;margin:17px 1px 25px;text-align:center}
+.extra-actions{display:flex;gap:10px;margin:0 0 16px}
+.utility{background:#fff;border:1px solid #DCE4F1;border-radius:11px;flex:1;font-size:16px;font-weight:750;color:#3A4C6D;min-height:55px;display:flex;align-items:center;gap:8px;justify-content:center}
+.utility svg{height:20px;width:20px;stroke-width:2}
+.primary{width:100%;min-height:66px;background:var(--blue);color:#fff;border:0;border-radius:12px;font-size:21px;font-weight:850;letter-spacing:-.04em;box-shadow:0 7px 18px rgba(35,91,250,.17);transition:transform .15s,background .15s}
+.primary:hover{background:var(--blue-dark)}.primary:active{transform:scale(.985)}
+.recap{padding-top:45px}.recap-head{font-size:33px;letter-spacing:-.06em;margin:14px 0 29px}.recap-sub{color:var(--blue);font-size:14px;font-weight:850}
+.recap-line{padding:22px 0;border-bottom:1px solid #E8EDF4}.recap-line small{color:#8A98AA;font-weight:800;font-size:14px}.recap-line strong{display:block;font-size:23px;line-height:1.45;letter-spacing:-.045em;margin-top:8px;overflow-wrap:anywhere}
+.recap .primary{margin-top:35px}
+@keyframes pop{0%{transform:scale(.89);opacity:.35}100%{transform:scale(1);opacity:1}}
+@keyframes ring{0%{transform:scale(.65);opacity:.1}100%{transform:scale(1);opacity:1}}
+@media(max-width:550px){body{background:#fff}.screen{box-shadow:none}.header{padding:0 22px;height:70px}main{padding:0 22px 22px}.progress-wrap{padding-top:21px}.hero{padding-top:40px}.hero h1{font-size:30px}.board{margin-top:28px}.question-area{margin-top:35px}.question-area h2{font-size:27px;margin-bottom:21px}.answer{min-height:80px}.done{min-height:480px}}
+@media(max-width:380px){main{padding-left:17px;padding-right:17px}.header{padding:0 17px}.hero h1{font-size:28px}.board{padding:18px 14px}.slot{padding:9px;min-width:67px}.question-area{margin-top:29px}.question-area h2{font-size:25px}.answer{min-height:75px;padding:12px}.answer-name{font-size:22px}}
+@media(min-width:560px){.screen{min-height:790px;margin:36px auto;border:1px solid #E5EAF2;border-radius:21px;overflow:hidden}.bottom-note{padding-bottom:20px}}
+.privacy-link{color:#7B86A0;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* v0.4 learning flow */
+.header .top-action{font-size:14px}
+.exercise-progress{display:flex;gap:8px;align-items:center;margin-top:12px}
+.exercise-progress .pill{background:#EEF3FF;color:#2459CF;font-size:13px;letter-spacing:0;font-weight:800;padding:8px 11px;border-radius:7px}
+.hero .hero-label{margin-bottom:11px}
+.board.recall-board{display:none}
+.question-area.recall-area{margin-top:41px}
+.answer.no-chevron{cursor:pointer}
+.micro-hint{font-size:14px;color:#7B879B;line-height:1.5;margin:9px 0 0;letter-spacing:-.025em}
+.standalone{margin-top:30px}
+.reveal-card{margin:20px 0;background:#F3F7FF;padding:23px;border:1px solid #DCE5F8;border-radius:12px}
+.reveal-card strong{font-size:27px;letter-spacing:-.045em;line-height:1.45;display:block;overflow-wrap:anywhere}
+.reveal-card p{font-size:14px;color:#6880AC;margin:8px 0 0}
+.muted{color:#7C8BA3;font-size:14px;line-height:1.65}
+.today-done{padding:33px 0 20px}
+.today-done h1{font-size:34px;letter-spacing:-.065em;line-height:1.35;margin:11px 0 24px}
+.today-done .done-sub{font-size:15px;color:#6B7C98;line-height:1.65;margin-bottom:23px}
+.review-list{display:grid;gap:10px;margin:21px 0 27px}
+.review-list .review{border:1px solid #E1E8F3;padding:19px;border-radius:12px}
+.review-label{font-size:13px;color:#8B97AD;font-weight:800;margin-bottom:9px}
+.review strong{font-size:22px;letter-spacing:-.04em;line-height:1.5;overflow-wrap:anywhere;display:block}
+.feedback-panel{background:#F7F9FD;border-radius:13px;padding:20px;margin:24px 0 20px;border:1px solid #E7EBF3}
+.feedback-panel h3{font-size:19px;margin:0 0 8px;letter-spacing:-.035em}
+.rating-group{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:14px}
+.rating-btn{border:1px solid #DCE3EE;background:white;border-radius:9px;min-height:49px;font-size:14px;font-weight:800;color:#34435D;letter-spacing:-.04em}
+.rating-btn.selected{border-color:var(--blue);background:#E9F0FF;color:var(--blue)}
+.feedback-text{width:100%;resize:vertical;min-height:68px;border:1px solid #DCE3EE;padding:12px;font:inherit;font-size:15px;background:white;border-radius:9px;margin:11px 0 7px}
+.send{width:100%;min-height:51px;border:1px solid #D4DCF1;background:#fff;border-radius:9px;color:#224EAD;font-size:16px;font-weight:800}
+.send:disabled{opacity:.55}
+.secondary{width:100%;border:1px solid #DCE4F1;background:#fff;border-radius:11px;min-height:57px;font-size:17px;font-weight:800;color:#52647E;margin-top:11px}
+.complete-note{margin:14px 0;color:#618073;font-size:14px;font-weight:750;line-height:1.45}
+.feedback-confirm{margin-top:11px;font-size:14px;font-weight:700;color:#267459;line-height:1.5}
+.app-footer{margin-top:8px}
+@media(max-width:400px){.rating-group{gap:4px}.rating-btn{font-size:12px}.feedback-panel{padding:16px}}
+</style></head><body>
+<div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div><button class="top-action" id="reset" type="button" aria-label="이 기기 학습 진도를 지우고 1일차부터 다시 시작">전체 초기화</button></header><main id="app"></main><footer class="bottom-note">틀린영어 · 매일 두 문장씩 <span id="cloud-status" aria-live="polite">· 학습 기록 연결 중</span> · <a class="privacy-link" href="./privacy.html" target="_blank" rel="noopener">기록 안내</a></footer></div>
+<!-- Netlify parses this literal HTML form during deployment. JS submits identical named fields. -->
+<form name="judongmok-feedback" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" hidden><input type="hidden" name="form-name" value="judongmok-feedback"><input name="day"><input name="rating"><textarea name="comment"></textarea><input name="client_id"><input name="bot-field"></form>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>(()=>{'use strict';
+const DAYS = [{"name":"1일차","be":{"ko":"나는 피곤해요.","s":"I","sAlt":"She","v":"am","vAlt":"is","c":"tired","cAlt":"a teacher","cDesc":"피곤한","extras":[["today","오늘"],["right now","지금"]]},"action":{"ko":"나는 커피를 만들어요.","s":"I","sAlt":"We","v":"make","vAlt":"sleep","need":true,"o":"coffee","oAlt":"water","extras":[["every morning","매일 아침"],["at home","집에서"]]}},{"name":"2일차","be":{"ko":"그녀는 선생님이에요.","s":"She","sAlt":"I","v":"is","vAlt":"am","c":"a teacher","cAlt":"tired","cDesc":"선생님","extras":[["at this school","이 학교에서"],["in Seoul","서울에서"]]},"action":{"ko":"그녀는 책을 읽어요.","s":"She","sAlt":"They","v":"reads","vAlt":"read","need":true,"o":"books","oAlt":"coffee","extras":[["before bed","자기 전에"],["every day","매일"]]}},{"name":"3일차","be":{"ko":"우리는 집에 있어요.","s":"We","sAlt":"He","v":"are","vAlt":"is","c":"at home","cAlt":"tired","cDesc":"집에","extras":[["now","지금"],["today","오늘"]]},"action":{"ko":"우리는 운동해요.","s":"We","sAlt":"She","v":"exercise","vAlt":"exercises","need":false,"extras":[["every morning","매일 아침"],["together","함께"]]}},{"name":"4일차","be":{"ko":"그들은 행복해요.","s":"They","sAlt":"He","v":"are","vAlt":"is","c":"happy","cAlt":"at home","cDesc":"행복한","extras":[["today","오늘"],["right now","지금"]]},"action":{"ko":"그들은 저녁을 요리해요.","s":"They","sAlt":"She","v":"cook","vAlt":"cooks","need":true,"o":"dinner","oAlt":"books","extras":[["together","함께"],["at home","집에서"]]}},{"name":"5일차","be":{"ko":"그는 바빠요.","s":"He","sAlt":"We","v":"is","vAlt":"are","c":"busy","cAlt":"a doctor","cDesc":"바쁜","extras":[["this afternoon","오늘 오후에"],["today","오늘"]]},"action":{"ko":"그는 걸어요.","s":"He","sAlt":"I","v":"walks","vAlt":"walk","need":false,"extras":[["in the park","공원에서"],["every evening","매일 저녁"]]}},{"name":"6일차","be":{"ko":"나는 배가 고파요.","s":"I","sAlt":"They","v":"am","vAlt":"are","c":"hungry","cAlt":"happy","cDesc":"배고픈","extras":[["right now","지금"],["after work","퇴근 후에"]]},"action":{"ko":"나는 아침 식사를 만들어요.","s":"I","sAlt":"He","v":"make","vAlt":"makes","need":true,"o":"breakfast","oAlt":"dinner","extras":[["at home","집에서"],["every morning","매일 아침"]]}},{"name":"7일차","be":{"ko":"날씨가 좋아요.","s":"The weather","sAlt":"We","v":"is","vAlt":"are","c":"nice","cAlt":"busy","cDesc":"좋은","extras":[["today","오늘"],["this morning","오늘 아침에"]]},"action":{"ko":"내 친구는 영어를 공부해요.","s":"My friend","sAlt":"I","v":"studies","vAlt":"study","need":true,"o":"English","oAlt":"coffee","extras":[["after work","퇴근 후에"],["every night","매일 밤"]]}}];
+const STORAGE_KEY='judongmok:v04:progress';
+const SUPABASE_URL='https://plgaumvzuoiiisbzwcei.supabase.co', SUPABASE_PUBLISHABLE_KEY='sb_publishable_xZB3mERXFTB-wl1BRSMhsg_Zc31XeyL';
+const QUEUE_KEY='judongmok:v05:queue';
+const $=s=>document.querySelector(s);
+const app=$('#app');
+const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const load=()=>{try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')||{}}catch(e){return {}}};
+const store=()=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(progress))}catch(e){}};
+let progress=load();progress.completed=Array.isArray(progress.completed)?progress.completed:[];
+progress.sentences=progress.sentences&&typeof progress.sentences==='object'?progress.sentences:{};
+progress.clientId=progress.clientId||(crypto?.randomUUID?.() || String(Date.now())+Math.random().toString(36).slice(2));
+const chooseDay=()=>{for(let i=0;i<7;i++)if(!progress.completed.includes(i+1))return i;return 6};
+let day=chooseDay(), lesson=progress.sentences[day+1]?.[0]&&progress.sentences[day+1]?.[1]?0:(progress.sentences[day+1]?.[0]?1:0);
+let step='subject',picked={},extra=null,revealed=false,busy=false,rating='',sending=false;
+let mistakes=0;
+const lessonData=()=>lesson===0?DAYS[day].be:DAYS[day].action;
+const type=()=>lesson===0?'be':'action';
+const dayResults=()=>progress.sentences[day+1]||[];
+const quote=()=>[picked.s,picked.v,lesson===0?picked.c:picked.o,extra?.[0]].filter(Boolean).join(' ')+'.';
+const baseQuote=()=>[picked.s,picked.v,lesson===0?picked.c:picked.o].filter(Boolean).join(' ')+'.';
+function sync(){store()}
+
+// v0.5: offline-first anonymous Supabase integration (no secret/service_role keys).
+let cloud=null, cloudUser=null, cloudInitPromise=null, cloudSending=false;
+let cloudQueue=(()=>{try{const q=JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]');return Array.isArray(q)?q:[]}catch(e){return []}})();
+function saveQueue(){try{localStorage.setItem(QUEUE_KEY,JSON.stringify(cloudQueue))}catch(e){}}
+function statusText(message){const s=$('#cloud-status');if(s)s.textContent=' · '+message;}
+function enqueueCloud(entry){
+ // A single pending snapshot per attempt: retries do not create duplicate attempts.
+ if(entry.kind==='session'){
+  const idx=cloudQueue.findIndex(x=>x.kind==='session'&&x.id===entry.id);
+  if(idx>=0)cloudQueue[idx]=entry;
+  else cloudQueue.push(entry);
+ }else cloudQueue.push(entry);
+ saveQueue();statusText('기기 저장됨 · 온라인 동기화 중');void flushCloud();
+}
+async function connectCloud(){
+ if(cloudUser)return cloudUser;
+ if(cloudInitPromise)return cloudInitPromise;
+ cloudInitPromise=(async()=>{
+  if(!navigator.onLine)throw new Error('offline');
+  if(!window.supabase?.createClient)throw new Error('supabase client not loaded');
+  if(!cloud)cloud=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+  let {data,error}=await cloud.auth.getSession();
+  if(error)throw error;
+  if(!data.session){({data,error}=await cloud.auth.signInAnonymously());if(error)throw error;}
+  cloudUser=data.session?.user||data.user;
+  if(!cloudUser?.id)throw new Error('Anonymous session unavailable');
+  statusText('온라인 학습 기록 연결됨');
+  return cloudUser;
+ })().catch(err=>{statusText('기기에 저장 중 · 온라인 연결 대기');throw err}).finally(()=>{cloudInitPromise=null});
+ return cloudInitPromise;
+}
+async function flushCloud(){
+ if(cloudSending||!cloudQueue.length)return;
+ cloudSending=true;
+ try{
+  const user=await connectCloud();
+  while(cloudQueue.length){
+   const entry=cloudQueue[0];
+   let error;
+   if(entry.kind==='record'){
+    ({error}=await cloud.from('learning_records').insert({user_id:user.id,lesson_day:entry.lesson_day,lesson_type:entry.lesson_type,mistakes:entry.mistakes,completed_at:entry.completed_at}));
+    // If the same user has already completed the lesson, the server rejects the duplicate.
+    if(error?.code==='23505')error=null;
+   }else if(entry.kind==='feedback'){
+    ({error}=await cloud.from('feedback').insert({user_id:user.id,category:entry.category,message:entry.message,lesson_day:entry.lesson_day,rating:entry.rating}));
+   }else if(entry.kind==='session'){
+    ({error}=await cloud.from('practice_sessions').upsert({
+      id:entry.id,user_id:user.id,lesson_day:entry.lesson_day,
+      lesson_type:entry.lesson_type,started_at:entry.started_at,
+      last_activity_at:entry.last_activity_at,completed_at:entry.completed_at,
+      last_step:entry.last_step,status:entry.status,mistakes:entry.mistakes
+    },{onConflict:'id'}));
+   }else {cloudQueue.shift();saveQueue();continue;}
+   if(error)throw error;
+   // The user may have advanced while this network request was in flight.
+   // Only discard the exact snapshot that the server confirmed.
+   if(cloudQueue[0]===entry)cloudQueue.shift();
+   saveQueue();
+  }
+  statusText('학습 기록 온라인 저장됨');
+ }catch(err){
+  // Retain items in localStorage and retry on a later online visit.
+  console.warn('주동목 온라인 기록 저장 대기:',err?.message||err);
+  statusText('기기에 저장됨 · 온라인 연결 대기');
+ }finally{cloudSending=false}
+}
+async function startCloud(){
+ try{await connectCloud();await flushCloud()}catch(e){/* offline or auth error; offline-first */}
+}
+window.addEventListener('online',()=>{void startCloud()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void startCloud()});
+
+// v0.7: one attempt per actual first answer; repeated practice creates a new UUID.
+let activeAttempt=null;
+function beginAttempt(){
+ if(activeAttempt)return;
+ const now=new Date().toISOString();
+ const raw=crypto.getRandomValues(new Uint8Array(16));raw[6]=(raw[6]&15)|64;raw[8]=(raw[8]&63)|128;
+ const uuid=[...raw].map(x=>x.toString(16).padStart(2,'0')).join('');
+ const attemptId=`${uuid.slice(0,8)}-${uuid.slice(8,12)}-${uuid.slice(12,16)}-${uuid.slice(16,20)}-${uuid.slice(20)}`;
+ activeAttempt={id:attemptId,lesson_day:day+1,lesson_type:lesson===0?'be':'general',
+  started_at:now,last_activity_at:now,completed_at:null,last_step:step,status:'started',mistakes:0};
+ enqueueCloud({kind:'session',...activeAttempt});
+}
+function touchAttempt(nextStep=step,finalStatus=null){
+ if(!activeAttempt)return;
+ const now=new Date().toISOString();
+ activeAttempt={...activeAttempt,last_step:nextStep,last_activity_at:now,mistakes,
+  ...(finalStatus?{status:finalStatus,completed_at:finalStatus==='completed'?now:null}:{})};
+ enqueueCloud({kind:'session',...activeAttempt});
+ if(finalStatus)activeAttempt=null;
+}
+function interruptAttempt(){if(activeAttempt)touchAttempt(step,'interrupted')}
+
+const header=()=>`<div class="progress-wrap"><div class="progress-heading"><span>${day+1}일차 · ${lesson===0?'be동사':'일반동사'}</span><span><b>${dayResults().length}</b> / 2문장 완료</span></div><div class="progress-bar"><div class="progress-segment"><span style="width:${(dayResults().length/2)*100}%"></span></div><div class="progress-segment"><span style="width:${dayResults().length?100:0}%"></span></div></div></div>`;
+const board=()=>{const l=lessonData();let slots=[['주어',picked.s],['동사',picked.v]];if(lesson===0)slots.push(['설명',picked.c]);if(lesson===1&&l.need)slots.push(['목적어',picked.o]);if(extra)slots.push(['추가정보',extra[0]]);return `<div class="board"><div class="board-heading">내가 조립한 문장</div><div class="slots">${slots.map(([name,w])=>`<div class="slot ${w?'filled':''} ${name==='추가정보'?'extra':''}"><div class="slot-label">${name}</div><div class="slot-word">${w?safe(w):'···'}</div></div>`).join('')}</div></div>`};
+const item=(t,desc,i)=>`<button type="button" class="answer" data-choice="${safe(t)}"><span class="answer-no">${i+1}</span><span class="answer-content"><span class="answer-name">${safe(t)}</span>${desc?`<span class="answer-meaning">${safe(desc)}</span>`:''}</span></button>`;
+function stage(){const l=lessonData();
+ const cfg={subject:['주어','누가 주인공일까요?'],verb:['동사',lesson===0?'어떤 be동사를 쓸까요?':'무엇을 하나요?'],comp:['주어 설명','주어를 어떻게 설명할까요?'],need:['목적어','이 문장에 목적어를 넣을까요?'],object:['목적어','무엇을?'],extra:['추가정보','한 가지 더 붙여볼까요?']};
+ let options=[],[tag,question]=cfg[step];
+ if(step==='subject') options=[[l.s,'정답'],[l.sAlt,'']];
+ if(step==='verb')options=[[l.v,''],[l.vAlt,'']];
+ if(step==='comp')options=[[l.c,l.cDesc],[l.cAlt,'']];
+ if(step==='need')options=[['네, 넣을게요',''],['아니요, 없어도 돼요','']];
+ if(step==='object')options=[[l.o,''],[l.oAlt,'']];
+ if(step==='extra')options=l.extras.map(([word,meaning])=>[word,meaning]);
+ // Display distractors in alternating order so position cannot be memorized.
+ if((day+lesson+(step==='verb'?1:0)+(step==='object'?1:0))%2===1)options.reverse();
+ if(step==='subject')options=options.map(([w])=>[w,'']);
+ app.innerHTML=header()+`<section class="hero"><div class="hero-label">${lesson===0?'01 · be동사':'02 · 일반동사'}</div><h1>${safe(l.ko)}</h1></section>`+board()+`<section class="question-area"><div class="step-info"><span class="step-dot"></span>${tag}</div><h2>${question}</h2><div class="answers">${options.map(([t,d],i)=>item(t,d,i)).join('')}</div>${step==='extra'?'<button type="button" class="skip" data-action="no-extra">추가하지 않고 완성하기</button>':''}<p class="feedback" id="answer-feedback" aria-live="polite"></p></section>`;
+}
+function audioGood(){try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const ac=new AC(),osc=ac.createOscillator(),gn=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(530,ac.currentTime);osc.frequency.linearRampToValueAtTime(770,ac.currentTime+.14);gn.gain.setValueAtTime(.018,ac.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.19);osc.connect(gn);gn.connect(ac.destination);osc.start();osc.stop(ac.currentTime+.19);osc.onended=()=>ac.close()}catch(e){}}
+function success(btn,go){busy=true;btn.classList.add('correct');btn.querySelector('.answer-no').textContent='✓';$('#answer-feedback').textContent='좋아요!';audioGood();try{navigator.vibrate?.(15)}catch(e){};setTimeout(()=>{go();touchAttempt(step);busy=false;render()},320)}
+function wrong(btn,txt){mistakes++;touchAttempt(step);btn.classList.add('wrong');$('#answer-feedback').classList.add('wrong');$('#answer-feedback').textContent=txt||'다시 골라보세요.';setTimeout(()=>btn.classList.remove('wrong'),540)}
+function pick(btn,w){if(busy)return;beginAttempt();const l=lessonData();
+ if(step==='subject'){if(w!==l.s)return wrong(btn,'누가 행동하는지 한국어 문장을 보세요.');return success(btn,()=>{picked.s=w;step='verb'})}
+ if(step==='verb'){if(w!==l.v)return wrong(btn,'주어에 어울리는 동사를 골라보세요.');return success(btn,()=>{picked.v=w;step=lesson===0?'comp':'need'})}
+ if(step==='comp'){if(w!==l.c)return wrong(btn,'한국어 문장의 의미를 다시 보세요.');return success(btn,()=>{picked.c=w;step='extra'})}
+ if(step==='need'){const yes=w==='네, 넣을게요';if(yes!==l.need)return wrong(btn,l.need?'이 문장에는 행동의 대상이 있어요.':'이 문장에는 목적어가 없어도 돼요.');return success(btn,()=>{step=l.need?'object':'extra'})}
+ if(step==='object'){if(w!==l.o)return wrong(btn,'한국어 문장의 대상을 확인하세요.');return success(btn,()=>{picked.o=w;step='extra'})}
+ if(step==='extra'){const e=l.extras.find(e=>e[0]===w);if(e)success(btn,()=>{extra=e;step='recall';revealed=false})}
+}
+function showRecall(){const l=lessonData();app.innerHTML=header()+`<section class="hero"><div class="hero-label">입으로 마무리하기</div><h1>${safe(l.ko)}</h1></section><section class="question-area recall-area"><div class="step-info"><span class="step-dot"></span>말하기</div><h2>영어 문장을 가리고<br>직접 말해보세요.</h2><p class="muted">천천히 말해도 괜찮아요. 필요한 만큼 생각한 다음 정답을 확인해 보세요.</p>${revealed?`<div class="reveal-card"><strong>${safe(quote())}</strong><p>${extra?'추가정보: '+safe(extra[1]):'기본 문장'}</p></div><button type="button" class="utility" style="width:100%;margin-bottom:12px" data-action="speak">▶ 발음 듣기</button><button type="button" class="primary" data-action="finish">문장 완성 ✓</button>`:'<button type="button" class="primary standalone" data-action="reveal">정답 확인하기</button>'}</section>`}
+function speak(){if(!('speechSynthesis'in window))return;window.speechSynthesis.cancel();const utter=new SpeechSynthesisUtterance(quote());utter.lang='en-US';utter.rate=.82;window.speechSynthesis.speak(utter)}
+function finish(){touchAttempt('finished','completed');const arr=dayResults().slice();arr[lesson]=quote();progress.sentences[day+1]=arr;sync();enqueueCloud({kind:'record',lesson_day:day+1,lesson_type:lesson===0?'be':'general',mistakes,completed_at:new Date().toISOString()});step='done';audioGood();render()}
+function completedLesson(){const isLast=lesson===1;const l=lessonData();const result=dayResults()[lesson];app.innerHTML=header()+`<div class="done"><div class="success-icon" aria-hidden="true">✓</div><p class="done-kicker">${day+1}일차 · ${lesson===0?'be동사':'일반동사'}</p><h2>문장 완성!</h2><div class="result"><div class="minor">MY SENTENCE</div><div class="big-sentence">${safe(result)}</div></div><p class="translation">${safe(l.ko)}</p><button class="primary" data-action="next">${isLast?'오늘의 결과 보기':'두 번째 문장으로 →'}</button></div>`}
+function feedbackForm(){return `<section class="feedback-panel"><h3>오늘 연습은 어땠나요?</h3><p class="muted" style="margin:0">의견은 학습 개선을 위해 저장돼요. 이름은 받지 않습니다.</p><div class="rating-group">${[['easy','쉬웠어요'],['good','적당해요'],['hard','어려웠어요']].map(([v,t])=>`<button type="button" class="rating-btn ${rating===v?'selected':''}" data-rating="${v}">${t}</button>`).join('')}</div><textarea id="feedback-comment" class="feedback-text" maxlength="250" placeholder="불편한 점이 있었다면 적어주세요. (선택)"></textarea><button class="send" data-action="send" ${!rating||sending?'disabled':''}>${sending?'전송 중…':'의견 보내기'}</button><div class="feedback-confirm" id="feedback-confirm" role="status" aria-live="polite"></div></section>`}
+function dayComplete(){if(!progress.completed.includes(day+1)){progress.completed.push(day+1);sync()}const arr=dayResults();app.innerHTML=header()+`<section class="today-done"><div class="done-kicker" style="text-align:left">${day+1}일차 완료 · 총 ${progress.completed.length}/7일</div><h1>오늘 두 문장,<br>직접 만들었어요.</h1><div class="review-list">${arr.map((text,i)=>`<div class="review"><div class="review-label">${i===0?'① be동사':'② 일반동사'}</div><strong>${safe(text)}</strong></div>`).join('')}</div>${feedbackForm()}<button class="primary" data-action="day-next">${day<6?'다음 날 연습하기 →':'7일 연습 다시 시작하기'}</button><button class="secondary" data-action="day-repeat">오늘 문장 다시 연습</button></section>`}
+function render(){if(step==='recall')return showRecall();if(step==='done')return completedLesson();if(step==='day-done')return dayComplete();return stage()}
+function moveNext(){if(lesson===0){lesson=1;step='subject';picked={};extra=null;revealed=false;mistakes=0;render()}else{step='day-done';render()}}
+function startDay(n){interruptAttempt();day=n;lesson=0;step='subject';picked={};extra=null;revealed=false;rating='';mistakes=0;render()}
+async function submitFeedback(){
+ if(sending||!rating)return;
+ const msg=$('#feedback-comment')?.value?.trim()||'';
+ const btn=$('[data-action="send"]'),notice=$('#feedback-confirm');
+ if(progress.feedbackSent?.[day+1]){notice.textContent='이 날짜의 의견은 이미 접수했어요.';return}
+ sending=true;btn.disabled=true;btn.textContent='저장 중…';
+ enqueueCloud({kind:'feedback',category:`day${day+1}:${rating}`,lesson_day:day+1,rating,message:msg});
+ // Local queue makes offline feedback durable. Confirmed server upload is separate.
+ await flushCloud();
+ progress.feedbackSent=progress.feedbackSent||{};
+ progress.feedbackSent[day+1]=true;sync();
+ notice.textContent=cloudQueue.some(x=>x.kind==='feedback')?'의견을 기기에 보관했어요. 인터넷 연결 시 자동 전송합니다.':'의견이 온라인에 저장됐어요. 감사합니다!';
+ btn.textContent='의견 저장됨';sending=false;
+}
+$('#reset').addEventListener('click',()=>{
+ // This intentionally resets only this browser's learning progression.
+ // Previously uploaded cloud records (including unique first completions) remain intact.
+ const agree=confirm('이 기기의 7일 학습 진도를 모두 초기화하고 1일차부터 다시 시작할까요?\n\n온라인에 이미 저장된 학습 기록은 삭제되지 않습니다.');
+ if(!agree)return;
+ interruptAttempt();
+ progress.completed=[];
+ progress.sentences={};
+ progress.feedbackSent={};
+ sync();
+ startDay(0);
+});
+app.addEventListener('click',event=>{const btn=event.target.closest('button');if(!btn||busy)return;if(btn.dataset.choice!==undefined)return pick(btn,btn.dataset.choice);if(btn.dataset.rating){rating=btn.dataset.rating;const keep=$('#feedback-comment')?.value||'';const savedScroll=window.scrollY;dayComplete();$('#feedback-comment').value=keep;window.scrollTo({top:savedScroll});return}
+const a=btn.dataset.action;
+if(a==='no-extra'){beginAttempt();extra=null;step='recall';revealed=false;touchAttempt(step);return render()}
+if(a==='reveal'){revealed=true;touchAttempt('reveal');return render()}
+if(a==='speak')return speak();
+if(a==='finish')return finish();
+if(a==='next')return moveNext();
+if(a==='send')return submitFeedback();
+if(a==='day-next'){const next=day===6?0:day+1;return startDay(next)}
+if(a==='day-repeat')return startDay(day);
+});
+// On reload, if today's first sentence is saved, resume with the second sentence.
+if(dayResults().length===2)step='day-done';
+render();
+void startCloud();
+if('serviceWorker'in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+})();</script></body></html>

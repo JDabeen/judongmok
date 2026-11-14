@@ -1,0 +1,28 @@
+주동목 v0.8 - 운영자 대시보드 추가 (기존 7일 학습 앱은 변경 없음)
+
+이 ZIP은 기존 Netlify 프로젝트에 그대로 올릴 수 있습니다.
+앱: /  | 운영자 화면: /admin/
+
+반드시 설정할 것:
+1. Supabase > Authentication > Users > Add user > Create new user
+   본인 이메일로 이메일/비밀번호 계정 생성. 이메일 확인이 필요하면 완료
+2. Supabase SQL Editor > New query > 01-admin-policies.sql 전체 붙여넣고 Run
+3. Supabase SQL Editor > New query > 02-grant-admin.sql을 열어
+   YOUR_ADMIN_EMAIL@example.com 부분을 실제 관리자 이메일로 수정 후 Run
+   마지막 SELECT 결과에 이메일이 1개 나오는지 확인
+4. 이 ZIP을 기존 Netlify 프로젝트에 업로드
+5. https://splendorous-mochi-346e26.netlify.app/admin/ 에 접속해서 로그인
+
+보안:
+- Publishable key만 포함, secret/service_role/password 불포함
+- 관리자 권한은 DB의 admin_members에 넣은 계정에만 부여
+- 관리자는 학습/시도/피드백에 SELECT(읽기)만 추가 허용
+- 다른 일반 이용자는 기존 RLS 때문에 자신의 기록만 조회 가능
+- 관리자 페이지 URL 자체는 공개되지만, 서버 데이터는 로그인+RLS 없이 볼 수 없음
+- 이 관리자는 Supabase Dashboard의 소유자 계정과 별도로 Supabase Auth에 등록한 앱 사용자임
+
+주의:
+- 이 버전은 관리 화면에서 수동 새로고침으로 데이터를 읽습니다. 스마트폰 알림은 아직 구현되지 않았습니다.
+- 배포 전 소규모 테스트 환경에서 정책이 정확히 작동하는지 확인하는 게 좋습니다.
+- 계정 보호를 위해 강력한 비밀번호와 적절한 인증 보안 정책을 사용하세요.
+- '문장 완료 건수'는 실사용자 수와 다릅니다.
