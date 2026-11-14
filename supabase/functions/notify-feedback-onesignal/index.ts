@@ -1,4 +1,4 @@
-// 주동목 관리자 OneSignal 푸시 (피드백 INSERT 웹훅 전용)
+// 주동목 관리자 OneSignal 푸시 (피드백 INSERT 웹훅 전용; 초기 테스트: 모든 평가 알림)
 // Secrets: FEEDBACK_WEBHOOK_TOKEN, ONESIGNAL_APP_ID, ONESIGNAL_REST_API_KEY
 // SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY는 Supabase Edge Functions의 서버 환경에서만 사용.
 // 반드시 verify_jwt=false + x-webhook-token 검증을 함께 사용하세요.
@@ -55,7 +55,7 @@ Deno.serve(async (request: Request) => {
   const day = Number(f.lesson_day ?? match?.[1] ?? 0);
   const rating = text(f.rating) || match?.[2] || "";
   const userComment = text(f.message);
-  if (rating !== "hard" && !userComment) return reply("Routine rating: no alert");
+  // 초기 사용자 테스트 기간에는 모든 난이도 평가와 작성 의견을 알립니다.
 
   const projectUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -88,7 +88,8 @@ Deno.serve(async (request: Request) => {
 
   // 의견 본문/사용자 ID는 잠금 화면 푸시에서 보여주지 않습니다.
   const title = "주동목 · 새 피드백";
-  const summary = rating === "hard" ? "학습이 어렵다는 평가가 도착했어요." : "새로운 의견이 도착했어요.";
+  const ratingLabel = rating === "hard" ? "어려웠어요" : rating === "good" ? "적당해요" : rating === "easy" ? "쉬웠어요" : "피드백";
+  const summary = userComment ? `${ratingLabel} · 새 의견이 도착했어요.` : `${ratingLabel} 평가가 도착했어요.`;
   const description = `${day>=1&&day<=7?"Day "+day+" · ":""}${summary} 관리자 화면에서 확인하세요.`;
   const message = {
     app_id: appId,
