@@ -57,13 +57,15 @@ async function enablePush(){
   const btn=$("push-enable");
   btn.disabled=true;
   try{
-    await verifyAdmin();
     if(!enabled)throw new Error("OneSignal 앱 연결을 먼저 완료해야 합니다.");
-    const os=await loadSdk();
+    // 권한 팝업은 브라우저의 사용자 클릭 직후 요청해야 합니다.
+    // 네트워크 호출(await)을 먼저 수행하면 사용자 제스처가 사라질 수 있어요.
+    const os=oneSignal;
+    if(!os)throw new Error("알림 도구를 아직 불러오는 중입니다. 다시 눌러주세요.");
     if(!os.Notifications.isPushSupported())throw new Error("이 브라우저에서는 웹 푸시를 지원하지 않습니다.");
-    // 화면에서 직접 누른 버튼을 통해 권한을 요청합니다.
     await os.Notifications.requestPermission();
     if(!os.Notifications.permission)throw new Error("브라우저 알림 권한이 허용되지 않았습니다.");
+    await verifyAdmin();
     await os.User.PushSubscription.optIn();
     if(os.User.PushSubscription.id) await syncSubscription();
     else setStatus("알림 승인됨. 기기 등록 처리 중입니다. 잠시 후 이 화면을 새로고침하세요.");
