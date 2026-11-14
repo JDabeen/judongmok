@@ -35,6 +35,7 @@
 | 데이터베이스 | Supabase PostgreSQL | 학습·피드백 데이터 |
 | 인증·권한 | Supabase Auth + RLS | 익명 학습자·운영자 접근 분리 |
 | 소스 관리 | GitHub | 코드·변경 이력 |
+| 알림 (연결 준비 중) | OneSignal + Supabase Edge Functions | 관리자 푸시 알림 |
 
 ## 주요 파일
 
@@ -43,11 +44,16 @@
 - `manifest.webmanifest`, `sw.js`: 웹앱 관련 설정
 - `privacy.html`: 학습 기록 안내
 - `01-admin-policies.sql`, `02-grant-admin.sql`: 초기 관리자 접근 정책
-- `supabase/functions/`: 서버 측 기능 코드 (기능별 배포 설정 필요)
+- `admin/push.js`, `admin/push-config.js`: 관리자 알림 등록 코드 (OneSignal App ID 입력 전 비활성)
+- `push/onesignal/OneSignalSDKWorker.js`: 웹 푸시 전용 서비스 워커
+- `admin/manifest.webmanifest`: 관리자 홈 화면 설치 설정
+- `03-admin-push.sql`: 관리자 기기별 구독을 안전하게 저장하는 테이블
+- `supabase/functions/notify-feedback-onesignal/`: 새 피드백 알림용 Edge Function (별도 배포 필요)
+- `docs/ONESIGNAL-SETUP.md`: 알림 설치 및 보안 설정 가이드
 
 ## 다음 개발 단계
 
-- [ ] 중요한 사용자 피드백의 운영자 휴대폰 알림
+- [ ] 중요한 사용자 피드백의 운영자 휴대폰 알림 — OneSignal 연동 코드 준비, 서비스 연결·실기기 테스트 필요
 - [ ] 실제 사용자 데이터로 사용성·중단 구간 분석
 - [ ] 보안·운영 점검 및 모니터링 강화
 - [ ] 학습 콘텐츠 확대와 복습 설계
@@ -60,6 +66,7 @@
 - `admin/` 페이지의 URL이 공개되어도 관리자 권한이 없는 사람에게 다른 사용자의 데이터가 노출되지 않도록 정책을 유지해야 합니다.
 - 실제 학습자 데이터를 GitHub에 업로드하지 않습니다.
 - 웹 앱과 앱스토어용 네이티브 앱은 다릅니다. 현재는 설치 가능한 웹앱(PWA)을 목표로 합니다.
+- 알림 기능은 현재 코드 준비 단계로, OneSignal 앱 생성·Supabase SQL·서버 함수 배포·웹훅 설정을 완료해야 실제 작동합니다.
 
 ## 개발·운영 목적
 
