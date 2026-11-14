@@ -25,7 +25,7 @@ function loadSdk(){
       try{
         await os.init({
           appId,
-          serviceWorkerPath:"push/onesignal/OneSignalSDKWorker.js",
+          serviceWorkerPath:"/push/onesignal/OneSignalSDKWorker.js",
           serviceWorkerParam:{scope:"/push/onesignal/"},
           notifyButton:{enable:false}
         });
