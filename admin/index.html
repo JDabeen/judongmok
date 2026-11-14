@@ -41,12 +41,19 @@ input{display:block;width:100%;border-radius:9px;border:1px solid #cad3e3;backgr
 <section id="login" class="login"><h1>운영자 로그인</h1><p>주동목의 학습 현황과 피드백은 권한이 있는 계정만 볼 수 있어요.</p><form id="login-form"><label for="email">이메일</label><input type="email" id="email" autocomplete="username" required placeholder="운영자 이메일"><label for="password">비밀번호</label><input type="password" id="password" autocomplete="current-password" required placeholder="운영자 비밀번호"><button class="btn primary" id="login-btn" type="submit">로그인</button></form><div id="login-error" class="alert" role="status"></div><p class="hint">Supabase 대시보드 비밀번호와는 별도로 생성한 주동목 관리자 계정을 사용하세요.</p></section>
 <section id="dashboard" hidden>
 <div class="headrow"><h1>운영 현황</h1><small id="updated-at">데이터 확인 중</small></div>
+<section id="admin-push" hidden style="background:#fff;border:1px solid #dbe3f0;border-radius:12px;padding:17px 20px;margin:12px 0 20px">
+<strong style="font-size:17px">휴대폰 알림</strong>
+<p id="push-status" style="font-size:14px;color:#5a6680;margin:7px 0 14px">설정 확인 중...</p>
+<button type="button" class="btn primary" id="push-enable" disabled>이 기기에서 알림 켜기</button>
+</section>
 <div id="data-error" hidden class="error"></div>
 <div class="stats"><div class="stat"><div class="num" id="count-records">—</div><div class="name">누적 문장 완료 기록</div></div><div class="stat"><div class="num" id="count-sessions">—</div><div class="name">전체 연습 시도</div></div><div class="stat"><div class="num" id="count-completed">—</div><div class="name">완료된 연습 시도</div></div><div class="stat"><div class="num" id="count-feedback">—</div><div class="name">누적 피드백</div></div></div>
 <div class="cols"><section class="panel"><div class="panel-head"><h2>최근 피드백</h2><small>최신 15건</small></div><div id="feedback-list" class="empty">불러오는 중...</div></section><section class="panel"><div class="panel-head"><h2>최근 연습</h2><small>최신 20건</small></div><div id="sessions-list" class="empty">불러오는 중...</div></section></div>
-<p class="footer">기록된 연습·완료 데이터 기준으로 집계합니다. 단순 방문자는 포함되지 않습니다. 시작만 하고 완료되지 않은 시도가 반드시 학습 포기를 뜻하지는 않습니다. 이 화면은 자동 푸시 알림 기능을 포함하지 않습니다.</p>
+<p class="footer">기록된 연습·완료 데이터 기준으로 집계합니다. 단순 방문자는 포함되지 않습니다. 시작만 하고 완료되지 않은 시도가 반드시 학습 포기를 뜻하지는 않습니다. 알림은 관리자 인증 후 이 기기에서 별도로 허용해야 작동합니다.</p>
 </section>
 </div>
+<script src="./push-config.js"></script>
+<script src="./push.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (()=>{'use strict';
@@ -58,8 +65,8 @@ const setText=(id,value)=>{const n=$(id);if(n)n.textContent=String(value)};
 const dateText=x=>{if(!x)return '—';try{return new Date(x).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch{return '—'}};
 const labelRating={easy:'쉬웠어요',good:'적당해요',hard:'어려웠어요'};
 const labelStatus={started:'진행 중 / 미완료',completed:'완료',interrupted:'중단 기록'};
-const showLogin=()=>{$('login').hidden=false;$('dashboard').hidden=true;$('top-actions').hidden=true};
-const showDashboard=()=>{$('login').hidden=true;$('dashboard').hidden=false;$('top-actions').hidden=false};
+const showLogin=()=>{$('login').hidden=false;$('dashboard').hidden=true;$('top-actions').hidden=true;window.JudongmokPush?.clear()};
+const showDashboard=()=>{$('login').hidden=true;$('dashboard').hidden=false;$('top-actions').hidden=false;void window.JudongmokPush?.activate(client)};
 const el=(tag,klass,text)=>{const n=document.createElement(tag);if(klass)n.className=klass;if(text!==undefined)n.textContent=String(text);return n};
 const empty=(n,message)=>{n.replaceChildren(el('div','empty',message));n.className=''};
 function item(list,topLeft,topRight,title,msg,pill){const e=el('article','entry');const top=el('div','entry-top');top.append(el('span','',topLeft),el('span','',topRight));e.append(top);const strong=el('strong','',title);e.append(strong);if(pill){strong.append(' ',el('span',pill==='completed'?'pill good':'pill',labelStatus[pill]||pill))}if(msg)e.append(el('p','',msg));list.append(e)}
