@@ -13,8 +13,8 @@
 
 feedback 신규 INSERT → Supabase Database Webhook → notify-feedback-onesignal Edge Function → OneSignal REST API → 등록된 관리자 휴대폰의 Chrome 웹 푸시.
 
-- 글로 쓴 의견이 있거나 '어려웠어요'(hard) 평가가 있는 경우에만 푸시를 보낸다.
-- 글 없는 '쉬웠어요'(easy)·'적당해요'(good) 평가만으로는 푸시를 보내지 않는다.
+- 초기 사용자 테스트 동안 쉬웠어요(easy)·적당해요(good)·어려웠어요(hard) 등 모든 난이도 피드백 INSERT에 푸시를 보낸다.
+- 평가만 보내고 의견을 작성하지 않아도 푸시 대상이다.
 - 학습자 식별자 및 원문 의견은 잠금화면 푸시 본문에 싣지 않는다.
 - 알림을 클릭하면 관리자 페이지로 이동하며, 로그아웃 상태라면 재로그인이 필요할 수 있다.
 - 관리자 로그아웃은 이미 등록된 브라우저 알림 구독을 해지하지 않는다.
