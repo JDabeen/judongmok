@@ -270,6 +270,10 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
  .guide-list{margin-bottom:16px}
  .guide-item{padding:11px 0}
 }
+
+/* Accessible non-moving celebration for phones with Reduce Motion enabled */
+.celebrate-static{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%);z-index:9999;pointer-events:none;max-width:calc(100vw - 26px);padding:19px 25px;border:2px solid #e1edff;background:#fff;border-radius:19px;box-shadow:0 18px 45px rgba(18,45,99,.19);font-size:clamp(22px,6vw,29px);font-weight:850;color:#134dca;text-align:center;white-space:nowrap}
+.celebrate-static.mini{top:31%;font-size:21px;padding:12px 17px}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app");
@@ -340,7 +344,16 @@ function victorySound(){
 }
 function celebrate(force=false,mini=false){
  const reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
- if(reduce&&!force)return;
+ if(reduce&&!force){
+  document.querySelector(".celebrate-static")?.remove();
+  const badge=document.createElement("div");
+  badge.className="celebrate-static"+(mini?" mini":"");
+  badge.setAttribute("role","status");
+  badge.textContent=mini?"✨ 문장 완성!":"🎉 잘했어요!";
+  document.body.appendChild(badge);
+  setTimeout(()=>badge.remove(),mini?1350:2400);
+  return;
+ }
  const old=document.querySelector(".celebrate-layer");if(old)old.remove();
  const layer=document.createElement("div");
  layer.className="celebrate-layer"+(force?" force-motion":"")+(mini?" mini-burst":"");
