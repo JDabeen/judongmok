@@ -225,6 +225,14 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 .back{min-width:86px;min-height:46px;padding:10px 10px 10px 0;text-align:left}
 .small-blue,.mini-link{min-height:46px;min-width:92px;padding:12px 15px}
 .learn-good{margin:17px 0 7px;color:var(--success);font-size:16px;font-weight:800}
+
+/* Celebrations stay in the visible viewport on mobile */
+.celebrate-layer{position:fixed;inset:0;z-index:9999;overflow:hidden;pointer-events:none}
+.celebrate-bit{position:absolute;top:47%;left:50%;width:9px;height:16px;opacity:0;will-change:transform,opacity;animation:celebrate-fly var(--time,2000ms) cubic-bezier(.1,.58,.23,1) forwards var(--delay,0ms)}
+.celebrate-layer.mini-burst .celebrate-bit{width:6px;height:10px}
+@media(prefers-reduced-motion:reduce){.celebrate-layer.force-motion{display:block}.celebrate-layer.force-motion .celebrate-bit{animation:celebrate-fly var(--time,2000ms) cubic-bezier(.1,.58,.23,1) forwards var(--delay,0ms)!important}}
+.done button.success-icon{border:0;cursor:pointer;color:#0D9B70;font-size:40px;font-weight:800;display:grid;place-items:center}
+.done button.success-icon:focus-visible{outline:3px solid var(--blue);outline-offset:5px}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app");
@@ -272,7 +280,7 @@ async function share(){
  if(navigator.share){try{await navigator.share({text,title:"주동목"});}catch(e){}return;}
  try{await navigator.clipboard.writeText(text);alert("문장을 복사했어요.");}catch(e){alert("공유 기능을 지원하지 않는 브라우저예요.");}
 }
-function playTone(){try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;const c=new Audio(),o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.setValueAtTime(500,c.currentTime);o.frequency.linearRampToValueAtTime(750,c.currentTime+.12);g.gain.setValueAtTime(.015,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.2);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.2);o.onended=()=>c.close();}catch(e){}}
+function playTone(){try{const c=unlockAudio();if(!c)return;const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+.015;o.type="sine";o.frequency.setValueAtTime(500,t);o.frequency.linearRampToValueAtTime(740,t+.12);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.028,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+.20);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.21);}catch(e){}}
 
 function unlockAudio(){
  try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;
@@ -293,29 +301,30 @@ function victorySound(){
   o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+.36);
  });
 }
-function celebrate(){
- if(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches)return;
- const screen=document.querySelector(".screen");
- screen.querySelector(".celebrate-layer")?.remove();
- const overlay=document.createElement("div");overlay.className="celebrate-layer";overlay.setAttribute("aria-hidden","true");
- const colors=["#235BFA","#FFD44D","#15B786","#FE779E","#9F7BFF","#5DCFE3"];
+function celebrate(force=false,mini=false){
+ const reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+ if(reduce&&!force)return;
+ const old=document.querySelector(".celebrate-layer");if(old)old.remove();
+ const layer=document.createElement("div");
+ layer.className="celebrate-layer"+(force?" force-motion":"")+(mini?" mini-burst":"");
+ layer.setAttribute("aria-hidden","true");
+ const palette=["#235BFA","#FFCC32","#12B78A","#FB6D9C","#A17DFC","#64CBEA"],parts=mini?34:94;
  const fragment=document.createDocumentFragment();
- for(let i=0;i<108;i++){
-  const el=document.createElement("i");el.className="celebrate-bit";
-  const theta=Math.random()*2*Math.PI,radius=130+Math.random()*430;
-  el.style.background=colors[i%colors.length];
-  el.style.borderRadius=Math.random()>.65?"50%":"1px";
-  el.style.setProperty("--dx",(Math.cos(theta)*radius).toFixed(1)+"px");
-  el.style.setProperty("--dy",(Math.sin(theta)*radius+Math.random()*400).toFixed(1)+"px");
-  el.style.setProperty("--turn",(Math.random()*1250-625).toFixed(0)+"deg");
-  el.style.setProperty("--delay",(Math.random()*220).toFixed(0)+"ms");
-  el.style.setProperty("--time",(1600+Math.random()*900).toFixed(0)+"ms");
-  fragment.appendChild(el);
+ for(let i=0;i<parts;i++){
+  const bit=document.createElement("i");bit.className="celebrate-bit";
+  const angle=(2*Math.PI*i/parts)+(Math.random()*.38-.19),r=(mini?85:175)+Math.random()*(mini?110:315);
+  bit.style.background=palette[i%palette.length];
+  bit.style.borderRadius=i%4===0?"50%":"2px";
+  bit.style.setProperty("--dx",Math.cos(angle)*r+"px");
+  bit.style.setProperty("--dy",Math.sin(angle)*r+Math.random()*(mini?95:320)+"px");
+  bit.style.setProperty("--turn",(Math.random()*1440-720)+"deg");
+  bit.style.setProperty("--delay",(Math.random()*(mini?90:240))+"ms");
+  bit.style.setProperty("--time",(mini?900:1750)+Math.random()*(mini?450:1100)+"ms");
+  fragment.appendChild(bit);
  }
- overlay.appendChild(fragment);screen.appendChild(overlay);
- setTimeout(()=>overlay.remove(),2900);
+ layer.appendChild(fragment);document.body.appendChild(layer);
+ setTimeout(()=>layer.remove(),mini?1650:3300);
 }
-
 function finish(kind,english,korean){
  stage=kind;resultFrom=kind===4?"daily":"tutorial";resultSentence=english;resultKorean=korean;scene="done";locked=false;render();requestAnimationFrame(celebrate);
 }
@@ -350,7 +359,7 @@ function render(){
   const first=stage===1,second=stage===2,third=stage===3;
   const label=first?"첫 문장을 만들었어요!":second?"혼자서도 해냈어요!":third?"문장이 길어졌어요!":"오늘도 해냈어요!";
   const small=third?'<div class="compare-old">I drink water.</div>':'';
-  app.innerHTML='<section class="done"><div class="success-icon" aria-hidden="true">✓</div><p class="done-kicker">🎉 잘했어요!</p><h2>'+label+'</h2>'+small+
+  app.innerHTML='<section class="done"><button type="button" class="success-icon" data-action="replay-celebration" aria-label="축하 효과 다시 보기">✓</button><p class="done-kicker">🎉 잘했어요!</p><h2>'+label+'</h2>'+small+
   '<div class="result"><div class="big-sentence">'+esc(resultSentence)+'</div></div><p class="translation">'+esc(resultKorean)+'</p>'+
   '<div class="done-buttons"><button class="utility" data-action="listen">🔊 듣기</button><button class="utility" data-action="share">↗ 공유</button></div>'+
   button(stage===3?"학습 시작하기":stage===4?"홈으로":"다음 단계","next")+'</section>';return;
@@ -457,18 +466,18 @@ function clickChoice(kind,i,button){
   if(a.kind==="expand"){
    if(a.options[i]!==a.correct){feedbackWrong(button);return;}
    locked=true;feedbackRight(button,"잘했어요!");tapEffect(false);
-   setTimeout(()=>{locked=false;nextDaily();},380);return;
+   setTimeout(()=>{locked=false;celebrate(false,true);nextDaily();},780);return;
   }
   if(a.kind!=="order"&&a.kind!=="apply")return;
   if(a.options[i]!==a.order[sequence]){feedbackWrong(button);return;}
   locked=true;sequence++;rememberDraft();
-  feedbackRight(button,sequence===a.order.length?"완성!":"좋아요!");
+  feedbackRight(button,sequence===a.order.length?"문장 완성!":"좋아요!");
   tapEffect(a.kind==="apply"&&sequence===a.order.length);
   setTimeout(()=>{
    locked=false;
-   if(sequence===a.order.length)nextDaily();
+   if(sequence===a.order.length){celebrate(false,true);nextDaily();}
    else render();
-  },a.kind==="apply"&&sequence===a.order.length?620:290);
+  },a.kind==="apply"&&sequence===a.order.length?760:sequence===a.order.length?800:340);
   return;
  }}
 function action(which,el){
@@ -486,6 +495,7 @@ function action(which,el){
  if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
  if(which==="home"){scene="home";render();window.scrollTo(0,0);}
  if(which==="listen"){speak(resultSentence);}
+ if(which==="replay-celebration"){tapEffect(true);celebrate(true);}
  if(which==="listen-daily"){const a=dailyCurrent();if(a.kind==="learn")speak(a.english);}
  if(which==="next-daily"){if(scene==="daily"&&dailyCurrent().kind==="learn"&&sequence>=1){tapEffect(false);nextDaily();}}
  if(which==="share"){share();}
