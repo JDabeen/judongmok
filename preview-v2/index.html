@@ -1,154 +1,184 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ffffff">
-<meta name="robots" content="noindex,nofollow">
-<title>주동목 · 새로운 첫 경험 미리보기</title>
-<style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;color:#19213b;--blue:#235bfa;--pale:#f1f5ff;--light:#f7f8fc;--line:#dce4f2;--text:#19213b;--muted:#6a7894;--success:#05784f}
-*{box-sizing:border-box}
-body{margin:0;background:#e9eef7}
-.app{max-width:540px;min-height:100dvh;margin:auto;background:white;display:flex;flex-direction:column;box-shadow:0 14px 48px #27375b11}
-header{padding:24px 26px 20px;border-bottom:1px solid #eef1f7;display:flex;align-items:center;justify-content:space-between}
-.logo{font-size:26px;letter-spacing:-.07em;font-weight:900}.preview{font-size:12px;font-weight:800;color:#667a9d;background:#f0f3fa;padding:6px 9px;border-radius:7px}
-main{padding:26px;flex:1}
-.tag{font-size:13px;color:var(--blue);font-weight:850;letter-spacing:.03em}
-h1{font-size:clamp(28px,6.2vw,34px);line-height:1.38;letter-spacing:-.065em;margin:12px 0 14px;word-break:keep-all}
-p{line-height:1.65;color:var(--muted);font-size:16px;margin:0 0 16px;word-break:keep-all}
-button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
-button:focus-visible{outline:3px solid #a1bcff;outline-offset:3px}
-.btn{width:100%;min-height:65px;border:1.5px solid var(--line);background:white;border-radius:12px;color:var(--text);font-size:19px;font-weight:800;letter-spacing:-.03em;padding:13px 17px;text-align:left;transition:background .12s,border-color .12s}
-.btn+.btn{margin-top:11px}.btn:hover{border-color:#9fb7fb;background:#f9fbff}
-.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);text-align:center;margin-top:20px}
-.btn:disabled{opacity:.52;cursor:default}
-.board{background:var(--pale);border:1px solid #dce7ff;border-radius:15px;padding:22px 17px;margin:25px 0 28px}
-.board-title{color:#687cae;font-size:13px;font-weight:850;margin-bottom:12px}
-.korean{display:flex;gap:7px;flex-wrap:wrap;line-height:1.5}
-.word{display:inline-block;padding:7px 9px;border-radius:9px;font-size:22px;font-weight:850;letter-spacing:-.045em;color:#435171}
-.word.active{background:#e0e9ff;color:#1752e2;box-shadow:inset 0 0 0 1px #acc6ff;animation:glow .38s}
-@keyframes glow{50%{transform:scale(1.05)}}
-.english{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 10px}
-.slot{border:1px solid #cedaf4;background:#fff;border-radius:10px;min-width:80px;min-height:69px;padding:9px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px}
-.slot small{color:#8592ad;font-size:11px;font-weight:800}.slot strong{font-size:22px;color:#2059e4}.slot.blank strong{color:#b6c2d7}
-.question{font-size:24px;font-weight:850;line-height:1.4;letter-spacing:-.05em;margin:20px 0}
-.hint{font-size:15px;color:var(--muted);margin:12px 0 20px}
-.result{min-height:28px;font-size:15px;font-weight:750;color:var(--success);margin-top:15px}
-.result.bad{color:#bf3744}
-.prog{height:7px;background:#ebeff7;border-radius:20px;margin-bottom:22px;overflow:hidden}
-.fill{height:100%;background:#2c64f5;border-radius:20px;transition:width .25s}
-.notice{font-size:14px;color:#5e6f90;border-left:3px solid #95b2ff;background:#f4f7ff;padding:12px 14px;border-radius:4px;line-height:1.6}
-.comparison{display:grid;gap:12px;margin:27px 0}
-.compare-line{background:var(--light);border-radius:12px;padding:18px}
-.compare-line strong{font-size:24px;letter-spacing:-.05em}
-.compare-line small{display:block;color:var(--muted);margin-bottom:7px}
-.goal{border:2px solid #cddbf9;background:#f5f8ff;padding:22px;border-radius:16px;margin:25px 0}
-.goal strong{font-size:25px;line-height:1.5;letter-spacing:-.04em}
-.confetti{font-size:65px;text-align:center;animation:pop .5s both;margin:18px 0}
-@keyframes pop{0%{transform:scale(.3) rotate(-15deg);opacity:0}70%{transform:scale(1.17) rotate(7deg);opacity:1}100%{transform:scale(1)}}
-.big{font-weight:900;font-size:29px;letter-spacing:-.045em;line-height:1.55;text-align:center}
-.share-card{background:#f3f7ff;border:1px solid #d7e4ff;padding:22px;border-radius:15px;margin:18px 0}
-footer{text-align:center;padding:16px;font-size:12px;color:#8995ac}
-@media(max-width:360px){main{padding:19px}.word{font-size:19px}.slot{min-width:66px}.slot strong{font-size:19px}header{padding:19px}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style>
-</head>
-<body>
-<div class="app"><header><span class="logo">주동목</span><span class="preview">V2 체험판</span></header><main id="root"></main><footer>기존 주동목과 별개인 체험판 · 학습 데이터는 전송하지 않아요</footer></div>
-<script>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><meta name="robots" content="noindex,nofollow"><title>주동목 — 문장 조립 체험</title><style>
+:root{color-scheme:light;--blue:#235BFA;--blue-dark:#1245D4;--navy:#121D36;--muted:#76829A;--border:#DFE6F1;--pale:#F2F6FF;--surface:#F7F9FD;--success:#0D9B70;--wrong:#C7464A}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;height:100%}
+body{margin:0;min-height:100vh;background:#f0f3fa;font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','Segoe UI',sans-serif;color:var(--navy);font-size:18px;letter-spacing:-.04em}
+button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #88AAFF;outline-offset:3px}button:disabled{cursor:default}
+.screen{background:#fff;max-width:535px;min-height:100dvh;margin:0 auto;position:relative;box-shadow:0 26px 75px rgba(21,36,77,.09);display:flex;flex-direction:column}
+.header{height:77px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;border-bottom:1px solid #F0F3F8;flex-shrink:0}
+.logo{font-weight:900;letter-spacing:-.07em;font-size:26px;display:flex;align-items:center;gap:9px}
+.logo-mark{display:grid;grid-template-columns:repeat(3,6px);gap:3px;align-items:end;height:20px;width:26px;transform:rotate(-9deg)}
+.logo-mark i{display:block;width:6px;height:11px;background:var(--blue);border-radius:2px}.logo-mark i:nth-child(2){height:20px}.logo-mark i:nth-child(3){height:15px}
+.top-action{border:0;background:transparent;color:#8994A9;font-size:15px;font-weight:700;padding:12px 3px}
+main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
+.progress-wrap{padding-top:25px}
+.progress-heading{display:flex;justify-content:space-between;align-items:center;color:#7B869B;font-size:14px;font-weight:700;letter-spacing:0}
+.progress-heading b{color:var(--blue);font-size:15px}
+.progress-bar{display:flex;gap:7px;margin-top:13px}
+.progress-segment{height:7px;border-radius:8px;flex:1;background:#E6EBF3;overflow:hidden}
+.progress-segment span{display:block;height:100%;width:0;background:var(--blue);border-radius:8px;transition:width .34s cubic-bezier(.15,.65,.3,1)}
+.hero{padding-top:47px}
+.hero-label{font-size:14px;color:var(--blue);font-weight:850;letter-spacing:.02em;margin-bottom:15px}
+.hero h1{font-size:clamp(28px,6.5vw,35px);line-height:1.46;letter-spacing:-.065em;margin:0;font-weight:850;word-break:keep-all;color:#111A30}
+.board{margin-top:34px;background:var(--pale);border:1px solid #E4ECFF;border-radius:15px;padding:21px 19px 19px;min-height:145px}
+.board-heading{font-size:13px;font-weight:800;color:#6C83BB;letter-spacing:0;margin-bottom:16px}
+.slots{display:flex;gap:7px;flex-wrap:wrap;align-items:flex-start}
+.slot{min-width:73px;border:1px solid #D4DEF7;background:#fff;border-radius:9px;padding:10px 11px 11px;transition:background .2s,border .2s,transform .18s}
+.slot-label{font-size:12px;font-weight:700;color:#98A4BC;letter-spacing:0;margin-bottom:5px;line-height:1}
+.slot-word{font-size:23px;letter-spacing:-.025em;font-weight:850;line-height:1.2;white-space:nowrap;color:#C0CADD}
+.slot.filled{border-color:#BBCFFF;background:white;animation:pop .22s ease-out both}
+.slot.filled .slot-word{color:var(--blue)}
+.slot.extra{background:#E8F0FF;border-color:#B8CFFF}.slot.extra .slot-word{font-size:17px}
+.question-area{margin-top:38px;min-width:0}
+.step-info{display:flex;align-items:center;gap:8px;font-size:14px;color:#71819A;font-weight:750;letter-spacing:0;margin-bottom:10px}
+.step-dot{width:7px;height:7px;border-radius:50%;background:var(--blue)}
+.question-area h2{font-size:28px;letter-spacing:-.065em;line-height:1.32;font-weight:850;margin:0 0 24px;word-break:keep-all}
+.answers{display:grid;gap:12px}
+.answer{min-height:84px;width:100%;border:1.5px solid #E1E7F1;border-radius:12px;background:#fff;padding:15px 17px;text-align:left;display:flex;align-items:center;gap:15px;color:var(--navy);transition:background .15s,border .15s,transform .12s,box-shadow .15s}
+.answer:hover{border-color:#97B3FA;background:#FBFCFF;box-shadow:0 5px 20px rgba(24,72,179,.055)}
+.answer:active{transform:scale(.991)}
+.answer-no{border:1px solid #DCE4F1;background:#F8FAFD;color:#7D8BA4;font-size:14px;font-weight:850;width:33px;height:33px;border-radius:8px;flex:none;display:grid;place-items:center;letter-spacing:0}
+.answer-content{display:flex;min-width:0;flex:1;flex-direction:column;gap:4px}
+.answer-name{font-size:24px;font-weight:850;letter-spacing:-.045em;line-height:1.1;overflow-wrap:anywhere}
+.answer-meaning{font-size:15px;font-weight:650;color:#8590A4;line-height:1.25}
+.answer svg{color:#CBD5E4;flex-shrink:0}
+.answer.correct{background:#EEF9F5;border-color:#49BB91}.answer.correct .answer-no{background:var(--success);border-color:var(--success);color:white}.answer.correct .answer-name{color:#066F50}
+.answer.wrong{border-color:#E99A9C;background:#FFF7F7}.answer.wrong .answer-no{color:var(--wrong);border-color:#E99A9C}
+.feedback{min-height:33px;margin-top:14px;font-size:16px;font-weight:750;color:var(--success);line-height:1.4}
+.feedback.wrong{color:var(--wrong)}
+.skip{border:0;background:transparent;color:#77859B;font-size:16px;font-weight:750;text-decoration:underline;text-underline-offset:4px;display:block;margin:18px auto 0;padding:9px 15px}
+.bottom-note{font-size:13px;color:#A1A9B7;text-align:center;padding:17px 16px 23px;flex-shrink:0;letter-spacing:0}
+.done{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:520px;position:relative;padding:28px 0 10px}
+.success-icon{margin:0 auto 21px;border-radius:50%;height:78px;width:78px;display:grid;place-items:center;background:#EAF8F2;color:var(--success);position:relative;animation:pop .38s both}
+.success-icon:after{position:absolute;content:"";width:94px;height:94px;border:1.5px solid #BEEBD5;border-radius:50%;animation:ring .6s both}
+.done-kicker{text-align:center;color:var(--success);font-size:15px;font-weight:850;margin:0 0 9px;letter-spacing:.02em}
+.done h2{font-size:34px;letter-spacing:-.07em;text-align:center;margin:0 0 36px;font-weight:850;line-height:1.3}
+.result{border-radius:15px;background:var(--blue);color:white;padding:30px 28px;box-shadow:0 15px 30px rgba(35,91,250,.16);overflow-wrap:anywhere;position:relative}
+.result::after{content:'';position:absolute;border:1px solid rgba(255,255,255,.12);width:185px;height:185px;border-radius:50%;right:-85px;top:-112px}
+.result .minor{font-size:13px;color:#D9E4FF;font-weight:750;letter-spacing:.07em;margin-bottom:14px}
+.result .big-sentence{font-size:clamp(29px,5.6vw,39px);font-weight:800;line-height:1.45;letter-spacing:-.045em}
+.result .big-sentence em{font-style:normal;color:#D0F4FF}
+.translation{font-size:16px;line-height:1.5;color:#76849B;margin:17px 1px 25px;text-align:center}
+.extra-actions{display:flex;gap:10px;margin:0 0 16px}
+.utility{background:#fff;border:1px solid #DCE4F1;border-radius:11px;flex:1;font-size:16px;font-weight:750;color:#3A4C6D;min-height:55px;display:flex;align-items:center;gap:8px;justify-content:center}
+.utility svg{height:20px;width:20px;stroke-width:2}
+.primary{width:100%;min-height:66px;background:var(--blue);color:#fff;border:0;border-radius:12px;font-size:21px;font-weight:850;letter-spacing:-.04em;box-shadow:0 7px 18px rgba(35,91,250,.17);transition:transform .15s,background .15s}
+.primary:hover{background:var(--blue-dark)}.primary:active{transform:scale(.985)}
+.recap{padding-top:45px}.recap-head{font-size:33px;letter-spacing:-.06em;margin:14px 0 29px}.recap-sub{color:var(--blue);font-size:14px;font-weight:850}
+.recap-line{padding:22px 0;border-bottom:1px solid #E8EDF4}.recap-line small{color:#8A98AA;font-weight:800;font-size:14px}.recap-line strong{display:block;font-size:23px;line-height:1.45;letter-spacing:-.045em;margin-top:8px;overflow-wrap:anywhere}
+.recap .primary{margin-top:35px}
+@keyframes pop{0%{transform:scale(.89);opacity:.35}100%{transform:scale(1);opacity:1}}
+@keyframes ring{0%{transform:scale(.65);opacity:.1}100%{transform:scale(1);opacity:1}}
+@media(max-width:550px){body{background:#fff}.screen{box-shadow:none}.header{padding:0 22px;height:70px}main{padding:0 22px 22px}.progress-wrap{padding-top:21px}.hero{padding-top:40px}.hero h1{font-size:30px}.board{margin-top:28px}.question-area{margin-top:35px}.question-area h2{font-size:27px;margin-bottom:21px}.answer{min-height:80px}.done{min-height:480px}}
+@media(max-width:380px){main{padding-left:17px;padding-right:17px}.header{padding:0 17px}.hero h1{font-size:28px}.board{padding:18px 14px}.slot{padding:9px;min-width:67px}.question-area{margin-top:29px}.question-area h2{font-size:25px}.answer{min-height:75px;padding:12px}.answer-name{font-size:22px}}
+@media(min-width:560px){.screen{min-height:790px;margin:36px auto;border:1px solid #E5EAF2;border-radius:21px;overflow:hidden}.bottom-note{padding-bottom:20px}}
+.privacy-link{color:#7B86A0;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+
+/* V2 additions, on top of the original Judongmok visual system */
+.intro-answers{margin-top:38px}
+.ko-line{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-bottom:18px}
+.ko-word{padding:7px 9px;border-radius:8px;font-weight:800;font-size:22px;line-height:1.4;color:#60718d}
+.ko-word.active{background:#dce8ff;box-shadow:inset 0 0 0 1px #acc5ff;color:#174dcc;animation:pop .27s both}
+.ko-word.used{color:#394b6d}
+.board-divider{border-top:1px solid #dbe6ff;margin:17px 0}
+.board-subtitle{font-size:13px;color:#6c83bb;font-weight:800;letter-spacing:0;margin-bottom:12px}
+.slot.pending{opacity:.72}
+.slot .slot-word{font-size:22px}
+.question-area.compact{margin-top:27px}
+.question-area.compact h2{font-size:26px;margin-bottom:19px}
+.answer{min-height:72px}
+.answer-name{font-size:21px}
+.answer-content{gap:0}
+.note{font-size:14px;line-height:1.6;color:#70819b;margin-top:13px}
+.done .result .big-sentence{font-size:clamp(24px,5.5vw,34px)}
+.done .result{padding:27px 23px}
+.utility{width:100%}
+.intro .hero{padding-top:58px}
+.intro .hero h1{margin-bottom:15px}
+.done-actions{display:grid;gap:12px;margin-top:15px}
+.done-actions .primary{margin:0}
+.done-actions .utility{margin:0}
+@media(max-width:380px){.ko-word{font-size:19px;padding:6px 7px}.answer-name{font-size:19px}.slot .slot-word{font-size:20px}}
+</style></head>
+<body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div><button class="top-action" id="reset" type="button">다시 시작</button></header><main id="app"></main></div><script>
 "use strict";
-const root=document.getElementById("root");
-let phase="intro",step=0,lessonIndex=0,selected="",answerState="",interruption=false;
+const root=document.querySelector("#app");
+let view="intro", lesson=0, step=0, locked=false, feedback="";
 const lessons=[
- {ko:["나는","집에서","매일","밥을","먹는다."],mini:["나는","밥을","먹는다."],glow:[0,4,-1,3,1,2],slots:["I","eat","rice","at home","every day"],labels:["주어","동사","목적어","장소","시간"],
+ {ko:["나는","밥을","먹는다."],full:["나는","집에서","매일","밥을","먹는다."],
+  slots:[{label:"주어",word:"I"},{label:"동사",word:"eat"},{label:"목적어",word:"rice"},{label:"장소",word:"at home"},{label:"시간",word:"every day"}],
+  english:"I eat rice at home every day.",translation:"나는 집에서 매일 밥을 먹는다.",
   steps:[
-   {q:"누가 먹나요? 주어를 골라보세요.",opts:["I","He","You"],yes:"I",slot:0,hi:0,hint:"'나는'에 불이 들어왔어요. 영어에서도 주어가 1등이에요."},
-   {q:"무엇을 하나요? 동사를 골라보세요.",opts:["drink","eat","go"],yes:"eat",slot:1,hi:4,hint:"한국어 끝의 '먹는다'가 영어에서는 주어 바로 뒤로 와요."},
-   {q:"먹다(eat)는 목적어를 꼭 넣어야 할까요?",opts:["필요하다","필요 없다","둘 다 가능하다"],yes:"둘 다 가능하다",slot:-1,hi:3,hint:"eat은 목적어를 넣어도, 생략해도 돼요. 이번 문장에서는 무엇을 먹는지 알려주는 rice를 붙여 봐요."},
-   {q:"무엇을 먹나요?",opts:["rice","water","books"],yes:"rice",slot:2,hi:3,hint:"동사 다음에 '밥을'을 붙이면 기본 문장이 완성돼요."},
-   {q:"어디서 먹나요? 장소를 더해 볼까요?",opts:["at home","after school","with friends"],yes:"at home",slot:3,hi:1,hint:"기본 문장 뒤에 장소를 붙였어요."},
-   {q:"언제 먹나요? 시간도 붙여 봐요.",opts:["every day","at school","with my sister"],yes:"every day",slot:4,hi:2,hint:"이제 시간까지 이어 붙여 긴 문장이 됐어요."}
+   {question:"주어는 무엇일까요?",options:["I","You","He"],correct:0,hi:0,slot:0,explain:"맞아요! 영어도 주어가 첫 번째예요."},
+   {question:"동사는 무엇일까요?",options:["go","eat","drink"],correct:1,hi:2,slot:1,explain:"잘했어요! 한국어 끝의 '먹는다'가 영어에서는 주어 뒤에 와요."},
+   {question:"먹다(eat)는 목적어가 꼭 필요할까요?",options:["필요하다","필요 없다","넣어도 되고 안 넣어도 된다"],correct:2,hi:1,slot:-1,explain:"정답! eat은 목적어를 생략할 수도 있어요. 이 문장에서는 '밥을' 넣어볼게요."},
+   {question:"그렇다면 무엇을 먹나요?",options:["water","rice","coffee"],correct:1,hi:1,slot:2,explain:"좋아요! 이제 I eat rice.가 완성됐어요."},
+   {question:"장소를 붙여볼까요?",options:["at home","every day","with you"],correct:0,hi:1,slot:3,full:true,explain:"잘했어요! 기본 문장 뒤에 장소를 붙였어요."},
+   {question:"마지막으로 시간을 넣어보세요.",options:["at school","with friends","every day"],correct:2,hi:2,slot:4,full:true,explain:"완벽해요! 긴 문장도 만들었어요."}
   ]},
- {ko:["나는","학생이다."],mini:["나는","학생이다."],glow:[0,1,-1,1],slots:["I","am","a student"],labels:["주어","동사","어떤 사람?"],
+ {ko:["나는","학생이다."],full:["나는","학생이다."],
+  slots:[{label:"주어",word:"I"},{label:"동사",word:"am"},{label:"어떤 사람?",word:"a student"}],
+  english:"I am a student.",translation:"나는 학생이다.",
   steps:[
-   {q:"이번에도 주어부터 골라보세요.",opts:["I","She","We"],yes:"I",slot:0,hi:0,hint:"한국어의 '나는'을 영어의 I로 옮겨요."},
-   {q:"'이다'에 해당하는 동사는 무엇일까요?",opts:["am","eat","go"],yes:"am",slot:1,hi:1,hint:"'학생이다'에서 '이다'의 역할을 영어에서는 am이 해요."},
-   {q:"이 문장에 목적어는 필요할까요?",opts:["필요하다","필요 없다","둘 다 가능하다"],yes:"필요 없다",slot:-1,hi:1,hint:"am 뒤의 'a student'는 목적어가 아니라, 내가 어떤 사람인지 알려주는 보어예요."},
-   {q:"어떤 사람인지 붙여서 완성해 보세요.",opts:["a student","rice","every day"],yes:"a student",slot:2,hi:1,hint:"be동사도 주어 다음에 동사를 놓는 큰 규칙은 같아요."}
+   {question:"주어는 무엇일까요?",options:["She","I","We"],correct:1,hi:0,slot:0,explain:"맞아요! 주어는 I예요."},
+   {question:"'이다'에 해당하는 동사는?",options:["eat","go","am"],correct:2,hi:1,slot:1,explain:"맞아요! 이 문장에서는 am이 동사예요."},
+   {question:"이 문장에 목적어가 필요할까요?",options:["필요하다","필요 없다","넣어도 되고 안 넣어도 된다"],correct:1,hi:1,slot:-1,explain:"맞아요! a student는 목적어가 아니라 '어떤 사람인지' 알려줘요."},
+   {question:"어떤 사람인지 넣어보세요.",options:["at home","a student","rice"],correct:1,hi:1,slot:2,explain:"잘했어요! I am a student.가 완성됐어요."}
   ]}
 ];
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function btn(label,action,primary){return '<button type="button" class="btn'+(primary?" primary":"")+'" data-action="'+esc(action)+'">'+esc(label)+'</button>';}
-function view(s){root.innerHTML=s;window.scrollTo({top:0,behavior:"instant"});}
+const safe=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function choice(text,i){return '<button class="answer" type="button" data-choice="'+i+'"><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+safe(text)+'</span></span></button>';}
 function render(){
- if(phase==="intro"){
-  view('<div class="tag">영어가 안 나오는 이유, 1분 만에 경험해 봐요</div><h1>영어와 한국어는<br>단어 순서가 다르다는 사실,<br>알고 계셨나요?</h1><p>어렵게 설명하지 않을게요. 딱 한 문장만 직접 만들어 보세요.</p>'
-   +'<div class="goal"><strong>나는 밥을 먹는다.</strong><p style="margin:8px 0 0">이 문장을 영어로 바꾸면 순서가 어떻게 달라질까요?</p></div>'
-   +btn("알고 있어요","intro-known")+btn("애매하게 알고 있어요","intro-unsure")+btn("잘 모르겠어요","intro-no"));
+ if(view==="intro"){
+  root.innerHTML='<section class="intro"><div class="hero"><div class="hero-label">영어, 문장부터 만들어 볼까요?</div><h1>영어와 한국어는<br>어순이 다르다는 사실,<br>알고 계셨나요?</h1></div><div class="intro-answers answers">'
+   +["알고 있어요","애매하게 알고 있어요","잘 모르겠어요"].map(choice).join("")+'</div></section>';
   return;
  }
- if(phase==="concept"){
-  view('<div class="tag">영어 어순의 출발점</div><h1>주어 1등!<br>동사 2등!</h1><p>초급에서는 동사가 문장 끝에 오는 쉬운 한국어 예문부터 연습할 거예요.</p>'
-   +'<div class="comparison"><div class="compare-line"><small>한국어 · 주어 → 목적어 → 동사</small><strong>나는 · 밥을 · 먹는다</strong></div>'
-   +'<div class="compare-line"><small>영어 · 주어 → 동사 → 목적어</small><strong>I · eat · rice</strong></div></div>'
-   +'<p class="notice">한국어 끝의 동작을 찾아서 영어에서는 주어 바로 뒤에 놓아볼 거예요. 이제 직접 해보세요.</p>'+btn("첫 문장 조립하기","start",true));
+ const l=lessons[lesson];
+ if(view==="done"){
+  root.innerHTML='<section class="done"><div class="success-icon" aria-hidden="true"><svg width="39" height="39" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></div><div class="done-kicker">문장 완성! 🎉</div><h2>직접 해내셨어요!</h2><div class="result"><div class="minor">오늘 내가 만든 영어 문장</div><div class="big-sentence">'+safe(l.english)+'</div></div><div class="translation">'+safe(l.translation)+'</div><div class="done-actions"><button class="utility" id="share" type="button">↗ 오늘 문장 자랑하기</button><button class="primary" id="continue" type="button">'+(lesson===0?"다음 문장 만들기":"다시 체험하기")+'</button></div></section>';
   return;
  }
- if(phase==="practice"){
-  const l=lessons[lessonIndex],s=l.steps[step],done=new Set();
-  for(let i=0;i<step;i++){const v=l.steps[i];if(v.slot>=0)done.add(v.slot);}
-  const displayKo=(lessonIndex===0 && step<4)?l.mini:l.ko;
-  const glowWord=(lessonIndex===0 && step<4)?({0:0,1:2,2:1,3:1}[step]):s.hi;
-  let ko='<div class="korean">'+displayKo.map((w,i)=>'<span class="word'+(i===glowWord?' active':'')+'">'+esc(w)+'</span>').join("")+'</div>';
-  let slots='<div class="english">'+l.slots.map((w,i)=>'<div class="slot'+(done.has(i)?"":" blank")+'"><small>'+esc(l.labels[i])+'</small><strong>'+(done.has(i)?esc(w):'?')+'</strong></div>').join("")+'</div>';
-  const a= '<div class="tag">'+(lessonIndex===0?"튜토리얼 · 첫 문장":"연습 · be동사도 같은 순서")+'</div>'
-     +'<div class="prog"><div class="fill" style="width:'+Math.round(step/l.steps.length*100)+'%"></div></div>'
-     +'<h1>'+(lessonIndex===0?"한국어를 영어 순서로<br>하나씩 조립해 볼까요?":"이번에는 '이다'를 찾아볼까요?")+'</h1>'
-     +'<div class="board"><div class="board-title">한국어 문장 · 파란 부분을 보세요</div>'+ko+'</div>'
-     +slots+'<div class="question">'+esc(s.q)+'</div>'
-     +s.opts.map(w=>btn(w,"pick:"+w)).join("")
-     +'<div class="result '+(answerState==="wrong"?"bad":"")+'" aria-live="polite">'+(answerState==="wrong"?"아쉬워요! 파랗게 표시된 말을 다시 보고 골라보세요.":"")+'</div>'
-     +'<p class="hint">'+esc(s.hint)+'</p>';
-  view(a);
-  return;
- }
- if(phase==="lesson-done"){
-  const first=lessonIndex===0;
-  view('<div class="confetti" aria-hidden="true">🎉✨🎉</div><div class="tag" style="text-align:center">해냈어요!</div>'
-   +'<h1 style="text-align:center">내가 직접 영어 문장을<br>만들었어요!</h1>'
-   +'<div class="share-card"><div class="big">'+(first?"I eat rice at home every day.":"I am a student.")+'</div></div>'
-   +'<p style="text-align:center">'+(first?"주어 → 동사 → 목적어 → 장소 → 시간!":"'이다'도 동사 자리에 두면 돼요.")+'</p>'
-   +btn(first?"다음 문장도 만들어 보기":"오늘 배운 문장 자랑하기",first?"next-lesson":"share",true)
-   +(first?btn("오늘 배운 문장 자랑하기","share"):"")+btn("처음부터 다시 해보기","restart"));
-  return;
- }
+ const q=l.steps[step], completed=new Set();
+ for(let i=0;i<step;i++)if(l.steps[i].slot>=0)completed.add(l.steps[i].slot);
+ const display=q.full?l.full:l.ko;
+ let highlight=q.hi;
+ if(q.full)highlight=q.hi;
+ const currentSlots=step<4&&lesson===0?l.slots.slice(0,3):l.slots;
+ const progress='<div class="progress-wrap"><div class="progress-heading"><span>'+(lesson===0?"첫 문장 조립하기":"두 번째 문장 만들기")+'</span><b>'+(step+1)+' / '+l.steps.length+'</b></div><div class="progress-bar">'+l.steps.map((_,i)=>'<div class="progress-segment"><span style="width:'+(i<step?100:0)+'%"></span></div>').join("")+'</div></div>';
+ const ko=display.map((w,i)=>'<span class="ko-word'+(i===highlight?" active":"")+'">'+safe(w)+'</span>').join("");
+ const slots=currentSlots.map((v,i)=>'<div class="slot '+(completed.has(i)?"filled":"pending")+'"><div class="slot-label">'+safe(v.label)+'</div><div class="slot-word">'+(completed.has(i)?safe(v.word):"?")+'</div></div>').join("");
+ root.innerHTML=progress
+  +'<div class="hero"><div class="hero-label">영어는 주어 1등, 동사 2등</div><h1>한국어를 영어 순서로<br>만들어보세요.</h1></div>'
+  +'<div class="board"><div class="board-heading">한국어 문장</div><div class="ko-line">'+ko+'</div><div class="board-divider"></div><div class="board-subtitle">내가 만든 영어 문장</div><div class="slots">'+slots+'</div></div>'
+  +'<section class="question-area compact"><div class="step-info"><span class="step-dot"></span>하나씩 선택해 보세요</div><h2>'+safe(q.question)+'</h2><div class="answers">'+q.options.map(choice).join("")+'</div><div class="feedback" id="feedback" aria-live="polite">'+safe(feedback)+'</div></section>';
 }
-function choose(value){
- const l=lessons[lessonIndex],s=l.steps[step];
- if(value!==s.yes){answerState="wrong"; const el=root.querySelector(".result");if(el){el.className="result bad";el.textContent="한 번 더! 파랗게 표시된 말을 보고 골라보세요.";}return;}
- answerState="";
- root.querySelectorAll("button").forEach(b=>b.disabled=true);
- const r=root.querySelector(".result");
- if(r){r.className="result";r.textContent="잘했어요! "+s.hint;}
- setTimeout(()=>{step++;if(step>=l.steps.length){phase="lesson-done"}render();},620);
+function start(){view="practice";lesson=0;step=0;locked=false;feedback="";render();}
+function select(i){
+ if(view==="intro"){start();return;}
+ if(view!=="practice"||locked)return;
+ const q=lessons[lesson].steps[step];
+ if(i!==q.correct){const f=document.querySelector("#feedback");f.className="feedback wrong";f.textContent="다시 골라보세요.";return;}
+ locked=true;const options=[...root.querySelectorAll("[data-choice]")];options.forEach((b,j)=>{b.disabled=true;if(j===i)b.classList.add("correct");});
+ const f=document.querySelector("#feedback");f.className="feedback";f.textContent=q.explain;
+ setTimeout(()=>{step++;feedback="";locked=false;if(step>=lessons[lesson].steps.length){view="done"}render();window.scrollTo(0,0);},1050);
 }
-function share(){
- const content="오늘 주동목에서 내가 만든 영어 문장!\nI eat rice at home every day.\nI am a student.\n나도 영어 문장 만들었다 🎉\nhttps://splendorous-mochi-346e26.netlify.app/";
- if(navigator.share){navigator.share({title:"주동목 · 오늘 배운 문장",text:content}).catch(()=>{});return;}
- if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(content).then(()=>alert("자랑할 문장이 복사됐어요! 카톡에 붙여넣어 보세요.")).catch(()=>alert("이 브라우저에서는 복사가 안 됩니다."));return;}
- const t=document.createElement("textarea");t.value=content;document.body.appendChild(t);t.select();try{document.execCommand("copy");alert("문장이 복사됐어요!")}catch(e){alert("복사에 실패했어요.")}t.remove();
+async function share(){
+ const sentence=lessons[lesson].english;
+ const content="오늘 주동목에서 직접 만든 문장!\n"+sentence+"\nhttps://splendorous-mochi-346e26.netlify.app/preview-v2/";
+ if(navigator.share){try{await navigator.share({title:"주동목 · 오늘의 문장",text:content});}catch(e){}return;}
+ try{await navigator.clipboard.writeText(content);alert("문장이 복사됐어요. 카톡에 붙여넣어 보세요.");}
+ catch(e){const input=document.createElement("textarea");input.value=content;document.body.appendChild(input);input.select();try{document.execCommand("copy");alert("문장이 복사됐어요.");}catch(_){alert("문장 복사가 지원되지 않는 환경이에요.");}input.remove();}
 }
 root.addEventListener("click",e=>{
- const b=e.target.closest("button[data-action]");if(!b)return;const act=b.dataset.action;
- if(act.startsWith("intro-")){phase="concept";render();}
- else if(act==="start"){phase="practice";lessonIndex=0;step=0;render();}
- else if(act.startsWith("pick:"))choose(act.slice(5));
- else if(act==="next-lesson"){lessonIndex=1;phase="practice";step=0;answerState="";render();}
- else if(act==="restart"){phase="intro";lessonIndex=0;step=0;render();}
- else if(act==="share")share();
+ const button=e.target.closest("button");if(!button)return;
+ if(button.hasAttribute("data-choice"))select(Number(button.dataset.choice));
+ else if(button.id==="share")share();
+ else if(button.id==="continue"){if(lesson===0){lesson=1;step=0;view="practice";locked=false;feedback="";render();}else start();}
 });
+document.querySelector("#reset").addEventListener("click",start);
 render();
-</script>
-</body>
-</html>
+</script></body></html>
