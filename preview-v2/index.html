@@ -133,6 +133,7 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 .slot.extra{background:#edf3ff}
 .slot.extra .slot-word{font-size:18px;white-space:normal}
 @media(max-width:380px){.board{padding:16px 13px}.slot{padding:8px 10px;min-width:58px}.slot-word{font-size:22px}.slot.extra .slot-word{font-size:17px}}
+ .slot.no-label{min-height:60px;justify-content:center;align-items:center}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app");
@@ -242,7 +243,8 @@ function korean(){
 function board(){
  const slots=[["주어",picked.subject],["동사",picked.verb],["목적어",picked.object]];
  if(extra&&!challenge)slots.push(["추가정보",extra]);
- return '<div class="board"><div class="slots">'+slots.map(([label,val])=>'<div class="slot '+(val?"filled":"")+' '+(label==="추가정보"?"extra":"")+'"><div class="slot-label">'+s(label)+'</div><div class="slot-word">'+(val?s(val):"···")+'</div></div>').join("")+'</div></div>';
+ const showLabels=scene==="learn";
+ return '<div class="board"><div class="slots">'+slots.map(([label,val])=>'<div class="slot '+(val?"filled":"")+' '+(label==="추가정보"?"extra":"")+' '+(showLabels?"":"no-label")+'">'+(showLabels?'<div class="slot-label">'+s(label)+'</div>':"")+'<div class="slot-word">'+(val?s(val):"···")+'</div></div>').join("")+'</div></div>';
 }
 
 function showChallenge(){
@@ -280,7 +282,7 @@ function showPersonal(){
  const koText=showTime?"나는 "+personalPlace.ko+" 간다.":"나는 어디에 갈까요?";
  const slots=[["주어","I"],["동사","go"],["장소",personalPlace?.en||"···"]];
  if(showTime)slots.push(["시간","···"]);
- const boardHTML='<div class="board"><div class="slots">'+slots.map(([label,val])=>'<div class="slot '+(val!=="···"?"filled":"")+' '+(label==="장소"||label==="시간"?"extra":"")+'"><div class="slot-label">'+s(label)+'</div><div class="slot-word">'+s(val)+'</div></div>').join("")+'</div></div>';
+ const boardHTML='<div class="board"><div class="slots">'+slots.map(([label,val])=>'<div class="slot no-label '+(val!=="···"?"filled":"")+' '+(label==="장소"||label==="시간"?"extra":"")+'"><div class="slot-word">'+s(val)+'</div></div>').join("")+'</div></div>';
  const opts=showTime?times:places;
  app.innerHTML='<section class="hero korean-hero"><h1>'+s(koText)+'</h1></section>'+boardHTML+
   '<section class="question-area"><h2>'+(showTime?"언제 가세요?":"어디로 가세요?")+'</h2><div class="answers">'+choices(opts.map(x=>x.en))+'</div><p class="feedback" id="feedback" aria-live="polite"></p></section>';
