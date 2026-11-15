@@ -98,6 +98,10 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 @media(max-width:550px){.intro{padding-top:clamp(100px,18dvh,170px)}.question-area h2{font-size:25px}.answer{min-height:73px}}
 @media(prefers-reduced-motion:reduce){.intro h1,.intro .answer{animation:none;opacity:1}}
 
+.board{padding-top:23px;padding-bottom:23px}
+.slot{display:flex;align-items:center;justify-content:center;min-height:57px}
+.slot-word{font-size:25px}
+.question-area{margin-top:32px}
 /* Completion celebration: built on original v08 result card */
 .done .success-icon{height:92px;width:92px;background:#eaf8f2;animation:victory-pop .65s cubic-bezier(.16,1.3,.3,1) both}
 .done .success-icon::before{content:"";position:absolute;inset:-15px;border:3px solid rgba(29,180,120,.17);border-radius:50%;animation:victory-ring .8s ease-out both}
@@ -213,7 +217,7 @@ function korean(){
 function board(){
  const slots=[["주어",picked.subject],["동사",picked.verb],["목적어",picked.object]];
  if(extra&&!challenge)slots.push(["추가정보",extra]);
- return '<div class="board"><div class="board-heading">내가 조립한 문장</div><div class="slots">'+slots.map(([label,val])=>'<div class="slot '+(val?"filled":"")+' '+(label==="추가정보"?"extra":"")+'"><div class="slot-label">'+label+'</div><div class="slot-word">'+(val?s(val):"···")+'</div></div>').join("")+'</div></div>';
+ return '<div class="board"><div class="slots">'+slots.map(([label,val])=>'<div class="slot '+(val?"filled":"")+' '+(label==="추가정보"?"extra":"")+'"><div class="slot-word">'+(val?s(val):"···")+'</div></div>').join("")+'</div></div>';
 }
 function render(){
  if(scene==="intro"){
@@ -229,7 +233,7 @@ function render(){
  }
  const q=currentSteps()[step];
  app.innerHTML='<section class="hero korean-hero"><h1>'+korean()+'</h1></section>'+board()
- +'<section class="question-area"><div class="step-info"><span class="step-dot"></span>'+q.tag+'</div><h2>'+s(q.question)+'</h2><div class="answers">'+choices(q.opts)+'</div><p class="feedback" id="feedback" aria-live="polite"></p></section>';
+ +'<section class="question-area"><h2>'+s(q.question)+'</h2><div class="answers">'+choices(q.opts)+'</div><p class="feedback" id="feedback" aria-live="polite"></p></section>';
 }
 function select(i,button){
  if(lock)return;
