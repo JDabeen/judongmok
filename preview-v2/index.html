@@ -224,6 +224,7 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 /* Minimum usable touch targets in review and course navigation */
 .back{min-width:86px;min-height:46px;padding:10px 10px 10px 0;text-align:left}
 .small-blue,.mini-link{min-height:46px;min-width:92px;padding:12px 15px}
+.learn-good{margin:17px 0 7px;color:var(--success);font-size:16px;font-weight:800}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app");
@@ -233,7 +234,8 @@ const empty=()=>({onboarded:false,day:0,history:[],draft:null});
 function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&typeof v.onboarded==="boolean"&&Array.isArray(v.history))return{onboarded:v.onboarded,day:Math.min(7,Math.max(0,Number(v.day)||0)),history:v.history,draft:v.draft&&typeof v.draft==="object"?v.draft:null};}catch(e){}return empty();}
 // Shared tutorial link deliberately starts at the beginning, without erasing saved progress.
 const forceTutorial=/(?:^\?|&)tutorial=1(?:&|$)/.test(window.location.search||"");
-let progress=load(),scene=forceTutorial?"intro":progress.onboarded?"home":"intro",mode="guided",step=0,stage=1,picked={},lessonIndex=0,dailyPart=0,sequence=0,locked=false,reviewShown=new Set(),dailyTask=0;
+const demoMode=/(?:^\?|&)demo=1(?:&|$)/.test(window.location.search||"");
+let progress=demoMode?{...empty(),onboarded:true}:load(),scene=forceTutorial?"intro":progress.onboarded?"home":"intro",mode="guided",step=0,stage=1,picked={},lessonIndex=0,dailyPart=0,sequence=0,locked=false,reviewShown=new Set(),dailyTask=0;
 let resultSentence="",resultKorean="",resultFrom="tutorial";
 let audioContext=null;
 const base1=["나는","밥을","먹는다."],base2=["나는","물을","마신다."];
@@ -250,7 +252,7 @@ const stage3Steps=[
  {part:2,q:"매일 아침?",opts:["every morning","after dinner","every day"],correct:0,value:"every morning"}
 ];
 const days=[{"verb":"DRINK","teach":[["나는 물을 마신다.","I drink water."],["나는 커피를 마신다.","I drink coffee."]],"practice":[["나는 물을 마신다.",["I","drink","water"],["water","I","drink"]],["나는 커피를 마신다.",["I","drink","coffee"],["drink","coffee","I"]],["우리는 차를 마신다.",["We","drink","tea"],["tea","We","drink"]]],"expand":[["나는 매일 아침 커피를 마신다.","I drink coffee","every morning",["after dinner","every morning","on weekends"]],["우리는 저녁 식사 후 차를 마신다.","We drink tea","after dinner",["after dinner","at the park","every morning"]]],"apply":["나는 집에서 매일 아침 물을 마신다.",["I","drink","water","at home","every morning"],["at home","water","every morning","I","drink"]],"baseKo":"나는 물을 마신다.","longKo":"나는 집에서 매일 아침 물을 마신다."},{"verb":"GO","teach":[["나는 직장에 간다.","I go to work."],["나는 공원에 간다.","I go to the park."]],"practice":[["나는 직장에 간다.",["I","go","to work"],["go","to work","I"]],["나는 공원에 간다.",["I","go","to the park"],["to the park","I","go"]],["우리는 집에 간다.",["We","go","home"],["home","go","We"]]],"expand":[["나는 주말마다 공원에 간다.","I go to the park","on weekends",["every night","on weekends","at home"]],["나는 매일 아침 직장에 간다.","I go to work","every morning",["every morning","on weekends","after dinner"]]],"apply":["우리는 점심 식사 후 공원에 간다.",["We","go","to the park","after lunch"],["after lunch","to the park","We","go"]],"baseKo":"나는 직장에 간다.","longKo":"우리는 점심 식사 후 공원에 간다."},{"verb":"TAKE","teach":[["나는 산책한다.","I take a walk."],["나는 쉰다.","I take a break."]],"practice":[["나는 산책한다.",["I","take","a walk"],["a walk","I","take"]],["나는 쉰다.",["I","take","a break"],["take","a break","I"]],["우리는 택시를 탄다.",["We","take","a taxi"],["a taxi","take","We"]]],"expand":[["나는 저녁 식사 후 산책한다.","I take a walk","after dinner",["at home","after dinner","every weekend"]],["우리는 역까지 택시를 탄다.","We take a taxi","to the station",["to the station","at home","every night"]]],"apply":["나는 매일 아침 공원에서 산책한다.",["I","take","a walk","in the park","every morning"],["in the park","a walk","I","every morning","take"]],"baseKo":"나는 산책한다.","longKo":"나는 매일 아침 공원에서 산책한다."},{"verb":"MAKE","teach":[["나는 저녁을 만든다.","I make dinner."],["나는 아침을 만든다.","I make breakfast."]],"practice":[["나는 저녁을 만든다.",["I","make","dinner"],["dinner","I","make"]],["우리는 커피를 만든다.",["We","make","coffee"],["coffee","We","make"]],["나는 아침을 만든다.",["I","make","breakfast"],["breakfast","make","I"]]],"expand":[["나는 가족을 위해 저녁을 만든다.","I make dinner","for my family",["after lunch","for my family","with friends"]],["우리는 집에서 커피를 만든다.","We make coffee","at home",["at work","on weekends","at home"]]],"apply":["나는 주말마다 가족을 위해 아침을 만든다.",["I","make","breakfast","for my family","on weekends"],["breakfast","on weekends","make","I","for my family"]],"baseKo":"나는 저녁을 만든다.","longKo":"나는 주말마다 가족을 위해 아침을 만든다."},{"verb":"STUDY","teach":[["나는 영어를 공부한다.","I study English."],["우리는 함께 공부한다.","We study together."]],"practice":[["나는 영어를 공부한다.",["I","study","English"],["English","study","I"]],["우리는 함께 공부한다.",["We","study","together"],["study","together","We"]],["나는 수학을 공부한다.",["I","study","math"],["math","I","study"]]],"expand":[["나는 매일 영어를 공부한다.","I study English","every day",["every day","at the park","after dinner"]],["우리는 도서관에서 함께 공부한다.","We study together","at the library",["at home","at the library","every night"]]],"apply":["나는 매일 아침 집에서 영어를 공부한다.",["I","study","English","at home","every morning"],["every morning","English","I","study","at home"]],"baseKo":"나는 영어를 공부한다.","longKo":"나는 매일 아침 집에서 영어를 공부한다."},{"verb":"MEET","teach":[["나는 친구를 만난다.","I meet my friend."],["우리는 카페에서 만난다.","We meet at the cafe."]],"practice":[["나는 친구를 만난다.",["I","meet","my friend"],["my friend","I","meet"]],["우리는 카페에서 만난다.",["We","meet","at the cafe"],["meet","at the cafe","We"]],["나는 여동생을 만난다.",["I","meet","my sister"],["my sister","meet","I"]]],"expand":[["나는 주말마다 친구를 만난다.","I meet my friend","on weekends",["on weekends","at the office","every morning"]],["우리는 퇴근 후 카페에서 만난다.","We meet at the cafe","after work",["every night","at home","after work"]]],"apply":["나는 매주 일요일 공원에서 여동생을 만난다.",["I","meet","my sister","at the park","every Sunday"],["my sister","at the park","I","every Sunday","meet"]],"baseKo":"나는 친구를 만난다.","longKo":"나는 매주 일요일 공원에서 여동생을 만난다."},{"verb":"READ","teach":[["나는 책을 읽는다.","I read a book."],["나는 뉴스를 읽는다.","I read the news."]],"practice":[["나는 책을 읽는다.",["I","read","a book"],["a book","read","I"]],["나는 뉴스를 읽는다.",["I","read","the news"],["read","the news","I"]],["우리는 이야기를 읽는다.",["We","read","stories"],["stories","We","read"]]],"expand":[["나는 자기 전에 책을 읽는다.","I read a book","before bed",["at the gym","before bed","on weekends"]],["나는 매일 아침 뉴스를 읽는다.","I read the news","every morning",["every morning","at the park","after lunch"]]],"apply":["나는 매일 밤 집에서 책을 읽는다.",["I","read","a book","at home","every night"],["at home","a book","every night","I","read"]],"baseKo":"나는 책을 읽는다.","longKo":"나는 매일 밤 집에서 책을 읽는다."}];
-function save(){try{localStorage.setItem(KEY,JSON.stringify(progress));}catch(e){}}
+function save(){if(demoMode)return;try{localStorage.setItem(KEY,JSON.stringify(progress));}catch(e){}}
 function button(label,action,kind="primary"){return '<button type="button" class="'+kind+'" data-action="'+action+'">'+esc(label)+'</button>';}
 function choices(items,kind="choice"){return items.map((w,i)=>'<button type="button" class="answer" data-kind="'+kind+'" data-index="'+i+'"><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("");}
 function board(parts,showLabels=false){
@@ -371,10 +373,11 @@ function renderHome(){
   '<button class="home-link" data-action="catalog"><span>다른 연습 둘러보기</span><span>›</span></button></section>';
 }
 
+const teachPicks=[[{"mask":"I ... water.","opts":["eat","drink"],"correct":"drink"},{"mask":"I drink ...","opts":["water","coffee"],"correct":"coffee"}],[{"mask":"I ... to work.","opts":["go","make"],"correct":"go"},{"mask":"I go ...","opts":["to the park","to school"],"correct":"to the park"}],[{"mask":"I ... a walk.","opts":["make","take"],"correct":"take"},{"mask":"I take ...","opts":["a break","a shower"],"correct":"a break"}],[{"mask":"I ... dinner.","opts":["take","make"],"correct":"make"},{"mask":"I make ...","opts":["breakfast","coffee"],"correct":"breakfast"}],[{"mask":"I ... English.","opts":["read","study"],"correct":"study"},{"mask":"We study ...","opts":["together","at home"],"correct":"together"}],[{"mask":"I ... my friend.","opts":["meet","see"],"correct":"meet"},{"mask":"We meet ...","opts":["at the cafe","at the park"],"correct":"at the cafe"}],[{"mask":"I ... a book.","opts":["read","make"],"correct":"read"},{"mask":"I read ...","opts":["the news","a letter"],"correct":"the news"}]];
 function dayActivity(){return Math.min(7,Math.max(0,dailyTask));}
 function dailyCurrent(){
  const d=days[lessonIndex],task=dayActivity();
- if(task<2)return {kind:"learn",ko:d.teach[task][0],english:d.teach[task][1],phase:"배우기"};
+ if(task<2)return {kind:"learn",ko:d.teach[task][0],english:d.teach[task][1],pick:teachPicks[lessonIndex][task],phase:"배우기"};
  if(task<5){const a=d.practice[task-2];return {kind:"order",ko:a[0],order:a[1],options:a[2],phase:"조립하기"};}
  if(task<7){const a=d.expand[task-5];return {kind:"expand",ko:a[0],base:a[1],correct:a[2],options:a[3],phase:"문장 늘리기"};}
  const a=d.apply;return {kind:"apply",ko:a[0],order:a[1],options:a[2],phase:"혼자 만들기"};
@@ -397,8 +400,10 @@ function renderDaily(){
  const d=days[lessonIndex],a=dailyCurrent(),used=a.order?a.order.slice(0,sequence):[];
  const heading='<section class="home lesson-head"><div class="lesson-top"><span>초급 · '+(lessonIndex+1)+'일차</span><span>'+a.phase+' '+(dailyTask+1)+'/8</span></div><div class="home-progress lesson-bar"><span style="width:'+((dailyTask+1)/8*100)+'%"></span></div><h1>'+esc(a.ko)+'</h1></section>';
  if(a.kind==="learn"){
-  app.innerHTML=heading+'<div class="board sentence-board"><div class="sentence-line">'+esc(a.english)+'</div></div>'+
-   '<div class="learn-actions"><button type="button" class="utility" data-action="listen-daily">🔊 듣기</button>'+button("다음","next-daily")+'</div>';
+  const solved=sequence>=1,displayed=solved?a.english:a.pick.mask.replace("...","<span class=\"unfinished\">···</span>");
+  app.innerHTML=heading+'<div class="board sentence-board"><div class="sentence-line">'+(solved?esc(displayed):displayed)+'</div></div>'+
+   (solved?'<div class="learn-actions"><p class="learn-good">✓ 직접 완성했어요.</p><button type="button" class="utility" data-action="listen-daily">🔊 듣기</button>'+button("다음","next-daily")+'</div>':
+   '<section class="question-area daily-options"><h2>빈칸에 들어갈 말은?</h2><div class="answers">'+choices(a.pick.opts,"daily")+'</div><p class="feedback" aria-live="polite"></p></section>');
   return;
  }
  if(a.kind==="expand"){
@@ -443,6 +448,12 @@ function clickChoice(kind,i,button){
  }
  if(kind==="daily"){
   const a=dailyCurrent();
+  if(a.kind==="learn"){
+   if(a.pick.opts[i]!==a.pick.correct){feedbackWrong(button);return;}
+   locked=true;feedbackRight(button,"좋아요!");tapEffect(false);
+   sequence=1;rememberDraft();
+   setTimeout(()=>{locked=false;render();},320);return;
+  }
   if(a.kind==="expand"){
    if(a.options[i]!==a.correct){feedbackWrong(button);return;}
    locked=true;feedbackRight(button,"잘했어요!");tapEffect(false);
@@ -470,13 +481,13 @@ function action(which,el){
   else{if(stage===3){progress.onboarded=true;save();}scene="home";}
   locked=false;render();window.scrollTo(0,0);
  }
- if(which==="startDaily"){lessonIndex=progress.day<7?progress.day:0;const draft=progress.draft;dailyTask=draft&&draft.day===lessonIndex&&Number.isInteger(draft.task)&&draft.task>=0&&draft.task<8?draft.task:0;sequence=draft&&draft.day===lessonIndex&&Number.isInteger(draft.sequence)?Math.max(0,draft.sequence):0;const a=dailyCurrent();if(a.order)sequence=Math.min(sequence,a.order.length-1);else sequence=0;locked=false;scene="daily";rememberDraft();render();window.scrollTo(0,0);}
+ if(which==="startDaily"){lessonIndex=progress.day<7?progress.day:0;const draft=progress.draft;dailyTask=draft&&draft.day===lessonIndex&&Number.isInteger(draft.task)&&draft.task>=0&&draft.task<8?draft.task:0;sequence=draft&&draft.day===lessonIndex&&Number.isInteger(draft.sequence)?Math.max(0,draft.sequence):0;const a=dailyCurrent();if(a.order)sequence=Math.min(sequence,a.order.length-1);else if(a.kind==="learn")sequence=sequence>0?1:0;else sequence=0;locked=false;scene="daily";rememberDraft();render();window.scrollTo(0,0);}
  if(which==="review"){scene="review";reviewShown.clear();render();window.scrollTo(0,0);}
  if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
  if(which==="home"){scene="home";render();window.scrollTo(0,0);}
  if(which==="listen"){speak(resultSentence);}
  if(which==="listen-daily"){const a=dailyCurrent();if(a.kind==="learn")speak(a.english);}
- if(which==="next-daily"){if(scene==="daily"&&dailyCurrent().kind==="learn"){tapEffect(false);nextDaily();}}
+ if(which==="next-daily"){if(scene==="daily"&&dailyCurrent().kind==="learn"&&sequence>=1){tapEffect(false);nextDaily();}}
  if(which==="share"){share();}
  if(which==="reveal"){reviewShown.add(Number(el.dataset.index));render();}
  if(which==="review-speak"){const x=progress.history[Number(el.dataset.index)];if(x)speak(x.en);}
