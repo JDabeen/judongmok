@@ -102,6 +102,12 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 .slot{display:flex;align-items:center;justify-content:center;min-height:57px}
 .slot-word{font-size:25px}
 .question-area{margin-top:32px}
+.ox-answers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ox-answer{min-height:94px;justify-content:center;padding:10px;border-radius:13px}
+.ox-symbol{display:block;font-size:clamp(38px,10vw,52px);font-weight:850;line-height:1}
+.ox-answer.correct .ox-symbol{color:#08734f}
+.ox-answer.wrong .ox-symbol{color:#c7464a}
+@media(max-width:380px){.ox-answers{gap:9px}.ox-answer{min-height:83px}}
 /* Completion celebration: built on original v08 result card */
 .done .success-icon{height:92px;width:92px;background:#eaf8f2;animation:victory-pop .65s cubic-bezier(.16,1.3,.3,1) both}
 .done .success-icon::before{content:"";position:absolute;inset:-15px;border:3px solid rgba(29,180,120,.17);border-radius:50%;animation:victory-ring .8s ease-out both}
@@ -131,10 +137,10 @@ let audioContext=null;
 const sentence=["나는","밥을","먹는다."];
 const challengeSentence=["나는","물을","마신다."];
 const steps=[
- {key:"subject",part:0,tag:"주어",question:"여기서 주어가 뭘까요?",opts:["I","You"],correct:0,value:"I",help:"맞습니다!"},
- {key:"verb",part:2,tag:"동사",question:"여기서 동사는 뭘까요?",opts:["eat","drink"],correct:0,value:"eat",help:"맞습니다!"},
- {key:"need",part:1,tag:"목적어",question:"eat은 목적어가 꼭 필요할까요?",opts:["필요하다","필요하지 않다","넣어도 되고 안 넣어도 된다"],correct:2,value:null,help:"맞습니다! 목적어 없이도 쓸 수 있어요."},
- {key:"object",part:1,tag:"목적어",question:"'밥을' 영어로 골라보세요.",opts:["water","rice"],correct:1,value:"rice",help:"맞습니다!"},
+ {key:"subject",part:0,tag:"주어",question:"주어는 무엇일까요?",opts:["I","You"],correct:0,value:"I",help:"맞습니다!"},
+ {key:"verb",part:2,tag:"동사",question:"동사는 무엇일까요?",opts:["eat","drink"],correct:0,value:"eat",help:"맞습니다!"},
+ {key:"need",part:1,tag:"목적어",question:"목적어가 필요할까요?",opts:["O","X","△"],correct:2,value:null,help:"둘 다 가능해요."},
+ {key:"object",part:1,tag:"목적어",question:"밥을 영어로?",opts:["water","rice"],correct:1,value:"rice",help:"맞습니다!"},
  {key:"extra",part:-1,tag:"추가정보",question:"한 가지 더 붙여볼까요?",opts:["at home","every day"],correct:-1,value:null,help:"좋아요!"}
 ];
 const challengeSteps=[
@@ -233,7 +239,7 @@ function render(){
  }
  const q=currentSteps()[step];
  app.innerHTML='<section class="hero korean-hero"><h1>'+korean()+'</h1></section>'+board()
- +'<section class="question-area"><h2>'+s(q.question)+'</h2><div class="answers">'+choices(q.opts)+'</div><p class="feedback" id="feedback" aria-live="polite"></p></section>';
+ +'<section class="question-area"><h2>'+s(q.question)+'</h2><div class="answers'+(q.key==="need"?" ox-answers":"")+'">'+(q.key==="need"?q.opts.map((symbol,i)=>'<button class="answer ox-answer" data-choice="'+i+'" type="button" aria-label="'+(["필요하다","필요 없다","둘 다 가능하다"][i])+'"><span class="ox-symbol">'+s(symbol)+'</span></button>').join(""):choices(q.opts))+'</div><p class="feedback" id="feedback" aria-live="polite"></p></section>';
 }
 function select(i,button){
  if(lock)return;
@@ -248,7 +254,7 @@ function select(i,button){
  if(!right){button.classList.add("wrong");feedback.classList.add("wrong");feedback.textContent="다시 골라보세요.";setTimeout(()=>button.classList.remove("wrong"),450);return;}
  lock=true;app.querySelectorAll(".answer").forEach(el=>el.disabled=true);
  button.classList.add("correct");
- button.querySelector(".answer-no").textContent="✓";
+ const marker=button.querySelector(".answer-no");if(marker)marker.textContent="✓";
  unlockAudio();
  if(q.value)picked[q.key]=q.value;
  if(q.key==="extra")extra=q.opts[i];
