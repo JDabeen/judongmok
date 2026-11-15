@@ -134,41 +134,96 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 .slot.extra .slot-word{font-size:18px;white-space:normal}
 @media(max-width:380px){.board{padding:16px 13px}.slot{padding:8px 10px;min-width:58px}.slot-word{font-size:22px}.slot.extra .slot-word{font-size:17px}}
  .slot.no-label{min-height:60px;justify-content:center;align-items:center}
+
+/* Home and focused practice, reusing v08 palette and controls */
+.slot.no-label{min-height:61px;align-items:center;justify-content:center}
+.intro .simple-line{font-size:26px;font-weight:850;letter-spacing:-.04em;background:var(--pale);padding:20px 22px;border-radius:12px;margin:-8px 0 26px;color:var(--blue)}
+.intro .primary{animation:appear .45s ease both .2s}
+.sentence-board{padding:26px 22px;min-height:90px}
+.sentence-line{font-size:clamp(24px,6vw,31px);line-height:1.5;color:var(--blue);font-weight:850;letter-spacing:-.035em;overflow-wrap:anywhere}
+.compare-old{text-align:center;color:#8895ae;font-weight:750;font-size:19px;margin:0 0 13px}
+.home{padding-top:48px}
+.home-label{font-size:14px;color:var(--blue);font-weight:850;letter-spacing:0;margin-bottom:13px}
+.home h1,.subpage h1{font-size:clamp(30px,7vw,36px);line-height:1.4;letter-spacing:-.065em;margin:0 0 29px;font-weight:850}
+.home-course{border:1px solid #E1E8F4;background:#F8FAFF;border-radius:16px;padding:24px 21px;margin:0 0 19px}
+.home-row{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:14px;font-weight:750;color:#617390;letter-spacing:0}
+.home-row strong{font-size:14px;color:var(--blue)}
+.home-progress{height:7px;background:#DFE7F5;border-radius:20px;margin:14px 0 25px;overflow:hidden}
+.home-progress span{display:block;height:100%;background:var(--blue);border-radius:20px}
+.home-verb{font-size:32px;font-weight:900;letter-spacing:-.04em;color:#121D36;margin:7px 0 8px}
+.home-muted{font-size:15px;color:#8390A5;line-height:1.55;margin:0 0 21px}
+.home-course .primary{box-shadow:none}
+.home-link{width:100%;display:flex;justify-content:space-between;align-items:center;background:white;border:1px solid #E1E8F4;border-radius:12px;padding:20px;font-size:17px;color:#253552;font-weight:750;letter-spacing:-.035em;margin-bottom:10px;text-align:left}
+.home-link span:last-child{font-size:29px;color:#9AA9C1;line-height:.5}
+.subpage{padding-top:36px}
+.back{background:none;border:0;color:#7B8AA5;font-weight:800;font-size:16px;margin:0 0 26px;padding:7px 0}
+.catalog-item{padding:20px;border:1px solid #E0E7F3;border-radius:13px;margin-bottom:11px}
+.catalog-item strong{display:block;font-size:19px;letter-spacing:-.045em;line-height:1.4}
+.catalog-item p{font-size:14px;color:#8390A5;margin:8px 0 0}
+.catalog-item.disabled{opacity:.55}
+.small-blue{background:#235BFA;border:0;color:white;font-size:15px;font-weight:800;border-radius:8px;margin-top:16px;padding:13px 20px}
+.review-list{display:grid;gap:12px;margin-top:21px}
+.review{border:1px solid #E1E8F3;padding:20px;border-radius:12px}
+.review-label{font-size:13px;font-weight:800;color:#91A0B6;margin-bottom:8px}
+.review strong{display:block;font-size:20px;line-height:1.5}
+.review-answer{font-size:20px;color:var(--blue);font-weight:800;letter-spacing:-.03em;margin-top:13px}
+.mini-link{border:0;background:#EEF3FF;color:var(--blue);padding:11px 14px;font-size:14px;font-weight:800;border-radius:8px;margin-top:15px}
+.empty-state{background:#F6F8FC;padding:28px 20px;border-radius:12px;color:#71809A}
+.lesson-head{padding-top:38px}
+.lesson-head h1{margin-bottom:0}
+@media(max-width:380px){.home-course{padding:20px 16px}.home{padding-top:40px}.sentence-line{font-size:25px}}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app");
-const s=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const choices=(items)=>items.map((w,i)=>'<button class="answer" data-choice="'+i+'" type="button"><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+s(w)+'</span></span></button>').join("");
-let scene="intro",mode="guided",step=0,lock=false,picked={},extra="",wrong=false,challenge=false,phaseIndex=1,stage3Step=0,personalPlace=null,personalTime=null;
+const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const KEY="judongmok:preview-v2:progress-v1";
+const empty=()=>({onboarded:false,day:0,history:[]});
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&typeof v.onboarded==="boolean"&&Array.isArray(v.history))return{onboarded:v.onboarded,day:Math.min(7,Math.max(0,Number(v.day)||0)),history:v.history};}catch(e){}return empty();}
+let progress=load(),scene=progress.onboarded?"home":"intro",mode="guided",step=0,stage=1,picked={},lessonIndex=0,dailyPart=0,sequence=0,locked=false,reviewShown=new Set();
+let resultSentence="",resultKorean="",resultFrom="tutorial";
 let audioContext=null;
-const sentence=["나는","밥을","먹는다."];
-const challengeSentence=["나는","물을","마신다."];
-const steps=[
- {key:"subject",part:0,tag:"주어",question:"주어는 무엇일까요?",opts:["I","You"],correct:0,value:"I",help:"맞습니다!"},
- {key:"verb",part:2,tag:"동사",question:"동사는 무엇일까요?",opts:["eat","drink"],correct:0,value:"eat",help:"맞습니다!"},
- {key:"need",part:1,tag:"목적어",question:"목적어가 필요할까요?",opts:["필요해요","필요 없어요","둘 다 돼요"],correct:2,value:null,help:"둘 다 가능해요."},
- {key:"object",part:1,tag:"목적어",question:"밥을 영어로?",opts:["water","rice"],correct:1,value:"rice",help:"맞습니다!"},
- {key:"extra",part:-1,tag:"추가정보",question:"한 가지 더 붙여볼까요?",opts:["at home","every day"],correct:-1,value:null,help:"좋아요!"}
+const base1=["나는","밥을","먹는다."],base2=["나는","물을","마신다."];
+const stage1=[
+ {part:0,q:"주어는 무엇일까요?",opts:["I","You"],correct:0,key:"subject",value:"I",reply:"잘했어요!"},
+ {part:2,q:"동사는 무엇일까요?",opts:["eat","drink"],correct:0,key:"verb",value:"eat",reply:"맞아요!"},
+ {part:1,q:"목적어가 필요할까요?",opts:["필요해요","필요 없어요","둘 다 돼요"],correct:2,reply:"둘 다 가능해요."},
+ {part:1,q:"밥을 영어로?",opts:["water","rice"],correct:1,key:"object",value:"rice",reply:"정답!"}
 ];
-const challengeWords=["water","I","drink"];
-const challengeOrder=["I","drink","water"];
-const challengeParts=[0,2,1];
-const places=[
- {en:"to the park",ko:"공원에"},
- {en:"to the market",ko:"시장에"},
- {en:"to the library",ko:"도서관에"}
+const stage2Words=["water","I","drink"],stage2Correct=["I","drink","water"],stage2Parts=[0,2,1];
+const stage3Ko=["나는","집에서","매일 아침","물을","마신다."];
+const stage3Steps=[
+ {part:1,q:"집에서?",opts:["at school","at home","on weekends"],correct:1,value:"at home"},
+ {part:2,q:"매일 아침?",opts:["every morning","after dinner","every day"],correct:0,value:"every morning"}
 ];
-const times=[
- {en:"every morning",ko:"매일 아침"},
- {en:"on weekends",ko:"주말마다"},
- {en:"after lunch",ko:"점심 식사 후에"}
+const days=[
+ {verb:"DRINK",baseKo:"나는 커피를 마신다.",longKo:"나는 매일 아침 커피를 마신다.",order:["I","drink","coffee"],words:["coffee","I","drink"],add:"every morning",options:["after dinner","every morning","at school"]},
+ {verb:"GO",baseKo:"나는 공원에 간다.",longKo:"나는 주말마다 공원에 간다.",order:["I","go","to the park"],words:["to the park","go","I"],add:"on weekends",options:["on weekends","every night","after work"]},
+ {verb:"TAKE",baseKo:"나는 산책한다.",longKo:"나는 저녁 식사 후 산책한다.",order:["I","take","a walk"],words:["a walk","I","take"],add:"after dinner",options:["every morning","at home","after dinner"]},
+ {verb:"MAKE",baseKo:"나는 저녁을 만든다.",longKo:"나는 가족을 위해 저녁을 만든다.",order:["I","make","dinner"],words:["dinner","I","make"],add:"for my family",options:["for my family","after work","with friends"]},
+ {verb:"STUDY",baseKo:"나는 영어를 공부한다.",longKo:"나는 매일 밤 영어를 공부한다.",order:["I","study","English"],words:["English","study","I"],add:"every night",options:["at work","every night","with friends"]},
+ {verb:"MEET",baseKo:"나는 친구를 만난다.",longKo:"나는 카페에서 친구를 만난다.",order:["I","meet","my friend"],words:["my friend","I","meet"],add:"at the cafe",options:["on weekends","at the cafe","every day"]},
+ {verb:"READ",baseKo:"나는 책을 읽는다.",longKo:"나는 자기 전에 책을 읽는다.",order:["I","read","a book"],words:["a book","read","I"],add:"before bed",options:["before bed","after lunch","at the gym"]}
 ];
-function personalEnglish(){return "I go "+(personalPlace?personalPlace.en:"")+" "+(personalTime?personalTime.en:"")+".";
+function save(){try{localStorage.setItem(KEY,JSON.stringify(progress));}catch(e){}}
+function button(label,action,kind="primary"){return '<button type="button" class="'+kind+'" data-action="'+action+'">'+esc(label)+'</button>';}
+function choices(items,kind="choice"){return items.map((w,i)=>'<button type="button" class="answer" data-kind="'+kind+'" data-index="'+i+'"><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("");}
+function board(parts,showLabels=false){
+ return '<div class="board"><div class="slots">'+parts.map(([label,value])=>'<div class="slot '+(value?"filled":"")+' '+(label==="장소"||label==="시간"?"extra":"")+(showLabels?"":" no-label")+'">'+(showLabels?'<div class="slot-label">'+esc(label)+'</div>':"")+'<div class="slot-word">'+(value?esc(value):"···")+'</div></div>').join("")+'</div></div>';
 }
-function personalKorean(){return "나는 "+(personalTime?personalTime.ko+" ":"")+(personalPlace?personalPlace.ko:"어디에")+" 간다.";}
-function finishedEnglish(){return phaseIndex===3?personalEnglish():phaseIndex===2?"I drink water.":"I eat rice"+(extra?" "+extra:"")+".";}
-function finishedKorean(){return phaseIndex===3?personalKorean():phaseIndex===2?"나는 물을 마신다.":extra==="at home"?"나는 집에서 밥을 먹는다.":extra==="every day"?"나는 매일 밥을 먹는다.":"나는 밥을 먹는다.";}
-const currentSteps=()=>steps;
+function koTokens(words,lit=-1,seen=[]){return words.map((word,i)=>'<span class="korean-token '+(lit===i||seen.includes(i)?"lit":"")+'">'+esc(word)+'</span>').join("");}
+function speak(text){
+ if(!("speechSynthesis" in window))return;
+ window.speechSynthesis.cancel();
+ const utterance=new SpeechSynthesisUtterance(text);utterance.lang="en-US";utterance.rate=.87;
+ const voices=window.speechSynthesis.getVoices();
+ utterance.voice=voices.find(v=>v.lang==="en-US")||voices.find(v=>v.lang.startsWith("en"))||null;
+ window.speechSynthesis.speak(utterance);
+}
+async function share(){
+ const text="오늘 주동목에서 만든 영어 문장!\n"+resultSentence+"\nhttps://splendorous-mochi-346e26.netlify.app/preview-v2/";
+ if(navigator.share){try{await navigator.share({text,title:"주동목"});}catch(e){}return;}
+ try{await navigator.clipboard.writeText(text);alert("문장을 복사했어요.");}catch(e){alert("공유 기능을 지원하지 않는 브라우저예요.");}
+}
 function playTone(){try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;const c=new Audio(),o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.setValueAtTime(500,c.currentTime);o.frequency.linearRampToValueAtTime(750,c.currentTime+.12);g.gain.setValueAtTime(.015,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.2);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.2);o.onended=()=>c.close();}catch(e){}}
 
 function unlockAudio(){
@@ -212,176 +267,142 @@ function celebrate(){
  overlay.appendChild(fragment);screen.appendChild(overlay);
  setTimeout(()=>overlay.remove(),2900);
 }
-function pronounce(){
- if(!("speechSynthesis" in window)){alert("이 기기는 영어 음성 재생을 지원하지 않아요.");return;}
- window.speechSynthesis.cancel();
- const sentence=finishedEnglish();
- const u=new SpeechSynthesisUtterance(sentence);
- u.lang="en-US";u.rate=.86;u.pitch=1;
- const voices=window.speechSynthesis.getVoices();
- const preferred=voices.find(v=>v.lang==="en-US")||voices.find(v=>v.lang.toLowerCase().startsWith("en"));
- if(preferred)u.voice=preferred;
- const b=document.querySelector('[data-action="listen"]');
- u.onstart=()=>{if(b)b.textContent="🔊 듣는 중...";};
- const restore=()=>{if(b)b.textContent="🔊 문장 듣기";};
- u.onend=restore;u.onerror=restore;
- window.speechSynthesis.speak(u);
-}
-async function shareSentence(){
- const sentence=finishedEnglish();
- const text="오늘 주동목에서 내가 만든 문장!\n"+sentence+"\nhttps://splendorous-mochi-346e26.netlify.app/preview-v2/";
- if(navigator.share){try{await navigator.share({title:"주동목 · 오늘의 문장",text});}catch(e){}return;}
- try{await navigator.clipboard.writeText(text);alert("문장을 복사했어요. 카톡에 붙여넣어 보세요.");}
- catch(e){alert("이 기기에서는 자동 복사를 지원하지 않아요.");}
-}
 
-function korean(){
- const q=currentSteps()[step];
- const lit=i=>mode==="guided"?i===q.part:((i===0&&picked.subject)||(i===2&&picked.verb)||(i===1&&picked.object));
- return (challenge?challengeSentence:sentence).map((w,i)=>'<span class="korean-token'+(lit(i)?" lit":"")+'">'+s(w)+'</span>').join('');
+function finish(kind,english,korean){
+ stage=kind;resultFrom=kind===4?"daily":"tutorial";resultSentence=english;resultKorean=korean;scene="done";locked=false;render();requestAnimationFrame(celebrate);
 }
-function board(){
- const slots=[["주어",picked.subject],["동사",picked.verb],["목적어",picked.object]];
- if(extra&&!challenge)slots.push(["추가정보",extra]);
- const showLabels=scene==="learn";
- return '<div class="board"><div class="slots">'+slots.map(([label,val])=>'<div class="slot '+(val?"filled":"")+' '+(label==="추가정보"?"extra":"")+' '+(showLabels?"":"no-label")+'">'+(showLabels?'<div class="slot-label">'+s(label)+'</div>':"")+'<div class="slot-word">'+(val?s(val):"···")+'</div></div>').join("")+'</div></div>';
-}
-
-function showChallenge(){
- const used=new Set(Object.values(picked));
- const koreanWords=challengeSentence.map((w,i)=>'<span class="korean-token'+(challengeParts.slice(0,step).includes(i)?" lit":"")+'">'+s(w)+'</span>').join("");
- const words=challengeWords.map((word,i)=>'<button class="answer'+(used.has(word)?" correct":"")+'" data-challenge="'+i+'" type="button"'+(used.has(word)?" disabled":"")+'><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+word+'</span></span></button>').join("");
- app.innerHTML='<section class="hero korean-hero"><h1>'+koreanWords+'</h1></section>'+board()+
-  '<section class="question-area"><h2>영어 순서대로 눌러보세요.</h2><div class="answers">'+words+'</div><p class="feedback" id="feedback" aria-live="polite"></p></section>';
-}
-function chooseChallenge(index,button){
- if(lock||scene!=="challenge"||!button||button.disabled)return;
- const word=challengeWords[index];
- if(word!==challengeOrder[step]){
-  button.classList.add("wrong");
-  const feedback=app.querySelector("#feedback");
-  if(feedback){feedback.className="feedback wrong";feedback.textContent="다시 해볼까요?";}
-  setTimeout(()=>button.classList.remove("wrong"),450);
-  return;
- }
- unlockAudio();
- const key=["subject","verb","object"][step];
- picked[key]=word;step++;lock=true;
- button.classList.add("correct");
- if(step===challengeOrder.length){
-  victorySound();try{navigator.vibrate?.([20,40,40])}catch(e){}
-  setTimeout(()=>{scene="done";lock=false;render();window.scrollTo(0,0);},700);
- }else{
-  playTone();try{navigator.vibrate?.(15)}catch(e){}
-  setTimeout(()=>{lock=false;render();},280);
- }
-}
-
-function showPersonal(){
- const showTime=stage3Step>0;
- const koText=showTime?"나는 "+personalPlace.ko+" 간다.":"나는 어디에 갈까요?";
- const slots=[["주어","I"],["동사","go"],["장소",personalPlace?.en||"···"]];
- if(showTime)slots.push(["시간","···"]);
- const boardHTML='<div class="board"><div class="slots">'+slots.map(([label,val])=>'<div class="slot no-label '+(val!=="···"?"filled":"")+' '+(label==="장소"||label==="시간"?"extra":"")+'"><div class="slot-word">'+s(val)+'</div></div>').join("")+'</div></div>';
- const opts=showTime?times:places;
- app.innerHTML='<section class="hero korean-hero"><h1>'+s(koText)+'</h1></section>'+boardHTML+
-  '<section class="question-area"><h2>'+(showTime?"언제 가세요?":"어디로 가세요?")+'</h2><div class="answers">'+choices(opts.map(x=>x.en))+'</div><p class="feedback" id="feedback" aria-live="polite"></p></section>';
-}
-function choosePersonal(i,button){
- if(lock||scene!=="personalize")return;
- const items=stage3Step===0?places:times;
- if(!items[i])return;
- lock=true;
- unlockAudio();
- button.classList.add("correct");
- const badge=button.querySelector(".answer-no");if(badge)badge.textContent="✓";
- app.querySelectorAll(".answer").forEach(b=>b.disabled=true);
- if(stage3Step===0){
-  personalPlace=items[i];
-  playTone();
-  setTimeout(()=>{stage3Step=1;lock=false;render();window.scrollTo(0,0);},430);
- }else{
-  personalTime=items[i];
-  victorySound();
-  try{navigator.vibrate?.([20,40,40])}catch(e){}
-  setTimeout(()=>{scene="done";lock=false;render();window.scrollTo(0,0);},690);
- }
-}
+function tapEffect(last=false){unlockAudio();if(last)victorySound();else playTone();try{navigator.vibrate?.(last?[20,40,40]:15);}catch(e){}}
+function feedbackRight(el,text){el.classList.add("correct");const mark=el.querySelector(".answer-no");if(mark)mark.textContent="✓";app.querySelectorAll(".answer").forEach(b=>b.disabled=true);const f=app.querySelector(".feedback");if(f)f.textContent=text||"잘했어요!";}
+function feedbackWrong(el){el.classList.add("wrong");const f=app.querySelector(".feedback");if(f){f.classList.add("wrong");f.textContent="다시 해보세요.";}setTimeout(()=>el.classList.remove("wrong"),380);}
+function resetStepState(){locked=false;step=0;picked={};sequence=0;}
 function render(){
- if(scene==="intro"){
- app.innerHTML='<section class="intro"><h1>영어와 한국어는<br>어순이 다르다는 사실,<br>알고 계셨나요?</h1><div class="answers">'+choices(["알고 있어요","느낌은 알지만 헷갈려요","잘 모르겠어요"])+'</div></section>';
- return;
+ if(scene==="intro"){app.innerHTML='<section class="intro"><h1>영어와 한국어는<br>어순이 다르다는 사실,<br>알고 계셨나요?</h1><div class="answers">'+choices(["알고 있어요","느낌은 알지만 헷갈려요","잘 모르겠어요"],"intro")+'</div></section>';return;}
+ if(scene==="learn"){
+  const q=stage1[step],lit=mode==="guided"?q.part:-1,seen=mode==="independent"?[picked.subject?0:-1,picked.verb?2:-1,picked.object?1:-1]:[];
+  app.innerHTML='<section class="hero korean-hero"><h1>'+koTokens(base1,lit,seen)+'</h1></section>'+
+   board([["주어",picked.subject],["동사",picked.verb],["목적어",picked.object]],true)+
+   '<section class="question-area"><h2>'+esc(q.q)+'</h2><div class="answers">'+choices(q.opts,"learn")+'</div><p class="feedback" aria-live="polite"></p></section>';return;
  }
- if(scene==="handoff"){
- app.innerHTML='<section class="intro"><h1>이번엔 힌트 없이<br>혼자 만들어볼까요?</h1><button class="primary" data-action="start-challenge">시작하기</button></section>';
- return;
+ if(scene==="handoff2"){app.innerHTML='<section class="intro"><h1>이번엔 혼자<br>만들어볼까요?</h1>'+button("시작하기","begin2")+'</section>';return;}
+ if(scene==="challenge"){
+  const chosen=stage2Correct.slice(0,sequence),filled=[["",chosen[0]],["",chosen[1]],["",chosen[2]]];
+  app.innerHTML='<section class="hero korean-hero"><h1>'+koTokens(base2,-1,stage2Parts.slice(0,sequence))+'</h1></section>'+board(filled)+
+   '<section class="question-area"><h2>영어 순서대로 눌러보세요.</h2><div class="answers">'+stage2Words.map((w,i)=>'<button type="button" class="answer '+(chosen.includes(w)?"correct":"")+'" data-kind="challenge" data-index="'+i+'" '+(chosen.includes(w)?"disabled":"")+'><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("")+'</div><p class="feedback" aria-live="polite"></p></section>';return;
  }
- if(scene==="challenge"){showChallenge();return;}
  if(scene==="handoff3"){
- app.innerHTML='<section class="intro"><h1>이제 내 문장을<br>만들어볼까요?</h1><button class="primary" data-action="start-personalize">계속하기</button></section>';
- return;
+  app.innerHTML='<section class="intro"><h1>이번엔 문장을<br>더 길게 만들어볼까요?</h1><div class="simple-line">I drink water.</div>'+button("시작하기","begin3")+'</section>';return;
  }
- if(scene==="personalize"){showPersonal();return;}
+ if(scene==="extend"){
+  const q=stage3Steps[step],base="I drink water"+(step>0?" at home":"")+".";
+  app.innerHTML='<section class="hero korean-hero"><h1>'+koTokens(stage3Ko,q.part)+'</h1></section>'+
+   '<div class="board sentence-board"><div class="sentence-line">'+esc(base)+'</div></div>'+
+   '<section class="question-area"><h2>'+esc(q.q)+'</h2><div class="answers">'+choices(q.opts,"extend")+'</div><p class="feedback" aria-live="polite"></p></section>';return;
+ }
  if(scene==="done"){
- const full=finishedEnglish();
- const translation=finishedKorean();
- app.innerHTML='<section class="done"><div class="success-icon" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></div><p class="done-kicker">🎉 해냈어요!</p><h2>'+ (phaseIndex===3?"내 문장이 완성됐어요!":phaseIndex===2?"혼자서도 만들었어요!":"첫 문장을 완성했어요!") +'</h2><div class="result"><div class="minor">내가 만든 영어 문장</div><div class="big-sentence">'+s(full)+'</div></div><p class="translation">'+s(translation)+'</p><div class="done-buttons"><button class="utility" data-action="listen">🔊 문장 듣기</button><button class="utility" data-action="share">↗ 공유</button></div><button class="primary" data-action="continue">'+(phaseIndex===3?"다시 해보기":"다음 단계")+'</button></section>';
- requestAnimationFrame(()=>celebrate());
- return;
+  const first=stage===1,second=stage===2,third=stage===3;
+  const label=first?"첫 문장을 만들었어요!":second?"혼자서도 해냈어요!":third?"문장이 길어졌어요!":"오늘도 해냈어요!";
+  const small=third?'<div class="compare-old">I drink water.</div>':'';
+  app.innerHTML='<section class="done"><div class="success-icon" aria-hidden="true">✓</div><p class="done-kicker">🎉 잘했어요!</p><h2>'+label+'</h2>'+small+
+  '<div class="result"><div class="big-sentence">'+esc(resultSentence)+'</div></div><p class="translation">'+esc(resultKorean)+'</p>'+
+  '<div class="done-buttons"><button class="utility" data-action="listen">🔊 듣기</button><button class="utility" data-action="share">↗ 공유</button></div>'+
+  button(stage===3?"학습 시작하기":stage===4?"홈으로":"다음 단계","next")+'</section>';return;
  }
- const q=currentSteps()[step];
- app.innerHTML='<section class="hero korean-hero"><h1>'+korean()+'</h1></section>'+board()
- +'<section class="question-area"><h2>'+s(q.question)+'</h2><div class="answers">'+choices(q.opts)+'</div><p class="feedback" id="feedback" aria-live="polite"></p></section>';
+ if(scene==="home"){renderHome();return;}
+ if(scene==="daily"){renderDaily();return;}
+ if(scene==="review"){renderReview();return;}
+ if(scene==="catalog"){renderCatalog();return;}
 }
-function select(i,button){
- if(lock)return;
- if(scene==="intro"){
-  // Knowing the rule = no hint until a correct choice; other answers = highlighted guidance.
-  mode=i===0?"independent":"guided";
-  scene="learn";step=0;picked={};extra="";challenge=false;render();return;
+function renderHome(){
+ const finished=progress.day>=days.length,day=days[Math.min(progress.day,days.length-1)];
+ const percent=Math.round(progress.day/days.length*100);
+ app.innerHTML='<section class="home"><div class="home-label">나의 영어 연습</div><h1>오늘도 한 문장<br>만들어볼까요?</h1>'+
+  '<div class="home-course"><div class="home-row"><span>초급 · 문장 만들기</span><strong>'+progress.day+' / 7일</strong></div>'+
+  '<div class="home-progress"><span style="width:'+percent+'%"></span></div>'+
+  (finished?'<p class="home-verb">7일 완성 🎉</p><p class="home-muted">배운 문장을 다시 떠올려보세요.</p>':
+  '<div class="home-muted">오늘의 동사</div><div class="home-verb">'+esc(day.verb)+'</div><p class="home-muted">'+esc(day.longKo)+'</p>')+
+  button(finished?"배운 문장 복습":"오늘의 연습 시작",finished?"review":"startDaily")+'</div>'+
+  '<button class="home-link" data-action="review"><span>지난 문장 복습</span><span>›</span></button>'+
+  '<button class="home-link" data-action="catalog"><span>다른 연습 둘러보기</span><span>›</span></button></section>';
+}
+function renderDaily(){
+ const d=days[lessonIndex], built=d.order.slice(0,sequence),isExt=dailyPart===1;
+ const korean=isExt?d.longKo:d.baseKo;
+ const line=isExt?d.order.join(" ")+" ...":built.join(" ")||"···";
+ const words=isExt?d.options:d.words;
+ app.innerHTML='<section class="home lesson-head"><div class="home-label">초급 · '+(lessonIndex+1)+'일차</div><h1>'+esc(korean)+'</h1></section>'+
+  '<div class="board sentence-board"><div class="sentence-line">'+esc(line)+'</div></div>'+
+  '<section class="question-area"><h2>'+(isExt?"뒤에 붙여보세요.":"영어 순서대로 눌러보세요.")+'</h2>'+
+  '<div class="answers">'+words.map((w,i)=>'<button type="button" class="answer '+(!isExt&&built.includes(w)?"correct":"")+'" data-kind="daily" data-index="'+i+'" '+(!isExt&&built.includes(w)?"disabled":"")+'><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("")+'</div><p class="feedback" aria-live="polite"></p></section>';
+}
+function renderReview(){
+ app.innerHTML='<section class="subpage"><button class="back" data-action="home">‹ 홈</button><h1>지난 문장 복습</h1><p class="home-muted">한국어를 보고 영어로 말해보세요.</p>'+
+ (progress.history.length?'<div class="review-list">'+progress.history.map((x,i)=>'<div class="review"><div class="review-label">'+(x.day+1)+'일차</div><strong>'+esc(x.ko)+'</strong>'+ (reviewShown.has(i)?'<div class="review-answer">'+esc(x.en)+'</div><button class="mini-link" data-action="review-speak" data-index="'+i+'">🔊 듣기</button>':'<button class="mini-link" data-action="reveal" data-index="'+i+'">정답 보기</button>')+'</div>').join("")+'</div>':
+ '<div class="empty-state">아직 복습할 문장이 없어요.</div>')+'</section>';
+}
+function renderCatalog(){
+ app.innerHTML='<section class="subpage"><button class="back" data-action="home">‹ 홈</button><h1>연습 둘러보기</h1>'+
+  '<div class="catalog-item"><div><div class="home-label">초급</div><strong>기초 동사로 문장 만들기</strong><p>7일 · 짧은 문장부터 길게</p></div>'+button("연습하기",progress.day>=7?"review":"startDaily","small-blue")+'</div>'+
+  '<div class="catalog-item disabled"><div class="home-label">중급</div><strong>문장 변형 연습</strong><p>준비 중</p></div>'+
+  '<div class="catalog-item disabled"><div class="home-label">고급</div><strong>자연스러운 문장 구성</strong><p>준비 중</p></div></section>';
+}
+function clickChoice(kind,i,button){
+ if(locked)return;
+ if(kind==="intro"){mode=i===0?"independent":"guided";scene="learn";step=0;picked={};render();return;}
+ if(kind==="learn"){
+  const q=stage1[step];if(i!==q.correct){feedbackWrong(button);return;}
+  locked=true;feedbackRight(button,q.reply);if(q.key)picked[q.key]=q.value;tapEffect(step===stage1.length-1);
+  if(q.key){const b=app.querySelector(".board");if(b)b.outerHTML=board([["주어",picked.subject],["동사",picked.verb],["목적어",picked.object]],true);}
+  setTimeout(()=>{step++;locked=false;if(step===stage1.length)finish(1,"I eat rice.","나는 밥을 먹는다.");else render();},step===stage1.length-1?670:500);return;
  }
- if(scene!=="learn")return;
- const q=currentSteps()[step], right=q.correct<0||i===q.correct;
- const feedback=document.querySelector("#feedback");
- if(!right){button.classList.add("wrong");feedback.classList.add("wrong");feedback.textContent="다시 골라보세요.";setTimeout(()=>button.classList.remove("wrong"),450);return;}
- lock=true;app.querySelectorAll(".answer").forEach(el=>el.disabled=true);
- button.classList.add("correct");
- const marker=button.querySelector(".answer-no");if(marker)marker.textContent="✓";
- unlockAudio();
- if(q.value)picked[q.key]=q.value;
- if(q.key==="extra")extra=q.opts[i];
- // In independent mode, only after the answer is correct does the Korean word light up.
- if(q.part>=0){
-   let token=app.querySelectorAll(".korean-token")[q.part];
-   if(token)token.classList.add("lit");
+ if(kind==="challenge"){
+  const word=stage2Words[i];if(word!==stage2Correct[sequence]){feedbackWrong(button);return;}
+  locked=true;sequence++;feedbackRight(button,"맞았어요!");tapEffect(sequence===stage2Correct.length);
+  setTimeout(()=>{locked=false;if(sequence===stage2Correct.length)finish(2,"I drink water.","나는 물을 마신다.");else render();},sequence===stage2Correct.length?670:300);return;
  }
- if(q.value||extra)app.querySelector(".board").outerHTML=board();
- feedback.classList.remove("wrong");feedback.textContent=q.help;
- if(step===currentSteps().length-1){victorySound();} else {playTone();}
- try{navigator.vibrate?.(step===currentSteps().length-1?[20,40,40]:15)}catch(e){}
- setTimeout(()=>{step++;scene=step===currentSteps().length?"done":"learn";lock=false;render();window.scrollTo(0,0)},step===currentSteps().length-1?700:560);
+ if(kind==="extend"){
+  const q=stage3Steps[step];if(i!==q.correct){feedbackWrong(button);return;}
+  locked=true;feedbackRight(button,"좋아요!");tapEffect(step===stage3Steps.length-1);
+  setTimeout(()=>{step++;locked=false;if(step===stage3Steps.length)finish(3,"I drink water at home every morning.","나는 집에서 매일 아침 물을 마신다.");else render();},step===stage3Steps.length-1?700:430);return;
+ }
+ if(kind==="daily"){
+  const d=days[lessonIndex];
+  if(dailyPart===0){
+   if(d.words[i]!==d.order[sequence]){feedbackWrong(button);return;}
+   locked=true;sequence++;feedbackRight(button,"좋아요!");tapEffect(false);
+   setTimeout(()=>{locked=false;if(sequence===d.order.length){dailyPart=1;}render();},340);return;
+  }
+  if(d.options[i]!==d.add){feedbackWrong(button);return;}
+  locked=true;feedbackRight(button,"완성!");tapEffect(true);
+  if(!progress.history.some(x=>x.day===lessonIndex)){
+   progress.history.push({day:lessonIndex,ko:d.longKo,en:d.order.join(" ")+" "+d.add+"."});
+  }
+  progress.day=Math.max(progress.day,lessonIndex+1);save();
+  setTimeout(()=>finish(4,d.order.join(" ")+" "+d.add+".",d.longKo),680);
+ }
+}
+function action(which,el){
+ if(which==="begin2"){scene="challenge";resetStepState();render();}
+ if(which==="begin3"){scene="extend";step=0;locked=false;render();}
+ if(which==="next"){
+  window.speechSynthesis?.cancel();
+  if(stage===1){scene="handoff2";}
+  else if(stage===2){scene="handoff3";}
+  else{if(stage===3){progress.onboarded=true;save();}scene="home";}
+  locked=false;render();window.scrollTo(0,0);
+ }
+ if(which==="startDaily"){lessonIndex=progress.day<7?progress.day:0;sequence=0;dailyPart=0;locked=false;scene="daily";render();window.scrollTo(0,0);}
+ if(which==="review"){scene="review";reviewShown.clear();render();window.scrollTo(0,0);}
+ if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
+ if(which==="home"){scene="home";render();window.scrollTo(0,0);}
+ if(which==="listen"){speak(resultSentence);}
+ if(which==="share"){share();}
+ if(which==="reveal"){reviewShown.add(Number(el.dataset.index));render();}
+ if(which==="review-speak"){const x=progress.history[Number(el.dataset.index)];if(x)speak(x.en);}
 }
 app.addEventListener("click",e=>{
- const button=e.target.closest("button");if(!button)return;
- if(scene!=="personalize"&&button.hasAttribute("data-choice"))select(Number(button.dataset.choice),button);
- else if(button.dataset.action==="continue"){
-  window.speechSynthesis?.cancel();
-  if(phaseIndex===1){scene="handoff";}
-  else if(phaseIndex===2){scene="handoff3";}
-  else{scene="intro";mode="guided";phaseIndex=1;}
-  step=0;lock=false;picked={};extra="";challenge=false;render();window.scrollTo(0,0);
- }
- else if(button.dataset.action==="start-challenge"){
-  scene="challenge";challenge=true;phaseIndex=2;mode="independent";step=0;picked={};extra="";lock=false;render();window.scrollTo(0,0);
- }
- else if(button.dataset.action==="start-personalize"){
-  scene="personalize";phaseIndex=3;challenge=false;step=0;stage3Step=0;personalPlace=null;personalTime=null;lock=false;render();window.scrollTo(0,0);
- }
- else if(button.hasAttribute("data-challenge"))chooseChallenge(Number(button.dataset.challenge),button);
- else if(scene==="personalize"&&button.hasAttribute("data-choice"))choosePersonal(Number(button.dataset.choice),button);
- else if(button.dataset.action==="listen"){pronounce();}
- else if(button.dataset.action==="share"){shareSentence();}
- else if(button.dataset.action==="restart"){scene="intro";step=0;lock=false;picked={};extra="";challenge=false;phaseIndex=1;mode="guided";render();}
+ const el=e.target.closest("button");if(!el||el.disabled)return;
+ if(el.hasAttribute("data-kind"))clickChoice(el.dataset.kind,Number(el.dataset.index),el);
+ else if(el.hasAttribute("data-action"))action(el.dataset.action,el);
 });
 render();
 })();
