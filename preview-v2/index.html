@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><meta name="robots" content="noindex,nofollow"><title>주동목 — 문장 조립 체험</title><style>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><meta name="robots" content="noindex,nofollow"><title>주동목 — 튜토리얼</title><style>
 :root{color-scheme:light;--blue:#235BFA;--blue-dark:#1245D4;--navy:#121D36;--muted:#76829A;--border:#DFE6F1;--pale:#F2F6FF;--surface:#F7F9FD;--success:#0D9B70;--wrong:#C7464A}
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;height:100%}
@@ -77,108 +77,96 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 
-/* V2 additions, on top of the original Judongmok visual system */
-.intro-answers{margin-top:38px}
-.ko-line{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-bottom:18px}
-.ko-word{padding:7px 9px;border-radius:8px;font-weight:800;font-size:22px;line-height:1.4;color:#60718d}
-.ko-word.active{background:#dce8ff;box-shadow:inset 0 0 0 1px #acc5ff;color:#174dcc;animation:pop .27s both}
-.ko-word.used{color:#394b6d}
-.board-divider{border-top:1px solid #dbe6ff;margin:17px 0}
-.board-subtitle{font-size:13px;color:#6c83bb;font-weight:800;letter-spacing:0;margin-bottom:12px}
-.slot.pending{opacity:.72}
-.slot .slot-word{font-size:22px}
-.question-area.compact{margin-top:27px}
-.question-area.compact h2{font-size:26px;margin-bottom:19px}
-.answer{min-height:72px}
-.answer-name{font-size:21px}
-.answer-content{gap:0}
-.note{font-size:14px;line-height:1.6;color:#70819b;margin-top:13px}
-.done .result .big-sentence{font-size:clamp(24px,5.5vw,34px)}
-.done .result{padding:27px 23px}
-.utility{width:100%}
-.intro .hero{padding-top:58px}
-.intro .hero h1{margin-bottom:15px}
-.done-actions{display:grid;gap:12px;margin-top:15px}
-.done-actions .primary{margin:0}
-.done-actions .utility{margin:0}
-@media(max-width:380px){.ko-word{font-size:19px;padding:6px 7px}.answer-name{font-size:19px}.slot .slot-word{font-size:20px}}
-</style></head>
-<body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div><button class="top-action" id="reset" type="button">다시 시작</button></header><main id="app"></main></div><script>
-"use strict";
-const root=document.querySelector("#app");
-let view="intro", lesson=0, step=0, locked=false, feedback="";
-const lessons=[
- {ko:["나는","밥을","먹는다."],full:["나는","집에서","매일","밥을","먹는다."],
-  slots:[{label:"주어",word:"I"},{label:"동사",word:"eat"},{label:"목적어",word:"rice"},{label:"장소",word:"at home"},{label:"시간",word:"every day"}],
-  english:"I eat rice at home every day.",translation:"나는 집에서 매일 밥을 먹는다.",
-  steps:[
-   {question:"주어는 무엇일까요?",options:["I","You","He"],correct:0,hi:0,slot:0,explain:"맞아요! 영어도 주어가 첫 번째예요."},
-   {question:"동사는 무엇일까요?",options:["go","eat","drink"],correct:1,hi:2,slot:1,explain:"잘했어요! 한국어 끝의 '먹는다'가 영어에서는 주어 뒤에 와요."},
-   {question:"먹다(eat)는 목적어가 꼭 필요할까요?",options:["필요하다","필요 없다","넣어도 되고 안 넣어도 된다"],correct:2,hi:1,slot:-1,explain:"정답! eat은 목적어를 생략할 수도 있어요. 이 문장에서는 '밥을' 넣어볼게요."},
-   {question:"그렇다면 무엇을 먹나요?",options:["water","rice","coffee"],correct:1,hi:1,slot:2,explain:"좋아요! 이제 I eat rice.가 완성됐어요."},
-   {question:"장소를 붙여볼까요?",options:["at home","every day","with you"],correct:0,hi:1,slot:3,full:true,explain:"잘했어요! 기본 문장 뒤에 장소를 붙였어요."},
-   {question:"마지막으로 시간을 넣어보세요.",options:["at school","with friends","every day"],correct:2,hi:2,slot:4,full:true,explain:"완벽해요! 긴 문장도 만들었어요."}
-  ]},
- {ko:["나는","학생이다."],full:["나는","학생이다."],
-  slots:[{label:"주어",word:"I"},{label:"동사",word:"am"},{label:"어떤 사람?",word:"a student"}],
-  english:"I am a student.",translation:"나는 학생이다.",
-  steps:[
-   {question:"주어는 무엇일까요?",options:["She","I","We"],correct:1,hi:0,slot:0,explain:"맞아요! 주어는 I예요."},
-   {question:"'이다'에 해당하는 동사는?",options:["eat","go","am"],correct:2,hi:1,slot:1,explain:"맞아요! 이 문장에서는 am이 동사예요."},
-   {question:"이 문장에 목적어가 필요할까요?",options:["필요하다","필요 없다","넣어도 되고 안 넣어도 된다"],correct:1,hi:1,slot:-1,explain:"맞아요! a student는 목적어가 아니라 '어떤 사람인지' 알려줘요."},
-   {question:"어떤 사람인지 넣어보세요.",options:["at home","a student","rice"],correct:1,hi:1,slot:2,explain:"잘했어요! I am a student.가 완성됐어요."}
-  ]}
+/* Only the minimum styles needed to extend the original v08 UI */
+.intro{padding-top:clamp(110px,20dvh,210px)}
+.intro h1{font-size:clamp(29px,6.3vw,35px);font-weight:850;line-height:1.5;letter-spacing:-.065em;word-break:keep-all;margin:0 0 38px;color:#111A30;opacity:0;animation:appear .55s ease forwards .16s}
+.intro .answer{opacity:0;animation:appear .4s ease forwards}
+.intro .answer:nth-child(1){animation-delay:.64s}
+.intro .answer:nth-child(2){animation-delay:.96s}
+.intro .answer:nth-child(3){animation-delay:1.28s}
+@keyframes appear{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.hero.korean-hero h1{display:flex;gap:.18em;flex-wrap:wrap;align-items:center}
+.korean-token{display:inline;padding:1px 3px;border-radius:6px;transition:background .18s,color .18s}
+.korean-token.lit{background:#FFE27A;color:#1E2540;box-shadow:0 0 0 2px rgba(255,211,63,.22)}
+.board{min-height:0}
+.slot{min-width:73px}
+.question-area{margin-top:31px}
+.question-area h2{font-size:26px}
+.answer{min-height:73px}
+.answer-name{font-size:22px}
+.done{min-height:0;justify-content:center}
+@media(max-width:550px){.intro{padding-top:clamp(100px,18dvh,170px)}.question-area h2{font-size:25px}.answer{min-height:73px}}
+@media(prefers-reduced-motion:reduce){.intro h1,.intro .answer{animation:none;opacity:1}}
+</style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
+(()=>{'use strict';
+const app=document.querySelector("#app");
+const s=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const choices=(items)=>items.map((w,i)=>'<button class="answer" data-choice="'+i+'" type="button"><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+s(w)+'</span></span></button>').join("");
+let scene="intro",mode="guided",step=0,lock=false,picked={},extra="",wrong=false;
+const sentence=["나는","밥을","먹는다."];
+const steps=[
+ {key:"subject",part:0,tag:"주어",question:"여기서 주어가 뭘까요?",opts:["I","You"],correct:0,value:"I",help:"맞습니다!"},
+ {key:"verb",part:2,tag:"동사",question:"여기서 동사는 뭘까요?",opts:["eat","drink"],correct:0,value:"eat",help:"맞습니다!"},
+ {key:"need",part:1,tag:"목적어",question:"eat은 목적어가 꼭 필요할까요?",opts:["필요하다","필요하지 않다","넣어도 되고 안 넣어도 된다"],correct:2,value:null,help:"맞습니다! 목적어 없이도 쓸 수 있어요."},
+ {key:"object",part:1,tag:"목적어",question:"'밥을' 영어로 골라보세요.",opts:["water","rice"],correct:1,value:"rice",help:"맞습니다!"},
+ {key:"extra",part:-1,tag:"추가정보",question:"한 가지 더 붙여볼까요?",opts:["at home","every day"],correct:-1,value:null,help:"좋아요!"}
 ];
-const safe=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function choice(text,i){return '<button class="answer" type="button" data-choice="'+i+'"><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+safe(text)+'</span></span></button>';}
+function playTone(){try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;const c=new Audio(),o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.setValueAtTime(500,c.currentTime);o.frequency.linearRampToValueAtTime(750,c.currentTime+.12);g.gain.setValueAtTime(.015,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.2);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.2);o.onended=()=>c.close();}catch(e){}}
+function korean(){
+ const q=steps[step];
+ const lit=i=>mode==="guided"?i===q.part:((i===0&&picked.subject)||(i===2&&picked.verb)||(i===1&&picked.object));
+ return sentence.map((w,i)=>'<span class="korean-token'+(lit(i)?" lit":"")+'">'+s(w)+'</span>').join('');
+}
+function board(){
+ const slots=[["주어",picked.subject],["동사",picked.verb],["목적어",picked.object]];
+ if(extra)slots.push(["추가정보",extra]);
+ return '<div class="board"><div class="board-heading">내가 조립한 문장</div><div class="slots">'+slots.map(([label,val])=>'<div class="slot '+(val?"filled":"")+' '+(label==="추가정보"?"extra":"")+'"><div class="slot-label">'+label+'</div><div class="slot-word">'+(val?s(val):"···")+'</div></div>').join("")+'</div></div>';
+}
 function render(){
- if(view==="intro"){
-  root.innerHTML='<section class="intro"><div class="hero"><div class="hero-label">영어, 문장부터 만들어 볼까요?</div><h1>영어와 한국어는<br>어순이 다르다는 사실,<br>알고 계셨나요?</h1></div><div class="intro-answers answers">'
-   +["알고 있어요","애매하게 알고 있어요","잘 모르겠어요"].map(choice).join("")+'</div></section>';
-  return;
+ if(scene==="intro"){
+ app.innerHTML='<section class="intro"><h1>영어와 한국어는<br>어순이 다르다는 사실,<br>알고 계셨나요?</h1><div class="answers">'+choices(["알고 있어요","느낌은 알지만 헷갈려요","잘 모르겠어요"])+'</div></section>';
+ return;
  }
- const l=lessons[lesson];
- if(view==="done"){
-  root.innerHTML='<section class="done"><div class="success-icon" aria-hidden="true"><svg width="39" height="39" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></div><div class="done-kicker">문장 완성! 🎉</div><h2>직접 해내셨어요!</h2><div class="result"><div class="minor">오늘 내가 만든 영어 문장</div><div class="big-sentence">'+safe(l.english)+'</div></div><div class="translation">'+safe(l.translation)+'</div><div class="done-actions"><button class="utility" id="share" type="button">↗ 오늘 문장 자랑하기</button><button class="primary" id="continue" type="button">'+(lesson===0?"다음 문장 만들기":"다시 체험하기")+'</button></div></section>';
-  return;
+ if(scene==="done"){
+ const full="I eat rice"+(extra?" "+extra:"")+".";
+ app.innerHTML='<section class="done"><div class="success-icon" aria-hidden="true">✓</div><p class="done-kicker">🎉 잘했어요!</p><h2>문장 완성!</h2><div class="result"><div class="minor">MY SENTENCE</div><div class="big-sentence">'+s(full)+'</div></div><p class="translation">나는 밥을 먹는다.</p><button class="primary" data-action="restart">다시 해보기</button></section>';
+ return;
  }
- const q=l.steps[step], completed=new Set();
- for(let i=0;i<step;i++)if(l.steps[i].slot>=0)completed.add(l.steps[i].slot);
- const display=q.full?l.full:l.ko;
- let highlight=q.hi;
- if(q.full)highlight=q.hi;
- const currentSlots=step<4&&lesson===0?l.slots.slice(0,3):l.slots;
- const progress='<div class="progress-wrap"><div class="progress-heading"><span>'+(lesson===0?"첫 문장 조립하기":"두 번째 문장 만들기")+'</span><b>'+(step+1)+' / '+l.steps.length+'</b></div><div class="progress-bar">'+l.steps.map((_,i)=>'<div class="progress-segment"><span style="width:'+(i<step?100:0)+'%"></span></div>').join("")+'</div></div>';
- const ko=display.map((w,i)=>'<span class="ko-word'+(i===highlight?" active":"")+'">'+safe(w)+'</span>').join("");
- const slots=currentSlots.map((v,i)=>'<div class="slot '+(completed.has(i)?"filled":"pending")+'"><div class="slot-label">'+safe(v.label)+'</div><div class="slot-word">'+(completed.has(i)?safe(v.word):"?")+'</div></div>').join("");
- root.innerHTML=progress
-  +'<div class="hero"><div class="hero-label">영어는 주어 1등, 동사 2등</div><h1>한국어를 영어 순서로<br>만들어보세요.</h1></div>'
-  +'<div class="board"><div class="board-heading">한국어 문장</div><div class="ko-line">'+ko+'</div><div class="board-divider"></div><div class="board-subtitle">내가 만든 영어 문장</div><div class="slots">'+slots+'</div></div>'
-  +'<section class="question-area compact"><div class="step-info"><span class="step-dot"></span>하나씩 선택해 보세요</div><h2>'+safe(q.question)+'</h2><div class="answers">'+q.options.map(choice).join("")+'</div><div class="feedback" id="feedback" aria-live="polite">'+safe(feedback)+'</div></section>';
+ const q=steps[step];
+ app.innerHTML='<section class="hero korean-hero"><h1>'+korean()+'</h1></section>'+board()
+ +'<section class="question-area"><div class="step-info"><span class="step-dot"></span>'+q.tag+'</div><h2>'+s(q.question)+'</h2><div class="answers">'+choices(q.opts)+'</div><p class="feedback" id="feedback" aria-live="polite"></p></section>';
 }
-function start(){view="practice";lesson=0;step=0;locked=false;feedback="";render();}
-function select(i){
- if(view==="intro"){start();return;}
- if(view!=="practice"||locked)return;
- const q=lessons[lesson].steps[step];
- if(i!==q.correct){const f=document.querySelector("#feedback");f.className="feedback wrong";f.textContent="다시 골라보세요.";return;}
- locked=true;const options=[...root.querySelectorAll("[data-choice]")];options.forEach((b,j)=>{b.disabled=true;if(j===i)b.classList.add("correct");});
- const f=document.querySelector("#feedback");f.className="feedback";f.textContent=q.explain;
- setTimeout(()=>{step++;feedback="";locked=false;if(step>=lessons[lesson].steps.length){view="done"}render();window.scrollTo(0,0);},1050);
+function select(i,button){
+ if(lock)return;
+ if(scene==="intro"){
+  // Knowing the rule = no hint until a correct choice; other answers = highlighted guidance.
+  mode=i===0?"independent":"guided";
+  scene="learn";step=0;picked={};extra="";render();return;
+ }
+ if(scene!=="learn")return;
+ const q=steps[step], right=q.correct<0||i===q.correct;
+ const feedback=document.querySelector("#feedback");
+ if(!right){button.classList.add("wrong");feedback.classList.add("wrong");feedback.textContent="다시 골라보세요.";setTimeout(()=>button.classList.remove("wrong"),450);return;}
+ lock=true;app.querySelectorAll(".answer").forEach(el=>el.disabled=true);
+ button.classList.add("correct");
+ button.querySelector(".answer-no").textContent="✓";
+ if(q.value)picked[q.key]=q.value;
+ if(q.key==="extra")extra=q.opts[i];
+ // In independent mode, only after the answer is correct does the Korean word light up.
+ if(q.part>=0){
+   let token=app.querySelectorAll(".korean-token")[q.part];
+   if(token)token.classList.add("lit");
+ }
+ if(q.value||extra)app.querySelector(".board").outerHTML=board();
+ feedback.classList.remove("wrong");feedback.textContent=q.help;
+ playTone();try{navigator.vibrate?.(15)}catch(e){}
+ setTimeout(()=>{step++;scene=step===steps.length?"done":"learn";lock=false;render();window.scrollTo(0,0)},560);
 }
-async function share(){
- const sentence=lessons[lesson].english;
- const content="오늘 주동목에서 직접 만든 문장!\n"+sentence+"\nhttps://splendorous-mochi-346e26.netlify.app/preview-v2/";
- if(navigator.share){try{await navigator.share({title:"주동목 · 오늘의 문장",text:content});}catch(e){}return;}
- try{await navigator.clipboard.writeText(content);alert("문장이 복사됐어요. 카톡에 붙여넣어 보세요.");}
- catch(e){const input=document.createElement("textarea");input.value=content;document.body.appendChild(input);input.select();try{document.execCommand("copy");alert("문장이 복사됐어요.");}catch(_){alert("문장 복사가 지원되지 않는 환경이에요.");}input.remove();}
-}
-root.addEventListener("click",e=>{
+app.addEventListener("click",e=>{
  const button=e.target.closest("button");if(!button)return;
- if(button.hasAttribute("data-choice"))select(Number(button.dataset.choice));
- else if(button.id==="share")share();
- else if(button.id==="continue"){if(lesson===0){lesson=1;step=0;view="practice";locked=false;feedback="";render();}else start();}
+ if(button.hasAttribute("data-choice"))select(Number(button.dataset.choice),button);
+ else if(button.dataset.action==="restart"){scene="intro";step=0;lock=false;picked={};extra="";mode="guided";render();}
 });
-document.querySelector("#reset").addEventListener("click",start);
 render();
+})();
 </script></body></html>
