@@ -254,7 +254,7 @@ function board(parts,showLabels=false){
 }
 function koTokens(words,lit=-1,seen=[]){return words.map((word,i)=>'<span class="korean-token '+(lit===i||seen.includes(i)?"lit":"")+'">'+esc(word)+'</span>').join("");}
 function speak(text){
- if(!("speechSynthesis" in window))return;
+ if(!("speechSynthesis" in window)||typeof SpeechSynthesisUtterance==="undefined"){alert("이 브라우저는 영어 음성 듣기를 지원하지 않아요.");return;}
  window.speechSynthesis.cancel();
  const utterance=new SpeechSynthesisUtterance(text);utterance.lang="en-US";utterance.rate=.87;
  const voices=window.speechSynthesis.getVoices();
@@ -362,7 +362,7 @@ function renderHome(){
   '<div class="home-progress"><span style="width:'+percent+'%"></span></div>'+
   (finished?'<p class="home-verb">7일 완성 🎉</p><p class="home-muted">배운 문장을 다시 떠올려보세요.</p>':
   '<div class="home-muted">오늘의 동사 · 8개 활동</div><div class="home-verb">'+esc(day.verb)+'</div><p class="home-muted">'+esc(day.longKo)+'</p>')+
-  button(finished?"배운 문장 복습":progress.draft&&progress.draft.day===progress.day?"이어서 연습하기":"오늘의 연습 시작",finished?"review":"startDaily")+'</div>'+
+  button(finished?"기초 문장 다시 연습":progress.draft&&progress.draft.day===progress.day?"이어서 연습하기":"오늘의 연습 시작","startDaily")+'</div>'+
   '<button class="home-link" data-action="review"><span>지난 문장 복습</span><span>›</span></button>'+
   '<button class="home-link" data-action="catalog"><span>다른 연습 둘러보기</span><span>›</span></button></section>';
 }
@@ -414,7 +414,7 @@ function renderReview(){
 }
 function renderCatalog(){
  app.innerHTML='<section class="subpage"><button class="back" data-action="home">‹ 홈</button><h1>연습 둘러보기</h1>'+
-  '<div class="catalog-item"><div><div class="home-label">초급</div><strong>기초 동사로 문장 만들기</strong><p>7일 · 짧은 문장부터 길게</p></div>'+button("연습하기",progress.day>=7?"review":"startDaily","small-blue")+'</div>'+
+  '<div class="catalog-item"><div><div class="home-label">초급</div><strong>기초 동사로 문장 만들기</strong><p>7일 · 짧은 문장부터 길게</p></div>'+button("연습하기","startDaily","small-blue")+'</div>'+
   '<div class="catalog-item disabled"><div class="home-label">중급</div><strong>문장 변형 연습</strong><p>준비 중</p></div>'+
   '<div class="catalog-item disabled"><div class="home-label">고급</div><strong>자연스러운 문장 구성</strong><p>준비 중</p></div></section>';
 }
