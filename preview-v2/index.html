@@ -448,6 +448,7 @@ function clickChoice(kind,i,button){
  if(kind==="challenge"){
   const word=stage2Words[i];if(word!==stage2Correct[sequence]){feedbackWrong(button);return;}
   locked=true;sequence++;feedbackRight(button,"맞았어요!");tapEffect(sequence===stage2Correct.length);
+  const boardNode=app.querySelector(".board");if(boardNode)boardNode.outerHTML=board(stage2Correct.map((w,i)=>["",i<sequence?w:""]),false);
   setTimeout(()=>{locked=false;if(sequence===stage2Correct.length)finish(2,"I drink water.","나는 물을 마신다.");else render();},sequence===stage2Correct.length?670:300);return;
  }
  if(kind==="extend"){
@@ -460,24 +461,28 @@ function clickChoice(kind,i,button){
   if(a.kind==="learn"){
    if(a.pick.opts[i]!==a.pick.correct){feedbackWrong(button);return;}
    locked=true;feedbackRight(button,"좋아요!");tapEffect(false);
-   sequence=1;rememberDraft();
-   setTimeout(()=>{locked=false;render();},320);return;
+   sequence=1;rememberDraft();speak(a.english);
+   setTimeout(()=>{locked=false;render();},400);return;
   }
   if(a.kind==="expand"){
    if(a.options[i]!==a.correct){feedbackWrong(button);return;}
    locked=true;feedbackRight(button,"잘했어요!");tapEffect(false);
-   setTimeout(()=>{locked=false;celebrate(false,true);nextDaily();},780);return;
+   const line=app.querySelector(".sentence-line");if(line)line.textContent=a.base+" "+a.correct+".";
+   speak(a.base+" "+a.correct+".");
+   setTimeout(()=>{locked=false;celebrate(false,true);nextDaily();},1200);return;
   }
   if(a.kind!=="order"&&a.kind!=="apply")return;
   if(a.options[i]!==a.order[sequence]){feedbackWrong(button);return;}
   locked=true;sequence++;rememberDraft();
+  const boardNode=app.querySelector(".board");if(boardNode)boardNode.outerHTML=board(a.order.map((w,j)=>["",j<sequence?w:""]),false);
   feedbackRight(button,sequence===a.order.length?"문장 완성!":"좋아요!");
+  if(sequence===a.order.length)speak(a.order.join(" ")+".");
   tapEffect(a.kind==="apply"&&sequence===a.order.length);
   setTimeout(()=>{
    locked=false;
    if(sequence===a.order.length){celebrate(false,true);nextDaily();}
    else render();
-  },a.kind==="apply"&&sequence===a.order.length?760:sequence===a.order.length?800:340);
+  },a.kind==="apply"&&sequence===a.order.length?1300:sequence===a.order.length?1200:340);
   return;
  }}
 function action(which,el){
