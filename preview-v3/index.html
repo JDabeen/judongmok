@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><meta name="robots" content="noindex,nofollow"><title>주동목 — 모바일 체험 V3</title><style>
+:root{color-scheme:light;--blue:#235BFA;--blue-dark:#1245D4;--navy:#121D36;--muted:#76829A;--border:#DFE6F1;--pale:#F2F6FF;--surface:#F7F9FD;--success:#0D9B70;--wrong:#C7464A}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;height:100%}
+body{margin:0;min-height:100vh;background:#f0f3fa;font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','Segoe UI',sans-serif;color:var(--navy);font-size:18px;letter-spacing:-.04em}
+button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #88AAFF;outline-offset:3px}button:disabled{cursor:default}
+.screen{background:#fff;max-width:535px;min-height:100dvh;margin:0 auto;position:relative;box-shadow:0 26px 75px rgba(21,36,77,.09);display:flex;flex-direction:column}
+.header{height:77px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;border-bottom:1px solid #F0F3F8;flex-shrink:0}
+.logo{font-weight:900;letter-spacing:-.07em;font-size:26px;display:flex;align-items:center;gap:9px}
+.logo-mark{display:grid;grid-template-columns:repeat(3,6px);gap:3px;align-items:end;height:20px;width:26px;transform:rotate(-9deg)}
+.logo-mark i{display:block;width:6px;height:11px;background:var(--blue);border-radius:2px}.logo-mark i:nth-child(2){height:20px}.logo-mark i:nth-child(3){height:15px}
+.top-action{border:0;background:transparent;color:#8994A9;font-size:15px;font-weight:700;padding:12px 3px}
+main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
+.progress-wrap{padding-top:25px}
+.progress-heading{display:flex;justify-content:space-between;align-items:center;color:#7B869B;font-size:14px;font-weight:700;letter-spacing:0}
+.progress-heading b{color:var(--blue);font-size:15px}
+.progress-bar{display:flex;gap:7px;margin-top:13px}
+.progress-segment{height:7px;border-radius:8px;flex:1;background:#E6EBF3;overflow:hidden}
+.progress-segment span{display:block;height:100%;width:0;background:var(--blue);border-radius:8px;transition:width .34s cubic-bezier(.15,.65,.3,1)}
+.hero{padding-top:47px}
+.hero-label{font-size:14px;color:var(--blue);font-weight:850;letter-spacing:.02em;margin-bottom:15px}
+.hero h1{font-size:clamp(28px,6.5vw,35px);line-height:1.46;letter-spacing:-.065em;margin:0;font-weight:850;word-break:keep-all;color:#111A30}
+.board{margin-top:34px;background:var(--pale);border:1px solid #E4ECFF;border-radius:15px;padding:21px 19px 19px;min-height:145px}
+.board-heading{font-size:13px;font-weight:800;color:#6C83BB;letter-spacing:0;margin-bottom:16px}
+.slots{display:flex;gap:7px;flex-wrap:wrap;align-items:flex-start}
+.slot{min-width:73px;border:1px solid #D4DEF7;background:#fff;border-radius:9px;padding:10px 11px 11px;transition:background .2s,border .2s,transform .18s}
+.slot-label{font-size:12px;font-weight:700;color:#98A4BC;letter-spacing:0;margin-bottom:5px;line-height:1}
+.slot-word{font-size:23px;letter-spacing:-.025em;font-weight:850;line-height:1.2;white-space:nowrap;color:#C0CADD}
+.slot.filled{border-color:#BBCFFF;background:white;animation:pop .22s ease-out both}
+.slot.filled .slot-word{color:var(--blue)}
+.slot.extra{background:#E8F0FF;border-color:#B8CFFF}.slot.extra .slot-word{font-size:17px}
+.question-area{margin-top:38px;min-width:0}
+.step-info{display:flex;align-items:center;gap:8px;font-size:14px;color:#71819A;font-weight:750;letter-spacing:0;margin-bottom:10px}
+.step-dot{width:7px;height:7px;border-radius:50%;background:var(--blue)}
+.question-area h2{font-size:28px;letter-spacing:-.065em;line-height:1.32;font-weight:850;margin:0 0 24px;word-break:keep-all}
+.answers{display:grid;gap:12px}
+.answer{min-height:84px;width:100%;border:1.5px solid #E1E7F1;border-radius:12px;background:#fff;padding:15px 17px;text-align:left;display:flex;align-items:center;gap:15px;color:var(--navy);transition:background .15s,border .15s,transform .12s,box-shadow .15s}
+.answer:hover{border-color:#97B3FA;background:#FBFCFF;box-shadow:0 5px 20px rgba(24,72,179,.055)}
+.answer:active{transform:scale(.991)}
+.answer-no{border:1px solid #DCE4F1;background:#F8FAFD;color:#7D8BA4;font-size:14px;font-weight:850;width:33px;height:33px;border-radius:8px;flex:none;display:grid;place-items:center;letter-spacing:0}
+.answer-content{display:flex;min-width:0;flex:1;flex-direction:column;gap:4px}
+.answer-name{font-size:24px;font-weight:850;letter-spacing:-.045em;line-height:1.1;overflow-wrap:anywhere}
+.answer-meaning{font-size:15px;font-weight:650;color:#8590A4;line-height:1.25}
+.answer svg{color:#CBD5E4;flex-shrink:0}
+.answer.correct{background:#EEF9F5;border-color:#49BB91}.answer.correct .answer-no{background:var(--success);border-color:var(--success);color:white}.answer.correct .answer-name{color:#066F50}
+.answer.wrong{border-color:#E99A9C;background:#FFF7F7}.answer.wrong .answer-no{color:var(--wrong);border-color:#E99A9C}
+.feedback{min-height:33px;margin-top:14px;font-size:16px;font-weight:750;color:var(--success);line-height:1.4}
+.feedback.wrong{color:var(--wrong)}
+.skip{border:0;background:transparent;color:#77859B;font-size:16px;font-weight:750;text-decoration:underline;text-underline-offset:4px;display:block;margin:18px auto 0;padding:9px 15px}
+.bottom-note{font-size:13px;color:#A1A9B7;text-align:center;padding:17px 16px 23px;flex-shrink:0;letter-spacing:0}
+.done{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:520px;position:relative;padding:28px 0 10px}
+.success-icon{margin:0 auto 21px;border-radius:50%;height:78px;width:78px;display:grid;place-items:center;background:#EAF8F2;color:var(--success);position:relative;animation:pop .38s both}
+.success-icon:after{position:absolute;content:"";width:94px;height:94px;border:1.5px solid #BEEBD5;border-radius:50%;animation:ring .6s both}
+.done-kicker{text-align:center;color:var(--success);font-size:15px;font-weight:850;margin:0 0 9px;letter-spacing:.02em}
+.done h2{font-size:34px;letter-spacing:-.07em;text-align:center;margin:0 0 36px;font-weight:850;line-height:1.3}
+.result{border-radius:15px;background:var(--blue);color:white;padding:30px 28px;box-shadow:0 15px 30px rgba(35,91,250,.16);overflow-wrap:anywhere;position:relative}
+.result::after{content:'';position:absolute;border:1px solid rgba(255,255,255,.12);width:185px;height:185px;border-radius:50%;right:-85px;top:-112px}
+.result .minor{font-size:13px;color:#D9E4FF;font-weight:750;letter-spacing:.07em;margin-bottom:14px}
+.result .big-sentence{font-size:clamp(29px,5.6vw,39px);font-weight:800;line-height:1.45;letter-spacing:-.045em}
+.result .big-sentence em{font-style:normal;color:#D0F4FF}
+.translation{font-size:16px;line-height:1.5;color:#76849B;margin:17px 1px 25px;text-align:center}
+.extra-actions{display:flex;gap:10px;margin:0 0 16px}
+.utility{background:#fff;border:1px solid #DCE4F1;border-radius:11px;flex:1;font-size:16px;font-weight:750;color:#3A4C6D;min-height:55px;display:flex;align-items:center;gap:8px;justify-content:center}
+.utility svg{height:20px;width:20px;stroke-width:2}
+.primary{width:100%;min-height:66px;background:var(--blue);color:#fff;border:0;border-radius:12px;font-size:21px;font-weight:850;letter-spacing:-.04em;box-shadow:0 7px 18px rgba(35,91,250,.17);transition:transform .15s,background .15s}
+.primary:hover{background:var(--blue-dark)}.primary:active{transform:scale(.985)}
+.recap{padding-top:45px}.recap-head{font-size:33px;letter-spacing:-.06em;margin:14px 0 29px}.recap-sub{color:var(--blue);font-size:14px;font-weight:850}
+.recap-line{padding:22px 0;border-bottom:1px solid #E8EDF4}.recap-line small{color:#8A98AA;font-weight:800;font-size:14px}.recap-line strong{display:block;font-size:23px;line-height:1.45;letter-spacing:-.045em;margin-top:8px;overflow-wrap:anywhere}
+.recap .primary{margin-top:35px}
+@keyframes pop{0%{transform:scale(.89);opacity:.35}100%{transform:scale(1);opacity:1}}
+@keyframes ring{0%{transform:scale(.65);opacity:.1}100%{transform:scale(1);opacity:1}}
+@media(max-width:550px){body{background:#fff}.screen{box-shadow:none}.header{padding:0 22px;height:70px}main{padding:0 22px 22px}.progress-wrap{padding-top:21px}.hero{padding-top:40px}.hero h1{font-size:30px}.board{margin-top:28px}.question-area{margin-top:35px}.question-area h2{font-size:27px;margin-bottom:21px}.answer{min-height:80px}.done{min-height:480px}}
+@media(max-width:380px){main{padding-left:17px;padding-right:17px}.header{padding:0 17px}.hero h1{font-size:28px}.board{padding:18px 14px}.slot{padding:9px;min-width:67px}.question-area{margin-top:29px}.question-area h2{font-size:25px}.answer{min-height:75px;padding:12px}.answer-name{font-size:22px}}
+@media(min-width:560px){.screen{min-height:790px;margin:36px auto;border:1px solid #E5EAF2;border-radius:21px;overflow:hidden}.bottom-note{padding-bottom:20px}}
+.privacy-link{color:#7B86A0;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+
+/* Only the minimum styles needed to extend the original v08 UI */
+.intro{padding-top:clamp(110px,20dvh,210px)}
+.intro h1{font-size:clamp(29px,6.3vw,35px);font-weight:850;line-height:1.5;letter-spacing:-.065em;word-break:keep-all;margin:0 0 38px;color:#111A30;animation:appear .55s ease forwards .16s}
+.intro .answer{animation:appear .4s ease forwards}
+.intro .answer:nth-child(1){animation-delay:.64s}
+.intro .answer:nth-child(2){animation-delay:.96s}
+.intro .answer:nth-child(3){animation-delay:1.28s}
+.intro .primary{animation:appear .5s ease both .25s}
+@keyframes appear{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.hero.korean-hero h1{display:flex;gap:.18em;flex-wrap:wrap;align-items:center}
+.korean-token{display:inline;padding:1px 3px;border-radius:6px;transition:background .18s,color .18s}
+.korean-token.lit{background:#FFE27A;color:#1E2540;box-shadow:0 0 0 2px rgba(255,211,63,.22)}
+.board{min-height:0}
+.slot{min-width:73px}
+.question-area{margin-top:31px}
+.question-area h2{font-size:26px}
+.answer{min-height:73px}
+.answer-name{font-size:22px}
+.done{min-height:0;justify-content:center}
+@media(max-width:550px){.intro{padding-top:clamp(100px,18dvh,170px)}.question-area h2{font-size:25px}.answer{min-height:73px}}
+@media(prefers-reduced-motion:reduce){.intro h1,.intro .answer{animation:none;opacity:1}}
+
+.board{padding-top:23px;padding-bottom:23px}
+.slot{display:flex;align-items:center;justify-content:center;min-height:57px}
+.slot-word{font-size:25px}
+.question-area{margin-top:32px}
+/* Completion celebration: built on original v08 result card */
+.done .success-icon{height:92px;width:92px;background:#eaf8f2;animation:victory-pop .65s cubic-bezier(.16,1.3,.3,1) both}
+.done .success-icon::before{content:"";position:absolute;inset:-15px;border:3px solid rgba(29,180,120,.17);border-radius:50%;animation:victory-ring .8s ease-out both}
+.done h2{animation:victory-rise .55s ease both .10s}
+.done .result{animation:victory-rise .65s cubic-bezier(.18,.8,.2,1) both .2s}
+.done .result .big-sentence{font-size:clamp(26px,6vw,36px)}
+.done-buttons{display:flex;gap:9px;margin:0 0 12px}
+.done-buttons .utility{min-height:62px}
+.done-buttons .utility:first-child{flex:1.3}
+.done-buttons .utility:last-child{flex:0.8}
+.celebrate-layer{position:absolute;z-index:30;inset:0;overflow:hidden;pointer-events:none}
+.celebrate-bit{position:absolute;top:25%;left:50%;width:9px;height:15px;opacity:0;will-change:transform,opacity;animation:celebrate-fly var(--time,2000ms) cubic-bezier(.1,.58,.23,1) forwards var(--delay,0ms)}
+@keyframes celebrate-fly{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(.8)}
+ 35%{opacity:1}
+ 100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--turn)) scale(.65)}}
+@keyframes victory-pop{0%{transform:scale(.45);opacity:.2}65%{transform:scale(1.2);opacity:1}100%{transform:scale(1)}}
+@keyframes victory-rise{0%{opacity:0;transform:translateY(19px) scale(.96)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes victory-ring{from{transform:scale(.55);opacity:1}to{transform:scale(1.55);opacity:0}}
+@media(prefers-reduced-motion:reduce){.celebrate-layer{display:none}.done .success-icon,.done h2,.done .result,.done .success-icon::before{animation:none}}
+
+/* Quiet v08 labels above filled slots: readability without extra instructional text */
+.board{padding:18px 16px 17px}
+.slots{gap:8px}
+.slot{min-width:65px;min-height:65px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:9px 12px 10px}
+.slot-label{font-size:11px;letter-spacing:.015em;font-weight:800;margin:0 0 7px;color:#9aa6bd}
+.slot.filled .slot-label{color:#7489b3}
+.slot-word{font-size:24px;line-height:1.15}
+.slot.extra{background:#edf3ff}
+.slot.extra .slot-word{font-size:18px;white-space:normal}
+@media(max-width:380px){.board{padding:16px 13px}.slot{padding:8px 10px;min-width:58px}.slot-word{font-size:22px}.slot.extra .slot-word{font-size:17px}}
+ .slot.no-label{min-height:60px;justify-content:center;align-items:center}
+
+/* Home and focused practice, reusing v08 palette and controls */
+.slot.no-label{min-height:61px;align-items:center;justify-content:center}
+.intro .simple-line{font-size:26px;font-weight:850;letter-spacing:-.04em;background:var(--pale);padding:20px 22px;border-radius:12px;margin:-8px 0 26px;color:var(--blue)}
+.intro .primary{animation:appear .45s ease both .2s}
+.sentence-board{padding:26px 22px;min-height:90px}
+.sentence-line{font-size:clamp(24px,6vw,31px);line-height:1.5;color:var(--blue);font-weight:850;letter-spacing:-.035em;overflow-wrap:anywhere}
+.compare-old{text-align:center;color:#8895ae;font-weight:750;font-size:19px;margin:0 0 13px}
+.home{padding-top:48px}
+.home-label{font-size:14px;color:var(--blue);font-weight:850;letter-spacing:0;margin-bottom:13px}
+.home h1,.subpage h1{font-size:clamp(30px,7vw,36px);line-height:1.4;letter-spacing:-.065em;margin:0 0 29px;font-weight:850}
+.home-course{border:1px solid #E1E8F4;background:#F8FAFF;border-radius:16px;padding:24px 21px;margin:0 0 19px}
+.home-row{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:14px;font-weight:750;color:#617390;letter-spacing:0}
+.home-row strong{font-size:14px;color:var(--blue)}
+.home-progress{height:7px;background:#DFE7F5;border-radius:20px;margin:14px 0 25px;overflow:hidden}
+.home-progress span{display:block;height:100%;background:var(--blue);border-radius:20px}
+.home-verb{font-size:32px;font-weight:900;letter-spacing:-.04em;color:#121D36;margin:7px 0 8px}
+.home-muted{font-size:15px;color:#8390A5;line-height:1.55;margin:0 0 21px}
+.home-course .primary{box-shadow:none}
+.home-link{width:100%;display:flex;justify-content:space-between;align-items:center;background:white;border:1px solid #E1E8F4;border-radius:12px;padding:20px;font-size:17px;color:#253552;font-weight:750;letter-spacing:-.035em;margin-bottom:10px;text-align:left}
+.home-link span:last-child{font-size:29px;color:#9AA9C1;line-height:.5}
+.subpage{padding-top:36px}
+.back{background:none;border:0;color:#7B8AA5;font-weight:800;font-size:16px;margin:0 0 26px;padding:7px 0}
+.catalog-item{padding:20px;border:1px solid #E0E7F3;border-radius:13px;margin-bottom:11px}
+.catalog-item strong{display:block;font-size:19px;letter-spacing:-.045em;line-height:1.4}
+.catalog-item p{font-size:14px;color:#8390A5;margin:8px 0 0}
+.catalog-item.disabled{opacity:.55}
+.small-blue{background:#235BFA;border:0;color:white;font-size:15px;font-weight:800;border-radius:8px;margin-top:16px;padding:13px 20px}
+.review-list{display:grid;gap:12px;margin-top:21px}
+.review{border:1px solid #E1E8F3;padding:20px;border-radius:12px}
+.review-label{font-size:13px;font-weight:800;color:#91A0B6;margin-bottom:8px}
+.review strong{display:block;font-size:20px;line-height:1.5}
+.review-answer{font-size:20px;color:var(--blue);font-weight:800;letter-spacing:-.03em;margin-top:13px}
+.mini-link{border:0;background:#EEF3FF;color:var(--blue);padding:11px 14px;font-size:14px;font-weight:800;border-radius:8px;margin-top:15px}
+.empty-state{background:#F6F8FC;padding:28px 20px;border-radius:12px;color:#71809A}
+.lesson-head{padding-top:38px}
+.lesson-head h1{margin-bottom:0}
+@media(max-width:380px){.home-course{padding:20px 16px}.home{padding-top:40px}.sentence-line{font-size:25px}}
+
+/* Mobile-first daily learning: safe wrapping and large touch controls */
+.lesson-top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;color:#687C9C;font-weight:800;margin:0 0 12px}
+.lesson-top span:last-child{color:#235BFA}
+.lesson-bar{margin:0 0 21px}
+.lesson-head{padding-top:25px}
+.lesson-head h1{font-size:clamp(27px,7vw,33px);line-height:1.4;word-break:keep-all;overflow-wrap:anywhere}
+.learn-actions{display:grid;gap:12px;margin-top:22px}
+.learn-actions .utility,.learn-actions .primary{width:100%;min-height:60px}
+.daily-options{margin-top:28px}
+.daily-options h2{font-size:22px;margin-bottom:17px}
+.daily-options .answer{min-height:68px}
+.daily-options .answer-name{font-size:clamp(20px,5.3vw,23px);line-height:1.25;overflow-wrap:anywhere}
+.board .slots{min-width:0;display:flex;flex-wrap:wrap;gap:8px}
+.board .slot{min-width:0;max-width:100%;flex:1 1 auto;padding:12px 11px}
+.board .slot-word{white-space:normal;overflow-wrap:anywhere;word-break:normal;font-size:clamp(19px,5vw,24px)}
+.board .slot.extra .slot-word{white-space:normal}
+.sentence-board .sentence-line{overflow-wrap:anywhere;word-break:normal;white-space:normal}
+.unfinished{color:#9BAACA}
+.done .result{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.done .big-sentence{overflow-wrap:anywhere;word-break:normal}
+.home-course,.catalog-item,.review{min-width:0}
+.home h1,.subpage h1{word-break:keep-all}
+.primary,.utility,.answer,.home-link,.mini-link{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(max-width:550px){
+ html,body{width:100%;max-width:100%;overflow-x:clip}
+ .screen{width:100%;max-width:100%;overflow-x:clip}
+ main{padding-left:clamp(16px,5vw,22px);padding-right:clamp(16px,5vw,22px)}
+ .header{padding-left:clamp(16px,5vw,22px);padding-right:clamp(16px,5vw,22px)}
+ .hero{padding-top:34px}
+ .board{margin-top:23px}
+ .lesson-head{padding-top:25px}
+ .question-area{margin-top:27px}
+ .done{padding-top:20px;padding-bottom:24px;min-width:0}
+ .done h2{font-size:clamp(24px,7.5vw,32px)}
+ .done .result{padding:24px 19px}
+ .done-buttons{gap:8px}
+ .done-buttons .utility{font-size:15px;padding:8px}
+}
+@media(max-width:350px){
+ .lesson-top{font-size:12px}
+ .daily-options .answer{min-height:59px;padding:10px 12px;gap:11px}
+ .daily-options .answer-name{font-size:19px}
+ .answer-no{width:30px;height:30px;flex-shrink:0}
+ .board{padding:14px 12px}
+ .board .slot{padding:9px}
+ .slot-word{font-size:19px}
+}
+
+/* Minimum usable touch targets in review and course navigation */
+.back{min-width:86px;min-height:46px;padding:10px 10px 10px 0;text-align:left}
+.small-blue,.mini-link{min-height:46px;min-width:92px;padding:12px 15px}
+.learn-good{margin:17px 0 7px;color:var(--success);font-size:16px;font-weight:800}
+
+/* Celebrations stay in the visible viewport on mobile */
+.celebrate-layer{position:fixed;inset:0;z-index:9999;overflow:hidden;pointer-events:none}
+.celebrate-bit{position:absolute;top:47%;left:50%;width:9px;height:16px;opacity:0;will-change:transform,opacity;animation:celebrate-fly var(--time,2000ms) cubic-bezier(.1,.58,.23,1) forwards var(--delay,0ms)}
+.celebrate-layer.mini-burst .celebrate-bit{width:6px;height:10px}
+@media(prefers-reduced-motion:reduce){.celebrate-layer.force-motion{display:block}.celebrate-layer.force-motion .celebrate-bit{animation:celebrate-fly var(--time,2000ms) cubic-bezier(.1,.58,.23,1) forwards var(--delay,0ms)!important}}
+.done button.success-icon{border:0;cursor:pointer;color:#0D9B70;font-size:40px;font-weight:800;display:grid;place-items:center}
+.done button.success-icon:focus-visible{outline:3px solid var(--blue);outline-offset:5px}
+.lesson-top{gap:8px}
+.lesson-home{width:46px;height:46px;min-width:46px;border:1px solid #E1E8F4;border-radius:11px;background:#fff;color:#647796;font-weight:800;font-size:32px;line-height:1;display:grid;place-items:center}
+@media(max-width:380px){.lesson-top{font-size:12px}.lesson-home{width:43px;height:46px;min-width:43px}}
+
+/* Consistent mobile rendering: content never depends on animation succeeding */
+.intro h1,.intro .answer{opacity:1}
+.jm-toast{position:fixed;z-index:10001;left:50%;top:max(92px,env(safe-area-inset-top) + 72px);transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);padding:13px 19px;border-radius:14px;background:#14254d;box-shadow:0 12px 36px rgba(16,39,80,.22);color:#fff;font-size:16px;font-weight:800;text-align:center;line-height:1.4;pointer-events:none}
+.guide{padding:50px 0 26px;display:flex;flex-direction:column;min-height:calc(100dvh - 120px)}
+.guide-complete{width:68px;height:68px;border-radius:50%;background:#e8f8f2;color:#05865e;display:grid;place-items:center;font-size:36px;font-weight:800;margin-bottom:14px}
+.guide-kicker{font-size:15px;color:#0b996e;font-weight:850;margin:0 0 8px}
+.guide h1{font-weight:850;font-size:clamp(28px,7vw,34px);line-height:1.34;letter-spacing:-.065em;margin:0 0 12px}
+.guide-intro{color:#77849c;line-height:1.55;font-size:16px;margin:0 0 24px;word-break:keep-all}
+.guide-list{border:1px solid #e1e9f6;border-radius:15px;padding:5px 18px;margin-bottom:23px}
+.guide-item{display:flex;gap:15px;padding:16px 0;align-items:center}
+.guide-item+.guide-item{border-top:1px solid #edf1f8}
+.guide-num{display:grid;place-items:center;flex:0 0 31px;height:31px;border-radius:9px;background:#edf3ff;color:#235bfa;font-weight:850}
+.guide-item strong{font-size:16px;color:#1c2944}
+.guide-item p{font-size:14px;color:#8390a6;margin:4px 0 0;line-height:1.3;word-break:keep-all}
+.guide .primary{margin-top:auto;min-height:62px}
+.home-nudge{font-size:15px;font-weight:800;color:#235bfa;margin:0 0 11px}
+@media(max-width:550px){
+ .intro{padding-top:clamp(30px,9dvh,80px)}
+ .intro h1{margin-bottom:24px;line-height:1.4}
+ .intro .answers{gap:10px}
+ .guide{padding-top:26px;min-height:calc(100dvh - 110px)}
+ .guide-item{padding:14px 0}
+ .jm-toast{top:max(75px,env(safe-area-inset-top) + 64px);font-size:15px}
+}
+@media(max-width:550px) and (max-height:720px){
+ .intro{padding-top:18px}
+ .intro h1{font-size:clamp(26px,6.5vw,30px);line-height:1.32}
+ .intro .answer{min-height:65px}
+ .guide{padding-top:16px}
+ .guide-complete{width:52px;height:52px;font-size:29px}
+ .guide-list{margin-bottom:16px}
+ .guide-item{padding:11px 0}
+}
+
+/* Accessible non-moving celebration for phones with Reduce Motion enabled */
+.celebrate-static{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%);z-index:9999;pointer-events:none;max-width:calc(100vw - 26px);padding:19px 25px;border:2px solid #e1edff;background:#fff;border-radius:19px;box-shadow:0 18px 45px rgba(18,45,99,.19);font-size:clamp(22px,6vw,29px);font-weight:850;color:#134dca;text-align:center;white-space:nowrap}
+.celebrate-static.mini{top:31%;font-size:21px;padding:12px 17px}
+
+/* Compact first-use handoff on short 320px-height phone screens */
+@media(max-width:360px) and (max-height:680px){
+ .guide{padding-top:10px;min-height:0}
+ .guide-complete{width:46px;height:46px;font-size:27px;margin-bottom:6px}
+ .guide-kicker{margin-bottom:5px}
+ .guide h1{font-size:27px;line-height:1.2;margin-bottom:8px}
+ .guide-intro{font-size:14px;line-height:1.4;margin-bottom:12px}
+ .guide-list{padding:2px 12px;margin-bottom:12px}
+ .guide-item{gap:10px;padding:9px 0}
+ .guide-item strong{font-size:15px}
+ .guide-item p{font-size:13px;line-height:1.25}
+ .guide .primary{min-height:55px}
+}
+</style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
+(()=>{'use strict';
+const app=document.querySelector("#app");
+const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const KEY="judongmok:preview-v3:progress-v1";
+const empty=()=>({onboarded:false,day:0,history:[],draft:null});
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&typeof v.onboarded==="boolean"&&Array.isArray(v.history))return{onboarded:v.onboarded,day:Math.min(7,Math.max(0,Number(v.day)||0)),history:v.history,draft:v.draft&&typeof v.draft==="object"?v.draft:null};}catch(e){}return empty();}
+// Shared tutorial link deliberately starts at the beginning, without erasing saved progress.
+const forceTutorial=/(?:^\?|&)tutorial=1(?:&|$)/.test(window.location.search||"");
+const demoMode=/(?:^\?|&)demo=1(?:&|$)/.test(window.location.search||"");
+let progress=demoMode?{...empty(),onboarded:true}:load(),scene=forceTutorial?"intro":progress.onboarded?"home":"intro",mode="guided",step=0,stage=1,picked={},lessonIndex=0,dailyPart=0,sequence=0,locked=false,reviewShown=new Set(),dailyTask=0;
+let resultSentence="",resultKorean="",resultFrom="tutorial",showHomeTip=false;
+let audioContext=null;
+const base1=["나는","밥을","먹는다."],base2=["나는","물을","마신다."];
+const stage1=[
+ {part:0,q:"주어는 무엇일까요?",opts:["I","You"],correct:0,key:"subject",value:"I",reply:"잘했어요!"},
+ {part:2,q:"동사는 무엇일까요?",opts:["eat","drink"],correct:0,key:"verb",value:"eat",reply:"맞아요!"},
+ {part:1,q:"목적어가 필요할까요?",opts:["필요해요","필요 없어요","둘 다 돼요"],correct:2,reply:"둘 다 가능해요."},
+ {part:1,q:"밥을 영어로?",opts:["water","rice"],correct:1,key:"object",value:"rice",reply:"정답!"}
+];
+const stage2Words=["water","I","drink"],stage2Correct=["I","drink","water"],stage2Parts=[0,2,1];
+const stage3Ko=["나는","집에서","매일 아침","물을","마신다."];
+const stage3Steps=[
+ {part:1,q:"집에서?",opts:["at school","at home","on weekends"],correct:1,value:"at home"},
+ {part:2,q:"매일 아침?",opts:["every morning","after dinner","every day"],correct:0,value:"every morning"}
+];
+const days=[{"verb":"DRINK","teach":[["나는 물을 마신다.","I drink water."],["나는 커피를 마신다.","I drink coffee."]],"practice":[["나는 물을 마신다.",["I","drink","water"],["water","I","drink"]],["나는 커피를 마신다.",["I","drink","coffee"],["drink","coffee","I"]],["우리는 차를 마신다.",["We","drink","tea"],["tea","We","drink"]]],"expand":[["나는 매일 아침 커피를 마신다.","I drink coffee","every morning",["after dinner","every morning","on weekends"]],["우리는 저녁 식사 후 차를 마신다.","We drink tea","after dinner",["after dinner","at the park","every morning"]]],"apply":["나는 집에서 매일 아침 물을 마신다.",["I","drink","water","at home","every morning"],["at home","water","every morning","I","drink"]],"baseKo":"나는 물을 마신다.","longKo":"나는 집에서 매일 아침 물을 마신다."},{"verb":"GO","teach":[["나는 직장에 간다.","I go to work."],["나는 공원에 간다.","I go to the park."]],"practice":[["나는 직장에 간다.",["I","go","to work"],["go","to work","I"]],["나는 공원에 간다.",["I","go","to the park"],["to the park","I","go"]],["우리는 집에 간다.",["We","go","home"],["home","go","We"]]],"expand":[["나는 주말마다 공원에 간다.","I go to the park","on weekends",["every night","on weekends","at home"]],["나는 매일 아침 직장에 간다.","I go to work","every morning",["every morning","on weekends","after dinner"]]],"apply":["우리는 점심 식사 후 공원에 간다.",["We","go","to the park","after lunch"],["after lunch","to the park","We","go"]],"baseKo":"나는 직장에 간다.","longKo":"우리는 점심 식사 후 공원에 간다."},{"verb":"TAKE","teach":[["나는 산책한다.","I take a walk."],["나는 쉰다.","I take a break."]],"practice":[["나는 산책한다.",["I","take","a walk"],["a walk","I","take"]],["나는 쉰다.",["I","take","a break"],["take","a break","I"]],["우리는 택시를 탄다.",["We","take","a taxi"],["a taxi","take","We"]]],"expand":[["나는 저녁 식사 후 산책한다.","I take a walk","after dinner",["at home","after dinner","every weekend"]],["우리는 역까지 택시를 탄다.","We take a taxi","to the station",["to the station","at home","every night"]]],"apply":["나는 매일 아침 공원에서 산책한다.",["I","take","a walk","in the park","every morning"],["in the park","a walk","I","every morning","take"]],"baseKo":"나는 산책한다.","longKo":"나는 매일 아침 공원에서 산책한다."},{"verb":"MAKE","teach":[["나는 저녁을 만든다.","I make dinner."],["나는 아침을 만든다.","I make breakfast."]],"practice":[["나는 저녁을 만든다.",["I","make","dinner"],["dinner","I","make"]],["우리는 커피를 만든다.",["We","make","coffee"],["coffee","We","make"]],["나는 아침을 만든다.",["I","make","breakfast"],["breakfast","make","I"]]],"expand":[["나는 가족을 위해 저녁을 만든다.","I make dinner","for my family",["after lunch","for my family","with friends"]],["우리는 집에서 커피를 만든다.","We make coffee","at home",["at work","on weekends","at home"]]],"apply":["나는 주말마다 가족을 위해 아침을 만든다.",["I","make","breakfast","for my family","on weekends"],["breakfast","on weekends","make","I","for my family"]],"baseKo":"나는 저녁을 만든다.","longKo":"나는 주말마다 가족을 위해 아침을 만든다."},{"verb":"STUDY","teach":[["나는 영어를 공부한다.","I study English."],["우리는 함께 공부한다.","We study together."]],"practice":[["나는 영어를 공부한다.",["I","study","English"],["English","study","I"]],["우리는 함께 공부한다.",["We","study","together"],["study","together","We"]],["나는 수학을 공부한다.",["I","study","math"],["math","I","study"]]],"expand":[["나는 매일 영어를 공부한다.","I study English","every day",["every day","at the park","after dinner"]],["우리는 도서관에서 함께 공부한다.","We study together","at the library",["at home","at the library","every night"]]],"apply":["나는 매일 아침 집에서 영어를 공부한다.",["I","study","English","at home","every morning"],["every morning","English","I","study","at home"]],"baseKo":"나는 영어를 공부한다.","longKo":"나는 매일 아침 집에서 영어를 공부한다."},{"verb":"MEET","teach":[["나는 친구를 만난다.","I meet my friend."],["우리는 카페에서 만난다.","We meet at the cafe."]],"practice":[["나는 친구를 만난다.",["I","meet","my friend"],["my friend","I","meet"]],["우리는 카페에서 만난다.",["We","meet","at the cafe"],["meet","at the cafe","We"]],["나는 여동생을 만난다.",["I","meet","my sister"],["my sister","meet","I"]]],"expand":[["나는 주말마다 친구를 만난다.","I meet my friend","on weekends",["on weekends","at the office","every morning"]],["우리는 퇴근 후 카페에서 만난다.","We meet at the cafe","after work",["every night","at home","after work"]]],"apply":["나는 매주 일요일 공원에서 여동생을 만난다.",["I","meet","my sister","at the park","every Sunday"],["my sister","at the park","I","every Sunday","meet"]],"baseKo":"나는 친구를 만난다.","longKo":"나는 매주 일요일 공원에서 여동생을 만난다."},{"verb":"READ","teach":[["나는 책을 읽는다.","I read a book."],["나는 뉴스를 읽는다.","I read the news."]],"practice":[["나는 책을 읽는다.",["I","read","a book"],["a book","read","I"]],["나는 뉴스를 읽는다.",["I","read","the news"],["read","the news","I"]],["우리는 이야기를 읽는다.",["We","read","stories"],["stories","We","read"]]],"expand":[["나는 자기 전에 책을 읽는다.","I read a book","before bed",["at the gym","before bed","on weekends"]],["나는 매일 아침 뉴스를 읽는다.","I read the news","every morning",["every morning","at the park","after lunch"]]],"apply":["나는 매일 밤 집에서 책을 읽는다.",["I","read","a book","at home","every night"],["at home","a book","every night","I","read"]],"baseKo":"나는 책을 읽는다.","longKo":"나는 매일 밤 집에서 책을 읽는다."}];
+function save(){if(demoMode)return;try{localStorage.setItem(KEY,JSON.stringify(progress));}catch(e){}}
+function button(label,action,kind="primary"){return '<button type="button" class="'+kind+'" data-action="'+action+'">'+esc(label)+'</button>';}
+function choices(items,kind="choice"){return items.map((w,i)=>'<button type="button" class="answer" data-kind="'+kind+'" data-index="'+i+'"><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("");}
+function board(parts,showLabels=false){
+ return '<div class="board"><div class="slots">'+parts.map(([label,value])=>'<div class="slot '+(value?"filled":"")+' '+(label==="장소"||label==="시간"?"extra":"")+(showLabels?"":" no-label")+'">'+(showLabels?'<div class="slot-label">'+esc(label)+'</div>':"")+'<div class="slot-word">'+(value?esc(value):"···")+'</div></div>').join("")+'</div></div>';
+}
+function koTokens(words,lit=-1,seen=[]){return words.map((word,i)=>'<span class="korean-token '+(lit===i||seen.includes(i)?"lit":"")+'">'+esc(word)+'</span>').join("");}
+function speak(text){
+ if(!("speechSynthesis" in window)||typeof SpeechSynthesisUtterance==="undefined"){alert("이 브라우저는 영어 음성 듣기를 지원하지 않아요.");return;}
+ window.speechSynthesis.cancel();
+ const utterance=new SpeechSynthesisUtterance(text);utterance.lang="en-US";utterance.rate=.87;
+ const voices=window.speechSynthesis.getVoices();
+ utterance.voice=voices.find(v=>v.lang==="en-US")||voices.find(v=>v.lang.startsWith("en"))||null;
+ window.speechSynthesis.speak(utterance);
+}
+async function share(){
+ const text="오늘 주동목에서 만든 영어 문장!\n"+resultSentence+"\nhttps://splendorous-mochi-346e26.netlify.app/preview-v3/";
+ if(navigator.share){try{await navigator.share({text,title:"주동목"});}catch(e){}return;}
+ try{await navigator.clipboard.writeText(text);alert("문장을 복사했어요.");}catch(e){alert("공유 기능을 지원하지 않는 브라우저예요.");}
+}
+function playTone(){try{const c=unlockAudio();if(!c)return;const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+.015;o.type="sine";o.frequency.setValueAtTime(500,t);o.frequency.linearRampToValueAtTime(740,t+.12);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.028,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+.20);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.21);}catch(e){}}
+
+function unlockAudio(){
+ try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;
+ if(!audioContext)audioContext=new A();
+ if(audioContext.state==="suspended")audioContext.resume().catch(()=>{});
+ return audioContext;
+ }catch(e){return null;}
+}
+function victorySound(){
+ const c=unlockAudio();if(!c||c.state==="closed")return;
+ const notes=[523.25,659.26,783.99,1046.5,1318.51];
+ const start=c.currentTime+.025;
+ notes.forEach((freq,i)=>{
+  const o=c.createOscillator(),g=c.createGain(),at=start+i*.105;
+  o.type=i===4?"sine":"triangle";o.frequency.value=freq;
+  g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(.035,at+.022);
+  g.gain.exponentialRampToValueAtTime(.0001,at+.34);
+  o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+.36);
+ });
+}
+function celebrate(force=false,mini=false){
+ const reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+ if(reduce&&!force){
+  document.querySelector(".celebrate-static")?.remove();
+  const badge=document.createElement("div");
+  badge.className="celebrate-static"+(mini?" mini":"");
+  badge.setAttribute("role","status");
+  badge.textContent=mini?"✨ 문장 완성!":"🎉 잘했어요!";
+  document.body.appendChild(badge);
+  setTimeout(()=>badge.remove(),mini?1350:2400);
+  return;
+ }
+ const old=document.querySelector(".celebrate-layer");if(old)old.remove();
+ const layer=document.createElement("div");
+ layer.className="celebrate-layer"+(force?" force-motion":"")+(mini?" mini-burst":"");
+ layer.setAttribute("aria-hidden","true");
+ const palette=["#235BFA","#FFCC32","#12B78A","#FB6D9C","#A17DFC","#64CBEA"],parts=mini?34:94;
+ const fragment=document.createDocumentFragment();
+ for(let i=0;i<parts;i++){
+  const bit=document.createElement("i");bit.className="celebrate-bit";
+  const angle=(2*Math.PI*i/parts)+(Math.random()*.38-.19),r=(mini?85:175)+Math.random()*(mini?110:315);
+  bit.style.background=palette[i%palette.length];
+  bit.style.borderRadius=i%4===0?"50%":"2px";
+  bit.style.setProperty("--dx",Math.cos(angle)*r+"px");
+  bit.style.setProperty("--dy",Math.sin(angle)*r+Math.random()*(mini?95:320)+"px");
+  bit.style.setProperty("--turn",(Math.random()*1440-720)+"deg");
+  bit.style.setProperty("--delay",(Math.random()*(mini?90:240))+"ms");
+  bit.style.setProperty("--time",(mini?900:1750)+Math.random()*(mini?450:1100)+"ms");
+  fragment.appendChild(bit);
+ }
+ layer.appendChild(fragment);document.body.appendChild(layer);
+ setTimeout(()=>layer.remove(),mini?1650:3300);
+}
+function showToast(message){
+ document.querySelector(".jm-toast")?.remove();
+ const toast=document.createElement("div");
+ toast.className="jm-toast";toast.setAttribute("role","status");
+ toast.textContent=message;document.body.appendChild(toast);
+ setTimeout(()=>toast.remove(),1150);
+}
+function finish(kind,english,korean){
+ stage=kind;resultFrom=kind===4?"daily":"tutorial";resultSentence=english;resultKorean=korean;scene="done";locked=false;render();celebrate();
+}
+function tapEffect(last=false){try{unlockAudio();if(last)victorySound();else playTone();}catch(e){}try{navigator.vibrate?.(last?[20,40,40]:15);}catch(e){}}
+function feedbackRight(el,text){el.classList.add("correct");const mark=el.querySelector(".answer-no");if(mark)mark.textContent="✓";app.querySelectorAll(".answer").forEach(b=>b.disabled=true);const f=app.querySelector(".feedback");if(f)f.textContent=text||"잘했어요!";}
+function feedbackWrong(el){el.classList.add("wrong");const f=app.querySelector(".feedback");if(f){f.classList.add("wrong");f.textContent="다시 해보세요.";}setTimeout(()=>el.classList.remove("wrong"),380);}
+function resetStepState(){locked=false;step=0;picked={};sequence=0;}
+function render(){
+ if(scene==="intro"){app.innerHTML='<section class="intro"><h1>영어와 한국어는<br>어순이 다르다는 사실,<br>알고 계셨나요?</h1><div class="answers">'+choices(["알고 있어요","느낌은 알지만 헷갈려요","잘 모르겠어요"],"intro")+'</div></section>';return;}
+ if(scene==="learn"){
+  const q=stage1[step],lit=mode==="guided"?q.part:-1,seen=mode==="independent"?[picked.subject?0:-1,picked.verb?2:-1,picked.object?1:-1]:[];
+  app.innerHTML='<section class="hero korean-hero"><h1>'+koTokens(base1,lit,seen)+'</h1></section>'+
+   board([["주어",picked.subject],["동사",picked.verb],["목적어",picked.object]],true)+
+   '<section class="question-area"><h2>'+esc(q.q)+'</h2><div class="answers">'+choices(q.opts,"learn")+'</div><p class="feedback" aria-live="polite"></p></section>';return;
+ }
+ if(scene==="handoff2"){app.innerHTML='<section class="intro"><h1>이번엔 혼자<br>만들어볼까요?</h1>'+button("시작하기","begin2")+'</section>';return;}
+ if(scene==="challenge"){
+  const chosen=stage2Correct.slice(0,sequence),filled=[["",chosen[0]],["",chosen[1]],["",chosen[2]]];
+  app.innerHTML='<section class="hero korean-hero"><h1>'+koTokens(base2,-1,stage2Parts.slice(0,sequence))+'</h1></section>'+board(filled)+
+   '<section class="question-area"><h2>영어 순서대로 눌러보세요.</h2><div class="answers">'+stage2Words.map((w,i)=>'<button type="button" class="answer '+(chosen.includes(w)?"correct":"")+'" data-kind="challenge" data-index="'+i+'" '+(chosen.includes(w)?"disabled":"")+'><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("")+'</div><p class="feedback" aria-live="polite"></p></section>';return;
+ }
+ if(scene==="handoff3"){
+  app.innerHTML='<section class="intro"><h1>이번엔 문장을<br>더 길게 만들어볼까요?</h1><div class="simple-line">I drink water.</div>'+button("시작하기","begin3")+'</section>';return;
+ }
+ if(scene==="extend"){
+  const q=stage3Steps[step],base="I drink water"+(step>0?" at home":"")+".";
+  app.innerHTML='<section class="hero korean-hero"><h1>'+koTokens(stage3Ko,q.part)+'</h1></section>'+
+   '<div class="board sentence-board"><div class="sentence-line">'+esc(base)+'</div></div>'+
+   '<section class="question-area"><h2>'+esc(q.q)+'</h2><div class="answers">'+choices(q.opts,"extend")+'</div><p class="feedback" aria-live="polite"></p></section>';return;
+ }
+ if(scene==="done"){
+  const first=stage===1,second=stage===2,third=stage===3;
+  const label=first?"첫 문장을 만들었어요!":second?"혼자서도 해냈어요!":third?"문장이 길어졌어요!":"오늘도 해냈어요!";
+  const small=third?'<div class="compare-old">I drink water.</div>':'';
+  app.innerHTML='<section class="done"><button type="button" class="success-icon" data-action="replay-celebration" aria-label="축하 효과 다시 보기">✓</button><p class="done-kicker">🎉 잘했어요!</p><h2>'+label+'</h2>'+small+
+  '<div class="result"><div class="big-sentence">'+esc(resultSentence)+'</div></div><p class="translation">'+esc(resultKorean)+'</p>'+
+  '<div class="done-buttons"><button class="utility" data-action="listen">🔊 듣기</button><button class="utility" data-action="share">↗ 공유</button></div>'+
+  button(stage===3?"앱 사용법 보기":stage===4?"홈으로":"다음 단계","next")+'</section>';return;
+ }
+ if(scene==="guide"){
+  app.innerHTML='<section class="guide"><div class="guide-complete" aria-hidden="true">✓</div><p class="guide-kicker">첫 체험 완료!</p><h1>이제 이렇게<br>사용하면 돼요.</h1><p class="guide-intro">오늘부터는 짧은 문장을 만들고, 조금씩 길게 말하는 연습을 해요.</p>'+
+  '<div class="guide-list">'+
+   '<div class="guide-item"><span class="guide-num">1</span><div><strong>오늘의 동사 하나</strong><p>쉬운 단어로 문장 만드는 법 배우기</p></div></div>'+
+   '<div class="guide-item"><span class="guide-num">2</span><div><strong>직접 문장 만들기</strong><p>단어를 골라 영어 순서대로 조립하기</p></div></div>'+
+   '<div class="guide-item"><span class="guide-num">3</span><div><strong>길게 말하고 복습하기</strong><p>장소·시간을 더하고 완성 문장 듣기</p></div></div></div>'+
+  button("내 학습 홈으로 가기","enter-home")+'</section>';return;
+ }
+ if(scene==="home"){renderHome();return;}
+ if(scene==="daily"){renderDaily();return;}
+ if(scene==="review"){renderReview();return;}
+ if(scene==="catalog"){renderCatalog();return;}
+}
+function renderHome(){
+ const finished=progress.day>=days.length,day=days[Math.min(progress.day,days.length-1)];
+ const percent=Math.round(progress.day/days.length*100);
+ app.innerHTML='<section class="home"><div class="home-label">나의 영어 연습</div><h1>오늘도 한 문장<br>만들어볼까요?</h1>'+
+  '<div class="home-course"><div class="home-row"><span>초급 · 문장 만들기</span><strong>'+progress.day+' / 7일</strong></div>'+
+  '<div class="home-progress"><span style="width:'+percent+'%"></span></div>'+
+  (finished?'<p class="home-verb">7일 완성 🎉</p><p class="home-muted">배운 문장을 다시 떠올려보세요.</p>':
+  '<div class="home-muted">오늘의 동사 · 8개 활동</div><div class="home-verb">'+esc(day.verb)+'</div><p class="home-muted">'+esc(day.longKo)+'</p>')+
+  (showHomeTip?'<p class="home-nudge">↓ 여기를 눌러 첫 연습을 시작하세요.</p>':"")+button(finished?"기초 문장 다시 연습":progress.draft&&progress.draft.day===progress.day?"이어서 연습하기":"오늘의 연습 시작","startDaily")+'</div>'+
+  '<button class="home-link" data-action="review"><span>지난 문장 복습</span><span>›</span></button>'+
+  '<button class="home-link" data-action="catalog"><span>다른 연습 둘러보기</span><span>›</span></button></section>';
+}
+
+const teachPicks=[[{"mask":"I ... water.","opts":["eat","drink"],"correct":"drink"},{"mask":"I drink ...","opts":["water","coffee"],"correct":"coffee"}],[{"mask":"I ... to work.","opts":["go","make"],"correct":"go"},{"mask":"I go ...","opts":["to the park","to school"],"correct":"to the park"}],[{"mask":"I ... a walk.","opts":["make","take"],"correct":"take"},{"mask":"I take ...","opts":["a break","a shower"],"correct":"a break"}],[{"mask":"I ... dinner.","opts":["take","make"],"correct":"make"},{"mask":"I make ...","opts":["breakfast","coffee"],"correct":"breakfast"}],[{"mask":"I ... English.","opts":["read","study"],"correct":"study"},{"mask":"We study ...","opts":["together","at home"],"correct":"together"}],[{"mask":"I ... my friend.","opts":["meet","see"],"correct":"meet"},{"mask":"We meet ...","opts":["at the cafe","at the park"],"correct":"at the cafe"}],[{"mask":"I ... a book.","opts":["read","make"],"correct":"read"},{"mask":"I read ...","opts":["the news","a letter"],"correct":"the news"}]];
+function dayActivity(){return Math.min(7,Math.max(0,dailyTask));}
+function dailyCurrent(){
+ const d=days[lessonIndex],task=dayActivity();
+ if(task<2)return {kind:"learn",ko:d.teach[task][0],english:d.teach[task][1],pick:teachPicks[lessonIndex][task],phase:"배우기"};
+ if(task<5){const a=d.practice[task-2];return {kind:"order",ko:a[0],order:a[1],options:a[2],phase:"조립하기"};}
+ if(task<7){const a=d.expand[task-5];return {kind:"expand",ko:a[0],base:a[1],correct:a[2],options:a[3],phase:"문장 늘리기"};}
+ const a=d.apply;return {kind:"apply",ko:a[0],order:a[1],options:a[2],phase:"혼자 만들기"};
+}
+function rememberDraft(){
+ if(scene==="daily"){progress.draft={day:lessonIndex,task:dailyTask,sequence};save();}
+}
+function completeDaily(){
+ const d=days[lessonIndex],en=d.apply[1].join(" ")+".",ko=d.apply[0];
+ if(!progress.history.some(x=>x.day===lessonIndex))progress.history.push({day:lessonIndex,ko,en});
+ progress.day=Math.max(progress.day,lessonIndex+1);
+ progress.draft=null;save();finish(4,en,ko);
+}
+function nextDaily(){
+ dailyTask++;sequence=0;
+ if(dailyTask>=8){completeDaily();return;}
+ rememberDraft();render();window.scrollTo(0,0);
+}
+function renderDaily(){
+ const d=days[lessonIndex],a=dailyCurrent(),used=a.order?a.order.slice(0,sequence):[];
+ const heading='<section class="home lesson-head"><div class="lesson-top"><button class="lesson-home" type="button" data-action="home" aria-label="홈으로">‹</button><span>초급 · '+(lessonIndex+1)+'일차</span><span>'+a.phase+' '+(dailyTask+1)+'/8</span></div><div class="home-progress lesson-bar"><span style="width:'+((dailyTask+1)/8*100)+'%"></span></div><h1>'+esc(a.ko)+'</h1></section>';
+ if(a.kind==="learn"){
+  const solved=sequence>=1,displayed=solved?a.english:a.pick.mask.replace("...","<span class=\"unfinished\">···</span>");
+  app.innerHTML=heading+'<div class="board sentence-board"><div class="sentence-line">'+(solved?esc(displayed):displayed)+'</div></div>'+
+   (solved?'<div class="learn-actions"><p class="learn-good">✓ 직접 완성했어요.</p><button type="button" class="utility" data-action="listen-daily">🔊 듣기</button>'+button("다음","next-daily")+'</div>':
+   '<section class="question-area daily-options"><h2>빈칸에 들어갈 말은?</h2><div class="answers">'+choices(a.pick.opts,"daily")+'</div><p class="feedback" aria-live="polite"></p></section>');
+  return;
+ }
+ if(a.kind==="expand"){
+  app.innerHTML=heading+'<div class="board sentence-board"><div class="sentence-line">'+esc(a.base)+' <span class="unfinished">···</span></div></div>'+
+   '<section class="question-area daily-options"><h2>뒤에 붙여보세요.</h2><div class="answers">'+choices(a.options,"daily")+'</div><p class="feedback" aria-live="polite"></p></section>';
+  return;
+ }
+ const cells=a.order.map((word,i)=>["",used[i]||""]);
+ app.innerHTML=heading+board(cells,false)+
+  '<section class="question-area daily-options"><h2>'+(a.kind==="apply"?"혼자 만들어보세요.":"영어 순서대로 눌러보세요.")+'</h2><div class="answers">'+a.options.map((w,i)=>
+  '<button type="button" class="answer '+(used.includes(w)?"correct":"")+'" data-kind="daily" data-index="'+i+'" '+(used.includes(w)?"disabled":"")+'><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("")+'</div><p class="feedback" aria-live="polite"></p></section>';
+}
+function renderReview(){
+ app.innerHTML='<section class="subpage"><button class="back" data-action="home">‹ 홈</button><h1>지난 문장 복습</h1><p class="home-muted">한국어를 보고 영어로 말해보세요.</p>'+
+ (progress.history.length?'<div class="review-list">'+progress.history.map((x,i)=>'<div class="review"><div class="review-label">'+(x.day+1)+'일차</div><strong>'+esc(x.ko)+'</strong>'+ (reviewShown.has(i)?'<div class="review-answer">'+esc(x.en)+'</div><button class="mini-link" data-action="review-speak" data-index="'+i+'">🔊 듣기</button>':'<button class="mini-link" data-action="reveal" data-index="'+i+'">정답 보기</button>')+'</div>').join("")+'</div>':
+ '<div class="empty-state">아직 복습할 문장이 없어요.</div>')+'</section>';
+}
+function renderCatalog(){
+ app.innerHTML='<section class="subpage"><button class="back" data-action="home">‹ 홈</button><h1>연습 둘러보기</h1>'+
+  '<div class="catalog-item"><div><div class="home-label">초급</div><strong>기초 동사로 문장 만들기</strong><p>7일 · 짧은 문장부터 길게</p></div>'+button("연습하기","startDaily","small-blue")+'</div>'+
+  '<div class="catalog-item disabled"><div class="home-label">중급</div><strong>문장 변형 연습</strong><p>준비 중</p></div>'+
+  '<div class="catalog-item disabled"><div class="home-label">고급</div><strong>자연스러운 문장 구성</strong><p>준비 중</p></div></section>';
+}
+function clickChoice(kind,i,button){
+ if(locked)return;
+ if(kind==="intro"){locked=true;button.classList.add("correct");showToast("좋아요! 첫 문장을 만들어볼까요?");setTimeout(()=>{mode=i===0?"independent":"guided";scene="learn";step=0;picked={};locked=false;render();window.scrollTo(0,0);},650);return;}
+ if(kind==="learn"){
+  const q=stage1[step];if(i!==q.correct){feedbackWrong(button);return;}
+  locked=true;feedbackRight(button,q.reply);if(q.key)picked[q.key]=q.value;tapEffect(step===stage1.length-1);if(step===stage1.length-1)showToast("✓ 첫 문장을 완성했어요!");
+  if(q.key){const b=app.querySelector(".board");if(b)b.outerHTML=board([["주어",picked.subject],["동사",picked.verb],["목적어",picked.object]],true);}
+  setTimeout(()=>{step++;locked=false;if(step===stage1.length)finish(1,"I eat rice.","나는 밥을 먹는다.");else render();},step===stage1.length-1?670:500);return;
+ }
+ if(kind==="challenge"){
+  const word=stage2Words[i];if(word!==stage2Correct[sequence]){feedbackWrong(button);return;}
+  locked=true;sequence++;feedbackRight(button,"맞았어요!");tapEffect(sequence===stage2Correct.length);if(sequence===stage2Correct.length)showToast("✓ 혼자 문장을 완성했어요!");
+  const boardNode=app.querySelector(".board");if(boardNode)boardNode.outerHTML=board(stage2Correct.map((w,i)=>["",i<sequence?w:""]),false);
+  setTimeout(()=>{locked=false;if(sequence===stage2Correct.length)finish(2,"I drink water.","나는 물을 마신다.");else render();},sequence===stage2Correct.length?670:300);return;
+ }
+ if(kind==="extend"){
+  const q=stage3Steps[step];if(i!==q.correct){feedbackWrong(button);return;}
+  locked=true;feedbackRight(button,"좋아요!");tapEffect(step===stage3Steps.length-1);if(step===stage3Steps.length-1)showToast("✓ 긴 문장 완성!");
+  setTimeout(()=>{step++;locked=false;if(step===stage3Steps.length)finish(3,"I drink water at home every morning.","나는 집에서 매일 아침 물을 마신다.");else render();},step===stage3Steps.length-1?700:430);return;
+ }
+ if(kind==="daily"){
+  const a=dailyCurrent();
+  if(a.kind==="learn"){
+   if(a.pick.opts[i]!==a.pick.correct){feedbackWrong(button);return;}
+   locked=true;feedbackRight(button,"좋아요!");tapEffect(false);
+   sequence=1;rememberDraft();speak(a.english);
+   setTimeout(()=>{locked=false;render();},400);return;
+  }
+  if(a.kind==="expand"){
+   if(a.options[i]!==a.correct){feedbackWrong(button);return;}
+   locked=true;feedbackRight(button,"잘했어요!");tapEffect(false);
+   const line=app.querySelector(".sentence-line");if(line)line.textContent=a.base+" "+a.correct+".";
+   speak(a.base+" "+a.correct+".");
+   setTimeout(()=>{locked=false;celebrate(false,true);nextDaily();},1200);return;
+  }
+  if(a.kind!=="order"&&a.kind!=="apply")return;
+  if(a.options[i]!==a.order[sequence]){feedbackWrong(button);return;}
+  locked=true;sequence++;rememberDraft();
+  const boardNode=app.querySelector(".board");if(boardNode)boardNode.outerHTML=board(a.order.map((w,j)=>["",j<sequence?w:""]),false);
+  feedbackRight(button,sequence===a.order.length?"문장 완성!":"좋아요!");
+  if(sequence===a.order.length)speak(a.order.join(" ")+".");
+  tapEffect(a.kind==="apply"&&sequence===a.order.length);
+  setTimeout(()=>{
+   locked=false;
+   if(sequence===a.order.length){celebrate(false,true);nextDaily();}
+   else render();
+  },a.kind==="apply"&&sequence===a.order.length?1300:sequence===a.order.length?1200:340);
+  return;
+ }}
+function action(which,el){
+ if(which==="begin2"){scene="challenge";resetStepState();render();}
+ if(which==="begin3"){scene="extend";step=0;locked=false;render();}
+ if(which==="enter-home"){showHomeTip=true;scene="home";render();window.scrollTo(0,0);}
+ if(which==="next"){
+  window.speechSynthesis?.cancel();
+  if(stage===1){scene="handoff2";}
+  else if(stage===2){scene="handoff3";}
+  else if(stage===3){progress.onboarded=true;save();scene="guide";}
+  else{scene="home";}
+  locked=false;render();window.scrollTo(0,0);
+ }
+ if(which==="startDaily"){showHomeTip=false;lessonIndex=progress.day<7?progress.day:0;const draft=progress.draft;dailyTask=draft&&draft.day===lessonIndex&&Number.isInteger(draft.task)&&draft.task>=0&&draft.task<8?draft.task:0;sequence=draft&&draft.day===lessonIndex&&Number.isInteger(draft.sequence)?Math.max(0,draft.sequence):0;const a=dailyCurrent();if(a.order)sequence=Math.min(sequence,a.order.length-1);else if(a.kind==="learn")sequence=sequence>0?1:0;else sequence=0;locked=false;scene="daily";rememberDraft();render();window.scrollTo(0,0);}
+ if(which==="review"){scene="review";reviewShown.clear();render();window.scrollTo(0,0);}
+ if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
+ if(which==="home"){scene="home";render();window.scrollTo(0,0);}
+ if(which==="listen"){speak(resultSentence);}
+ if(which==="replay-celebration"){tapEffect(true);celebrate(true);}
+ if(which==="listen-daily"){const a=dailyCurrent();if(a.kind==="learn")speak(a.english);}
+ if(which==="next-daily"){if(scene==="daily"&&dailyCurrent().kind==="learn"&&sequence>=1){tapEffect(false);nextDaily();}}
+ if(which==="share"){share();}
+ if(which==="reveal"){reviewShown.add(Number(el.dataset.index));render();}
+ if(which==="review-speak"){const x=progress.history[Number(el.dataset.index)];if(x)speak(x.en);}
+}
+app.addEventListener("click",e=>{
+ const el=e.target.closest("button");if(!el||el.disabled)return;
+ if(el.hasAttribute("data-kind"))clickChoice(el.dataset.kind,Number(el.dataset.index),el);
+ else if(el.hasAttribute("data-action"))action(el.dataset.action,el);
+});
+render();
+})();
+</script></body></html>
