@@ -180,7 +180,7 @@ const KEY="judongmok:preview-v2:progress-v1";
 const empty=()=>({onboarded:false,day:0,history:[]});
 function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&typeof v.onboarded==="boolean"&&Array.isArray(v.history))return{onboarded:v.onboarded,day:Math.min(7,Math.max(0,Number(v.day)||0)),history:v.history};}catch(e){}return empty();}
 // Shared tutorial link deliberately starts at the beginning, without erasing saved progress.
-const forceTutorial=new URLSearchParams(window.location.search).get("tutorial")==="1";
+const forceTutorial=/(?:^\?|&)tutorial=1(?:&|$)/.test(window.location.search||"");
 let progress=load(),scene=forceTutorial?"intro":progress.onboarded?"home":"intro",mode="guided",step=0,stage=1,picked={},lessonIndex=0,dailyPart=0,sequence=0,locked=false,reviewShown=new Set();
 let resultSentence="",resultKorean="",resultFrom="tutorial";
 let audioContext=null;
