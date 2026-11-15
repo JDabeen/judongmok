@@ -51,6 +51,16 @@
 - `supabase/functions/notify-feedback-onesignal/`: 새 피드백 알림용 Edge Function (별도 배포됨)
 - `docs/ONESIGNAL-SETUP.md`: 알림 설치 및 보안 설정 가이드
 
+## V2 학습 UX 체험판 (2026-11-15)
+
+기존 운영 앱과 별개로, **첫 문장 조립 → 혼자 조립 → 장소·시간을 붙여 문장 확장 → 학습 홈** 흐름을 실험하는 체험판을 개발했습니다.
+
+- **[처음 사용하는 사람에게 공유할 튜토리얼](https://splendorous-mochi-346e26.netlify.app/preview-v2/?tutorial=1)** — 첫 질문부터 시작하며 기존 브라우저 진도를 지우지 않습니다.
+- **[V2 일반 학습 링크](https://splendorous-mochi-346e26.netlify.app/preview-v2/)** — 튜토리얼 완료 후에는 홈에서 초급 7일 코스와 복습을 사용할 수 있습니다.
+- **[V2 전체 작업 기록·검증 범위·남은 과제](./docs/V2-UX-STATUS-2026-11-15.md)**
+
+V2는 현재 브라우저 `localStorage`만 사용하며 운영 Supabase 기록과 연동되지 않습니다. **기존 `index.html` 운영 앱은 그대로 유지합니다.** 실제 외부 학습자 사용성과 학습 효과는 아직 검증하지 않았습니다.
+
 ## 개발 상태 (2026-11-14)
 
 **기술적 MVP 구축 완료, 독립적인 외부 학습자 검증 예정.** 관리자 기기에서 end-to-end 피드백 푸시 수신은 확인했으나 실제 사용성·학습 효과가 입증된 것은 아닙니다.
