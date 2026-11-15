@@ -172,6 +172,54 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 .lesson-head{padding-top:38px}
 .lesson-head h1{margin-bottom:0}
 @media(max-width:380px){.home-course{padding:20px 16px}.home{padding-top:40px}.sentence-line{font-size:25px}}
+
+/* Mobile-first daily learning: safe wrapping and large touch controls */
+.lesson-top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;color:#687C9C;font-weight:800;margin:0 0 12px}
+.lesson-top span:last-child{color:#235BFA}
+.lesson-bar{margin:0 0 21px}
+.lesson-head{padding-top:25px}
+.lesson-head h1{font-size:clamp(27px,7vw,33px);line-height:1.4;word-break:keep-all;overflow-wrap:anywhere}
+.learn-actions{display:grid;gap:12px;margin-top:22px}
+.learn-actions .utility,.learn-actions .primary{width:100%;min-height:60px}
+.daily-options{margin-top:28px}
+.daily-options h2{font-size:22px;margin-bottom:17px}
+.daily-options .answer{min-height:68px}
+.daily-options .answer-name{font-size:clamp(20px,5.3vw,23px);line-height:1.25;overflow-wrap:anywhere}
+.board .slots{min-width:0;display:flex;flex-wrap:wrap;gap:8px}
+.board .slot{min-width:0;max-width:100%;flex:1 1 auto;padding:12px 11px}
+.board .slot-word{white-space:normal;overflow-wrap:anywhere;word-break:normal;font-size:clamp(19px,5vw,24px)}
+.board .slot.extra .slot-word{white-space:normal}
+.sentence-board .sentence-line{overflow-wrap:anywhere;word-break:normal;white-space:normal}
+.unfinished{color:#9BAACA}
+.done .result{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.done .big-sentence{overflow-wrap:anywhere;word-break:normal}
+.home-course,.catalog-item,.review{min-width:0}
+.home h1,.subpage h1{word-break:keep-all}
+.primary,.utility,.answer,.home-link,.mini-link{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(max-width:550px){
+ html,body{width:100%;max-width:100%;overflow-x:clip}
+ .screen{width:100%;max-width:100%;overflow-x:clip}
+ main{padding-left:clamp(16px,5vw,22px);padding-right:clamp(16px,5vw,22px)}
+ .header{padding-left:clamp(16px,5vw,22px);padding-right:clamp(16px,5vw,22px)}
+ .hero{padding-top:34px}
+ .board{margin-top:23px}
+ .lesson-head{padding-top:25px}
+ .question-area{margin-top:27px}
+ .done{padding-top:20px;padding-bottom:24px;min-width:0}
+ .done h2{font-size:clamp(24px,7.5vw,32px)}
+ .done .result{padding:24px 19px}
+ .done-buttons{gap:8px}
+ .done-buttons .utility{font-size:15px;padding:8px}
+}
+@media(max-width:350px){
+ .lesson-top{font-size:12px}
+ .daily-options .answer{min-height:59px;padding:10px 12px;gap:11px}
+ .daily-options .answer-name{font-size:19px}
+ .answer-no{width:30px;height:30px;flex-shrink:0}
+ .board{padding:14px 12px}
+ .board .slot{padding:9px}
+ .slot-word{font-size:19px}
+}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app");
