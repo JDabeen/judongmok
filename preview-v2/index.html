@@ -177,11 +177,11 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 const app=document.querySelector("#app");
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const KEY="judongmok:preview-v2:progress-v1";
-const empty=()=>({onboarded:false,day:0,history:[]});
-function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&typeof v.onboarded==="boolean"&&Array.isArray(v.history))return{onboarded:v.onboarded,day:Math.min(7,Math.max(0,Number(v.day)||0)),history:v.history};}catch(e){}return empty();}
+const empty=()=>({onboarded:false,day:0,history:[],draft:null});
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&typeof v.onboarded==="boolean"&&Array.isArray(v.history))return{onboarded:v.onboarded,day:Math.min(7,Math.max(0,Number(v.day)||0)),history:v.history,draft:v.draft&&typeof v.draft==="object"?v.draft:null};}catch(e){}return empty();}
 // Shared tutorial link deliberately starts at the beginning, without erasing saved progress.
 const forceTutorial=/(?:^\?|&)tutorial=1(?:&|$)/.test(window.location.search||"");
-let progress=load(),scene=forceTutorial?"intro":progress.onboarded?"home":"intro",mode="guided",step=0,stage=1,picked={},lessonIndex=0,dailyPart=0,sequence=0,locked=false,reviewShown=new Set();
+let progress=load(),scene=forceTutorial?"intro":progress.onboarded?"home":"intro",mode="guided",step=0,stage=1,picked={},lessonIndex=0,dailyPart=0,sequence=0,locked=false,reviewShown=new Set(),dailyTask=0;
 let resultSentence="",resultKorean="",resultFrom="tutorial";
 let audioContext=null;
 const base1=["나는","밥을","먹는다."],base2=["나는","물을","마신다."];
@@ -313,20 +313,51 @@ function renderHome(){
   '<div class="home-course"><div class="home-row"><span>초급 · 문장 만들기</span><strong>'+progress.day+' / 7일</strong></div>'+
   '<div class="home-progress"><span style="width:'+percent+'%"></span></div>'+
   (finished?'<p class="home-verb">7일 완성 🎉</p><p class="home-muted">배운 문장을 다시 떠올려보세요.</p>':
-  '<div class="home-muted">오늘의 동사</div><div class="home-verb">'+esc(day.verb)+'</div><p class="home-muted">'+esc(day.longKo)+'</p>')+
-  button(finished?"배운 문장 복습":"오늘의 연습 시작",finished?"review":"startDaily")+'</div>'+
+  '<div class="home-muted">오늘의 동사 · 8개 활동</div><div class="home-verb">'+esc(day.verb)+'</div><p class="home-muted">'+esc(day.longKo)+'</p>')+
+  button(finished?"배운 문장 복습":progress.draft&&progress.draft.day===progress.day?"이어서 연습하기":"오늘의 연습 시작",finished?"review":"startDaily")+'</div>'+
   '<button class="home-link" data-action="review"><span>지난 문장 복습</span><span>›</span></button>'+
   '<button class="home-link" data-action="catalog"><span>다른 연습 둘러보기</span><span>›</span></button></section>';
 }
+
+function dayActivity(){return Math.min(7,Math.max(0,dailyTask));}
+function dailyCurrent(){
+ const d=days[lessonIndex],task=dayActivity();
+ if(task<2)return {kind:"learn",ko:d.teach[task][0],english:d.teach[task][1],phase:"배우기"};
+ if(task<5){const a=d.practice[task-2];return {kind:"order",ko:a[0],order:a[1],options:a[2],phase:"조립하기"};}
+ if(task<7){const a=d.expand[task-5];return {kind:"expand",ko:a[0],base:a[1],correct:a[2],options:a[3],phase:"문장 늘리기"};}
+ const a=d.apply;return {kind:"apply",ko:a[0],order:a[1],options:a[2],phase:"혼자 만들기"};
+}
+function rememberDraft(){
+ if(scene==="daily"){progress.draft={day:lessonIndex,task:dailyTask,sequence};save();}
+}
+function completeDaily(){
+ const d=days[lessonIndex],en=d.apply[1].join(" ")+".",ko=d.apply[0];
+ if(!progress.history.some(x=>x.day===lessonIndex))progress.history.push({day:lessonIndex,ko,en});
+ progress.day=Math.max(progress.day,lessonIndex+1);
+ progress.draft=null;save();finish(4,en,ko);
+}
+function nextDaily(){
+ dailyTask++;sequence=0;
+ if(dailyTask>=8){completeDaily();return;}
+ rememberDraft();render();window.scrollTo(0,0);
+}
 function renderDaily(){
- const d=days[lessonIndex], built=d.order.slice(0,sequence),isExt=dailyPart===1;
- const korean=isExt?d.longKo:d.baseKo;
- const line=isExt?d.order.join(" ")+" ...":built.join(" ")||"···";
- const words=isExt?d.options:d.words;
- app.innerHTML='<section class="home lesson-head"><div class="home-label">초급 · '+(lessonIndex+1)+'일차</div><h1>'+esc(korean)+'</h1></section>'+
-  '<div class="board sentence-board"><div class="sentence-line">'+esc(line)+'</div></div>'+
-  '<section class="question-area"><h2>'+(isExt?"뒤에 붙여보세요.":"영어 순서대로 눌러보세요.")+'</h2>'+
-  '<div class="answers">'+words.map((w,i)=>'<button type="button" class="answer '+(!isExt&&built.includes(w)?"correct":"")+'" data-kind="daily" data-index="'+i+'" '+(!isExt&&built.includes(w)?"disabled":"")+'><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("")+'</div><p class="feedback" aria-live="polite"></p></section>';
+ const d=days[lessonIndex],a=dailyCurrent(),used=a.order?a.order.slice(0,sequence):[];
+ const heading='<section class="home lesson-head"><div class="lesson-top"><span>초급 · '+(lessonIndex+1)+'일차</span><span>'+a.phase+' '+(dailyTask+1)+'/8</span></div><div class="home-progress lesson-bar"><span style="width:'+((dailyTask+1)/8*100)+'%"></span></div><h1>'+esc(a.ko)+'</h1></section>';
+ if(a.kind==="learn"){
+  app.innerHTML=heading+'<div class="board sentence-board"><div class="sentence-line">'+esc(a.english)+'</div></div>'+
+   '<div class="learn-actions"><button type="button" class="utility" data-action="listen-daily">🔊 듣기</button>'+button("다음","next-daily")+'</div>';
+  return;
+ }
+ if(a.kind==="expand"){
+  app.innerHTML=heading+'<div class="board sentence-board"><div class="sentence-line">'+esc(a.base)+' <span class="unfinished">···</span></div></div>'+
+   '<section class="question-area daily-options"><h2>뒤에 붙여보세요.</h2><div class="answers">'+choices(a.options,"daily")+'</div><p class="feedback" aria-live="polite"></p></section>';
+  return;
+ }
+ const cells=a.order.map((word,i)=>["",used[i]||""]);
+ app.innerHTML=heading+board(cells,false)+
+  '<section class="question-area daily-options"><h2>'+(a.kind==="apply"?"혼자 만들어보세요.":"영어 순서대로 눌러보세요.")+'</h2><div class="answers">'+a.options.map((w,i)=>
+  '<button type="button" class="answer '+(used.includes(w)?"correct":"")+'" data-kind="daily" data-index="'+i+'" '+(used.includes(w)?"disabled":"")+'><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("")+'</div><p class="feedback" aria-live="polite"></p></section>';
 }
 function renderReview(){
  app.innerHTML='<section class="subpage"><button class="back" data-action="home">‹ 홈</button><h1>지난 문장 복습</h1><p class="home-muted">한국어를 보고 영어로 말해보세요.</p>'+
@@ -359,21 +390,24 @@ function clickChoice(kind,i,button){
   setTimeout(()=>{step++;locked=false;if(step===stage3Steps.length)finish(3,"I drink water at home every morning.","나는 집에서 매일 아침 물을 마신다.");else render();},step===stage3Steps.length-1?700:430);return;
  }
  if(kind==="daily"){
-  const d=days[lessonIndex];
-  if(dailyPart===0){
-   if(d.words[i]!==d.order[sequence]){feedbackWrong(button);return;}
-   locked=true;sequence++;feedbackRight(button,"좋아요!");tapEffect(false);
-   setTimeout(()=>{locked=false;if(sequence===d.order.length){dailyPart=1;}render();},340);return;
+  const a=dailyCurrent();
+  if(a.kind==="expand"){
+   if(a.options[i]!==a.correct){feedbackWrong(button);return;}
+   locked=true;feedbackRight(button,"잘했어요!");tapEffect(false);
+   setTimeout(()=>{locked=false;nextDaily();},380);return;
   }
-  if(d.options[i]!==d.add){feedbackWrong(button);return;}
-  locked=true;feedbackRight(button,"완성!");tapEffect(true);
-  if(!progress.history.some(x=>x.day===lessonIndex)){
-   progress.history.push({day:lessonIndex,ko:d.longKo,en:d.order.join(" ")+" "+d.add+"."});
-  }
-  progress.day=Math.max(progress.day,lessonIndex+1);save();
-  setTimeout(()=>finish(4,d.order.join(" ")+" "+d.add+".",d.longKo),680);
- }
-}
+  if(a.kind!=="order"&&a.kind!=="apply")return;
+  if(a.options[i]!==a.order[sequence]){feedbackWrong(button);return;}
+  locked=true;sequence++;rememberDraft();
+  feedbackRight(button,sequence===a.order.length?"완성!":"좋아요!");
+  tapEffect(a.kind==="apply"&&sequence===a.order.length);
+  setTimeout(()=>{
+   locked=false;
+   if(sequence===a.order.length)nextDaily();
+   else render();
+  },a.kind==="apply"&&sequence===a.order.length?620:290);
+  return;
+ }}
 function action(which,el){
  if(which==="begin2"){scene="challenge";resetStepState();render();}
  if(which==="begin3"){scene="extend";step=0;locked=false;render();}
@@ -384,11 +418,13 @@ function action(which,el){
   else{if(stage===3){progress.onboarded=true;save();}scene="home";}
   locked=false;render();window.scrollTo(0,0);
  }
- if(which==="startDaily"){lessonIndex=progress.day<7?progress.day:0;sequence=0;dailyPart=0;locked=false;scene="daily";render();window.scrollTo(0,0);}
+ if(which==="startDaily"){lessonIndex=progress.day<7?progress.day:0;const draft=progress.draft;dailyTask=draft&&draft.day===lessonIndex&&Number.isInteger(draft.task)&&draft.task>=0&&draft.task<8?draft.task:0;sequence=draft&&draft.day===lessonIndex&&Number.isInteger(draft.sequence)?Math.max(0,draft.sequence):0;const a=dailyCurrent();if(a.order)sequence=Math.min(sequence,a.order.length-1);else sequence=0;locked=false;scene="daily";rememberDraft();render();window.scrollTo(0,0);}
  if(which==="review"){scene="review";reviewShown.clear();render();window.scrollTo(0,0);}
  if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
  if(which==="home"){scene="home";render();window.scrollTo(0,0);}
  if(which==="listen"){speak(resultSentence);}
+ if(which==="listen-daily"){const a=dailyCurrent();if(a.kind==="learn")speak(a.english);}
+ if(which==="next-daily"){if(scene==="daily"&&dailyCurrent().kind==="learn"){tapEffect(false);nextDaily();}}
  if(which==="share"){share();}
  if(which==="reveal"){reviewShown.add(Number(el.dataset.index));render();}
  if(which==="review-speak"){const x=progress.history[Number(el.dataset.index)];if(x)speak(x.en);}
