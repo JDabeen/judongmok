@@ -397,7 +397,7 @@ function showToast(message){
  setTimeout(()=>toast.remove(),1150);
 }
 function finish(kind,english,korean){
- stage=kind;resultFrom=kind===4?"daily":"tutorial";resultSentence=english;resultKorean=korean;scene="done";locked=false;render();celebrate();
+ stage=kind;resultFrom=kind===4?"daily":"tutorial";resultSentence=english;resultKorean=korean;if(kind===3){progress.onboarded=true;save();}scene="done";locked=false;render();celebrate();
 }
 function tapEffect(last=false){try{unlockAudio();if(last)victorySound();else playTone();}catch(e){}try{navigator.vibrate?.(last?[20,40,40]:15);}catch(e){}}
 function feedbackRight(el,text){el.classList.add("correct");const mark=el.querySelector(".answer-no");if(mark)mark.textContent="✓";app.querySelectorAll(".answer").forEach(b=>b.disabled=true);const f=app.querySelector(".feedback");if(f)f.textContent=text||"잘했어요!";}
