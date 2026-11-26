@@ -1,0 +1,6 @@
+# Always revalidate the learning HTML so previously shared Kakao links get updates.
+/preview-v2/*
+  Cache-Control: no-cache, max-age=0, must-revalidate
+
+/preview-v3/*
+  Cache-Control: no-cache, max-age=0, must-revalidate
