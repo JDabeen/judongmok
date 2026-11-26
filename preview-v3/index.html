@@ -288,6 +288,37 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
  .guide-item p{font-size:13px;line-height:1.25}
  .guide .primary{min-height:55px}
 }
+
+/* v3 phone stability: all rewards stay within existing UI, never in global popups */
+.intro-reaction{margin:13px 0 0;padding:10px 12px;color:#0D8A63;background:#EEF9F5;border-radius:11px;font-size:15px;font-weight:800;text-align:center}
+.feedback.inline-spark{color:#0B8B63}
+.badge-confetti{position:absolute;left:50%;top:50%;width:0;height:0;overflow:visible;pointer-events:none}
+.badge-confetti-bit{position:absolute;left:0;top:0;width:7px;height:11px;border-radius:2px;opacity:0;pointer-events:none;animation:badge-confetti-fly 1.4s ease-out forwards var(--delay,0ms)}
+@keyframes badge-confetti-fly{
+  0%{opacity:1;transform:translate(-50%,-50%) rotate(0deg) scale(.85)}
+  65%{opacity:1}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(.55)}
+}
+.done .success-icon.badge-pop{animation:victory-pop .65s cubic-bezier(.16,1.3,.3,1) both}
+@media(prefers-reduced-motion:reduce){
+ .badge-confetti-bit{display:none!important}
+ .done .success-icon.badge-pop{animation:none!important}
+}
+@media(max-width:550px){
+ .done{justify-content:flex-start;min-height:0;padding:24px 0 22px}
+ .done .success-icon{height:76px;width:76px;margin-bottom:14px;flex-shrink:0}
+ .done h2{margin-bottom:18px}
+ .done .result{padding:18px 15px}
+ .done-buttons .utility{min-height:54px}
+ .done .primary{min-height:57px}
+}
+@media(max-width:360px) and (max-height:680px){
+ .done{padding-top:12px}
+ .done .success-icon{height:66px;width:66px;margin-bottom:11px;font-size:33px}
+ .done-kicker{margin-bottom:5px}
+ .done h2{font-size:26px;margin-bottom:14px}
+ .done .result{padding:15px 13px}
+}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app");
@@ -323,12 +354,24 @@ function board(parts,showLabels=false){
 }
 function koTokens(words,lit=-1,seen=[]){return words.map((word,i)=>'<span class="korean-token '+(lit===i||seen.includes(i)?"lit":"")+'">'+esc(word)+'</span>').join("");}
 function speak(text){
- if(!("speechSynthesis" in window)||typeof SpeechSynthesisUtterance==="undefined"){alert("이 브라우저는 영어 음성 듣기를 지원하지 않아요.");return;}
- window.speechSynthesis.cancel();
- const utterance=new SpeechSynthesisUtterance(text);utterance.lang="en-US";utterance.rate=.87;
- const voices=window.speechSynthesis.getVoices();
- utterance.voice=voices.find(v=>v.lang==="en-US")||voices.find(v=>v.lang.startsWith("en"))||null;
- window.speechSynthesis.speak(utterance);
+ // Embedded mobile browsers may not expose speech synthesis. Never interrupt learning.
+ if(!("speechSynthesis" in window)||typeof SpeechSynthesisUtterance==="undefined")return false;
+ try{
+  const synth=window.speechSynthesis;
+  synth.cancel();
+  const utterance=new SpeechSynthesisUtterance(text);
+  utterance.lang="en-US";utterance.rate=.87;
+  const voices=typeof synth.getVoices==="function"?synth.getVoices():[];
+  utterance.voice=voices.find(v=>v.lang==="en-US")||voices.find(v=>v.lang?.startsWith("en"))||null;
+  synth.speak(utterance);
+  return true;
+ }catch(e){return false;}
+}
+function showVoiceUnavailable(button){
+ if(!button)return;
+ button.textContent="🔇 이 환경에서 듣기 불가";
+ button.disabled=true;
+ button.setAttribute("aria-label","현재 브라우저는 음성 듣기를 지원하지 않아요.");
 }
 async function share(){
  const text="오늘 주동목에서 만든 영어 문장!\n"+resultSentence+"\nhttps://splendorous-mochi-346e26.netlify.app/preview-v3/";
@@ -357,44 +400,53 @@ function victorySound(){
  });
 }
 function celebrate(force=false,mini=false){
- const reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
- if(reduce&&!force){
-  document.querySelector(".celebrate-static")?.remove();
-  const badge=document.createElement("div");
-  badge.className="celebrate-static"+(mini?" mini":"");
-  badge.setAttribute("role","status");
-  badge.textContent=mini?"✨ 문장 완성!":"🎉 잘했어요!";
-  document.body.appendChild(badge);
-  setTimeout(()=>badge.remove(),mini?1350:2400);
+ // A small inline response for exercise completions: never cover the next question.
+ if(mini){
+  const feedback=app.querySelector(".feedback");
+  if(feedback){feedback.classList.add("inline-spark");feedback.textContent="✨ 문장 완성!";}
   return;
  }
- const old=document.querySelector(".celebrate-layer");if(old)old.remove();
- const layer=document.createElement("div");
- layer.className="celebrate-layer"+(force?" force-motion":"")+(mini?" mini-burst":"");
- layer.setAttribute("aria-hidden","true");
- const palette=["#235BFA","#FFCC32","#12B78A","#FB6D9C","#A17DFC","#64CBEA"],parts=mini?34:94;
- const fragment=document.createDocumentFragment();
- for(let i=0;i<parts;i++){
-  const bit=document.createElement("i");bit.className="celebrate-bit";
-  const angle=(2*Math.PI*i/parts)+(Math.random()*.38-.19),r=(mini?85:175)+Math.random()*(mini?110:315);
-  bit.style.background=palette[i%palette.length];
-  bit.style.borderRadius=i%4===0?"50%":"2px";
-  bit.style.setProperty("--dx",Math.cos(angle)*r+"px");
-  bit.style.setProperty("--dy",Math.sin(angle)*r+Math.random()*(mini?95:320)+"px");
-  bit.style.setProperty("--turn",(Math.random()*1440-720)+"deg");
-  bit.style.setProperty("--delay",(Math.random()*(mini?90:240))+"ms");
-  bit.style.setProperty("--time",(mini?900:1750)+Math.random()*(mini?450:1100)+"ms");
-  fragment.appendChild(bit);
+ // The big reward is attached to the existing completion badge, not a fullscreen overlay.
+ const badge=app.querySelector(".done .success-icon");
+ if(!badge)return;
+ badge.querySelector(".badge-confetti")?.remove();
+ badge.classList.remove("badge-pop");
+ // Restart animation when explicitly replayed.
+ void badge.offsetWidth;
+ badge.classList.add("badge-pop");
+ if(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches)return;
+ const group=document.createElement("span");
+ group.className="badge-confetti";group.setAttribute("aria-hidden","true");
+ const colors=["#235BFA","#FFD44D","#15B786","#FE779E","#9F7BFF"];
+ for(let i=0;i<22;i++){
+  const bit=document.createElement("i");
+  bit.className="badge-confetti-bit";
+  bit.style.backgroundColor=colors[i%colors.length];
+  const angle=i*Math.PI*2/22;
+  bit.style.setProperty("--dx",(Math.cos(angle)*(68+(i%5)*12)).toFixed(0)+"px");
+  bit.style.setProperty("--dy",(Math.sin(angle)*(65+(i%4)*12)).toFixed(0)+"px");
+  bit.style.setProperty("--r",(i*137)+"deg");
+  bit.style.setProperty("--delay",((i%4)*30)+"ms");
+  group.appendChild(bit);
  }
- layer.appendChild(fragment);document.body.appendChild(layer);
- setTimeout(()=>layer.remove(),mini?1650:3300);
+ badge.appendChild(group);
+ setTimeout(()=>group.remove(),1750);
 }
 function showToast(message){
- document.querySelector(".jm-toast")?.remove();
- const toast=document.createElement("div");
- toast.className="jm-toast";toast.setAttribute("role","status");
- toast.textContent=message;document.body.appendChild(toast);
- setTimeout(()=>toast.remove(),1150);
+ // Feedback belongs to the current lesson, not a fixed popup over the mobile UI.
+ const location=app.querySelector(".feedback")||app.querySelector(".intro");
+ if(!location)return;
+ if(location.classList.contains("feedback")){
+  location.textContent=message;
+  location.classList.add("inline-spark");
+ }else{
+  location.querySelector(".intro-reaction")?.remove();
+  const note=document.createElement("p");
+  note.className="intro-reaction";
+  note.textContent=message;
+  note.setAttribute("role","status");
+  location.appendChild(note);
+ }
 }
 function finish(kind,english,korean){
  stage=kind;resultFrom=kind===4?"daily":"tutorial";resultSentence=english;resultKorean=korean;if(kind===3){progress.onboarded=true;save();}scene="done";locked=false;render();celebrate();
@@ -569,7 +621,7 @@ function action(which,el){
  if(which==="begin3"){scene="extend";step=0;locked=false;render();}
  if(which==="enter-home"){showHomeTip=true;scene="home";render();window.scrollTo(0,0);}
  if(which==="next"){
-  window.speechSynthesis?.cancel();
+  try{window.speechSynthesis?.cancel();}catch(e){}
   if(stage===1){scene="handoff2";}
   else if(stage===2){scene="handoff3";}
   else if(stage===3){progress.onboarded=true;save();scene="guide";}
@@ -580,13 +632,13 @@ function action(which,el){
  if(which==="review"){scene="review";reviewShown.clear();render();window.scrollTo(0,0);}
  if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
  if(which==="home"){scene="home";render();window.scrollTo(0,0);}
- if(which==="listen"){speak(resultSentence);}
+ if(which==="listen"){if(!speak(resultSentence))showVoiceUnavailable(el);}
  if(which==="replay-celebration"){tapEffect(true);celebrate(true);}
- if(which==="listen-daily"){const a=dailyCurrent();if(a.kind==="learn")speak(a.english);}
+ if(which==="listen-daily"){const a=dailyCurrent();if(a.kind==="learn"&&!speak(a.english))showVoiceUnavailable(el);}
  if(which==="next-daily"){if(scene==="daily"&&dailyCurrent().kind==="learn"&&sequence>=1){tapEffect(false);nextDaily();}}
  if(which==="share"){share();}
  if(which==="reveal"){reviewShown.add(Number(el.dataset.index));render();}
- if(which==="review-speak"){const x=progress.history[Number(el.dataset.index)];if(x)speak(x.en);}
+ if(which==="review-speak"){const x=progress.history[Number(el.dataset.index)];if(x&&!speak(x.en))showVoiceUnavailable(el);}
 }
 app.addEventListener("click",e=>{
  const el=e.target.closest("button");if(!el||el.disabled)return;
