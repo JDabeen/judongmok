@@ -12,17 +12,21 @@ export default async function(request){
   if(typeof korean!=="string"||korean.trim().length<3||korean.length>1600)return reply({error:"INVALID_TEXT"},400);
   const res=await fetch(base+"/v1/chat/completions",{
    method:"POST",headers:{Authorization:"Bearer "+key,"content-type":"application/json"},
-   body:JSON.stringify({model:"gpt-5.4-mini",max_completion_tokens:450,messages:[
+   body:JSON.stringify({model:process.env.JM_DIARY_MODEL||"gpt-4.1-mini",max_completion_tokens:600,messages:[
     {role:"developer",content:"Convert the user's short Korean personal diary into natural spoken English suitable for an A2 adult learner. Preserve all real events, people, and facts; do not invent details or embellish. Use short, easy sentences, usually 2–4. Write ONLY the English diary sentences, no bullet points, labels, explanations or quotation marks. If the input is inappropriate or unclear, translate only the understandable factual content."},
     {role:"user",content:korean.trim()}
    ]}),signal:AbortSignal.timeout(26000)
   });
-  if(!res.ok)return reply({error:"TRANSLATION_UNAVAILABLE"},502);
+  if(!res.ok){
+   let code="";try{const e=await res.json();code=String(e.error?.code||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80);}catch{}
+   console.warn("diary_english_upstream",res.status,code);
+   return reply({error:res.status===401||res.status===403?"AI_AUTH":res.status===429?"AI_LIMIT":res.status===404||code==="model_not_found"?"AI_MODEL":"AI_UPSTREAM",upstreamStatus:res.status},502);
+  }
   const data=await res.json();
   const english=String(data.choices?.[0]?.message?.content||"").trim().slice(0,2000);
   if(!english)return reply({error:"EMPTY_RESULT"},502);
   return reply({english});
- }catch(e){return reply({error:"TRANSLATION_FAILED"},502);}
+ }catch(e){console.warn("diary_english_failure",e?.name||"Error");return reply({error:e?.name==="TimeoutError"?"AI_TIMEOUT":"TRANSLATION_FAILED"},502);}
 }
 
 // Per-IP API cost guard (Netlify deployment enforces this limit).
