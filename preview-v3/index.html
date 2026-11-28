@@ -578,6 +578,8 @@ function render(){
    '<div class="guide-item"><span class="guide-num">3</span><div><strong>길게 말하고 복습하기</strong><p>장소·시간을 더하고 완성 문장 듣기</p></div></div></div>'+
   button("내 학습 홈으로 가기","enter-home")+'</section>';return;
  }
+ if(scene==="diary"){renderDiary();return;}
+ if(scene==="diary-library"){renderDiaryList();return;}
  if(scene==="home"){renderHome();return;}
  if(scene==="daily"){renderDaily();return;}
  if(scene==="review"){renderReview();return;}
@@ -593,7 +595,10 @@ function renderHome(){
   '<div class="home-muted">오늘의 핵심 표현 · 8개 활동</div><div class="home-verb">'+esc(day.verb)+'</div><p class="home-muted">'+esc(day.longKo)+'</p>')+
   (showHomeTip?'<p class="home-nudge">↓ 여기를 눌러 첫 연습을 시작하세요.</p>':"")+button(finished?"기초 문장 다시 연습":progress.draft&&progress.draft.day===progress.day?"이어서 연습하기":"오늘의 연습 시작","startDaily")+'</div>'+
   '<button class="home-link" data-action="review"><span>지난 문장 복습</span><span>›</span></button>'+
-  '<button class="home-link" data-action="catalog"><span>다른 연습 둘러보기</span><span>›</span></button></section>';
+  '<button class="home-link" data-action="catalog"><span>다른 연습 둘러보기</span><span>›</span></button>'+
+  '<div class="diary-home-card"><div><strong>🎙️ 오늘의 말하기 일기</strong><p>오늘 있었던 일을 영어로 남겨보세요.</p></div>'+
+  button("일기 시작하기","diary-open")+
+  '<button class="mini-link" data-action="diary-list">지난 일기 보기</button></div></section>';
 }
 
 const teachPicks=[[{"mask":"I ... water.","opts":["eat","drink"],"correct":"drink"},{"mask":"I drink ...","opts":["water","coffee"],"correct":"coffee"}],[{"mask":"I ... to work.","opts":["go","make"],"correct":"go"},{"mask":"I go ...","opts":["to the park","to school"],"correct":"to the park"}],[{"mask":"I ... a walk.","opts":["make","take"],"correct":"take"},{"mask":"I take ...","opts":["a break","a shower"],"correct":"a break"}],[{"mask":"I ... dinner.","opts":["take","make"],"correct":"make"},{"mask":"I make ...","opts":["breakfast","coffee"],"correct":"breakfast"}],[{"mask":"I ... English.","opts":["read","study"],"correct":"study"},{"mask":"We study ...","opts":["together","at home"],"correct":"together"}],[{"mask":"I ... my friend.","opts":["meet","see"],"correct":"meet"},{"mask":"We meet ...","opts":["at the cafe","at the park"],"correct":"at the cafe"}],[{"mask":"I ... a book.","opts":["read","make"],"correct":"read"},{"mask":"I read ...","opts":["the news","a letter"],"correct":"the news"}],[{"mask":"I ... a question.","opts":["have","make"],"correct":"have"},{"mask":"I have ...","opts":["a dog","a cat"],"correct":"a dog"}],[{"mask":"I ... a message.","opts":["get","do"],"correct":"get"},{"mask":"I get ...","opts":["a call","a gift"],"correct":"a call"}],[{"mask":"I ... the dishes.","opts":["do","get"],"correct":"do"},{"mask":"I do ...","opts":["the laundry","the shopping"],"correct":"the laundry"}],[{"mask":"I ... a diary.","opts":["keep","take"],"correct":"keep"},{"mask":"I keep ...","opts":["the receipt","the ticket"],"correct":"the receipt"}],[{"mask":"I like coffee, ... I drink tea.","opts":["but","because"],"correct":"but"},{"mask":"I am tired, ... I want to walk.","opts":["because","but"],"correct":"but"}],[{"mask":"I study English ... I want to travel.","opts":["but","because"],"correct":"because"},{"mask":"I rest ... I am tired.","opts":["because","but"],"correct":"because"}]];
@@ -723,7 +728,9 @@ function action(which,el){
  if(which==="startDaily"){showHomeTip=false;lessonIndex=progress.day<days.length?progress.day:0;const draft=progress.draft;dailyTask=draft&&draft.day===lessonIndex&&Number.isInteger(draft.task)&&draft.task>=0&&draft.task<8?draft.task:0;sequence=draft&&draft.day===lessonIndex&&Number.isInteger(draft.sequence)?Math.max(0,draft.sequence):0;const a=dailyCurrent();if(a.order)sequence=Math.min(sequence,a.order.length);else if(a.kind==="learn"||a.kind==="expand")sequence=sequence>0?1:0;else sequence=0;locked=false;scene="daily";rememberDraft();render();window.scrollTo(0,0);}
  if(which==="review"){scene="review";reviewShown.clear();render();window.scrollTo(0,0);}
  if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
- if(which==="home"){scene="home";render();window.scrollTo(0,0);}
+ if(which==="home"){if(diaryRecorder&&diaryRecorder.state==="recording")diaryRecorder.stop();scene="home";render();window.scrollTo(0,0);}
+ if(which==="diary-open"){scene="diary";diaryStep="korean";diaryError="";render();window.scrollTo(0,0);}
+ if(which.startsWith("diary-")){diaryAction(which,el);return;}
  if(which==="listen"){playEnglish(resultSentence,el);}
  if(which==="replay-celebration"){tapEffect(true);celebrate(true);}
  if(which==="listen-daily"){if(scene==="daily"){const a=dailyCurrent();if(dailySolved(a))playEnglish(dailyEnglish(a),el);}}
@@ -732,10 +739,232 @@ function action(which,el){
  if(which==="reveal"){reviewShown.add(Number(el.dataset.index));render();}
  if(which==="review-speak"){const x=progress.history[Number(el.dataset.index)];if(x)playEnglish(x.en,el);}
 }
+
+/* Personal voice diary: Korean speech -> edited transcript -> English -> spoken recording.
+   Entries & audio clips remain on this browser, not on the app server. */
+const DIARY_KEY="judongmok:diary:v1",DIARY_DRAFT_KEY="judongmok:diary-draft:v1";
+function diaryRead(key,fallback){
+ try{const v=JSON.parse(localStorage.getItem(key));return v??fallback;}catch(e){return fallback;}
+}
+let diaryEntries=(Array.isArray(diaryRead(DIARY_KEY,[]))?diaryRead(DIARY_KEY,[]):[]).filter(x=>x&&typeof x.korean==="string"&&typeof x.english==="string").slice(0,100);
+let diaryDraft=diaryRead(DIARY_DRAFT_KEY,{korean:"",english:""});
+let diaryKorean=typeof diaryDraft.korean==="string"?diaryDraft.korean:"";
+let diaryEnglish=typeof diaryDraft.english==="string"?diaryDraft.english:"";
+let diaryStep="korean",diaryError="",diaryBusy=false,diaryRecorder=null,diaryStream=null,diaryRecordKind="",diaryChunks=[],diaryEnglishBlob=null,diaryPreviewUrl=null;
+function saveDiaryDraft(){
+ try{localStorage.setItem(DIARY_DRAFT_KEY,JSON.stringify({korean:diaryKorean.slice(0,1600),english:diaryEnglish.slice(0,2000)}));}catch(e){}
+}
+function diaryStatus(){return diaryBusy?"음성·문장을 처리하고 있어요.":diaryError;}
+function diaryBanner(){return diaryStatus()?'<p class="diary-alert" role="status">'+esc(diaryStatus())+'</p>':"";}
+function renderDiary(){
+ const recording=diaryRecorder&&diaryRecorder.state==="recording";
+ const toolbar='<div class="diary-toolbar"><button class="back" data-action="home">‹ 홈</button><button class="mini-link" data-action="diary-list">지난 일기</button></div>';
+ if(diaryStep==="korean"){
+  app.innerHTML='<section class="diary">'+toolbar+'<div class="home-label">말하기 일기 · 1단계</div>'+
+   '<h1>오늘 어떤 일이<br>있었나요?</h1><p class="diary-lead">한국어로 말하거나 직접 적어보세요.</p>'+
+   '<button type="button" class="voice-button '+(recording?"is-recording":"")+'" data-action="diary-record-ko" '+(diaryBusy?"disabled":"")+'>'+
+    (recording?"■ 녹음 끝내기":"<span aria-hidden=\"true\">🎤</span> 한국어로 말하기")+'</button>'+
+   '<label class="file-label" for="diary-file-ko">휴대폰에서 녹음한 음성파일 선택</label><input class="diary-file" id="diary-file-ko" type="file" accept="audio/*,video/mp4" capture="microphone" '+(diaryBusy?"disabled":"")+'>'+
+   '<label class="diary-input-label" for="diary-korean">오늘의 이야기</label><textarea id="diary-korean" rows="5" maxlength="1600" placeholder="예: 오늘 오랜만에 친구를 만났어요. 같이 점심을 먹어서 기분이 좋았어요.">'+esc(diaryKorean)+'</textarea>'+
+   diaryBanner()+button(diaryBusy?"처리 중...":"자연스러운 영어로 바꾸기","diary-convert")+
+   '<p class="diary-privacy">마이크 사용을 허용해야 녹음할 수 있어요. 음성 인식과 영어 변환을 누르면 내용이 AI 서비스로 전송됩니다. 일기 기록은 이 브라우저에만 저장됩니다.</p>'+
+   '<p class="diary-tip">카카오톡에서 녹음이 안 된다면 ⋯ 메뉴에서 다른 브라우저로 열거나, 휴대폰 키보드의 마이크를 이용할 수 있어요.</p></section>';
+  return;
+ }
+ if(diaryStep==="english"){
+  app.innerHTML='<section class="diary">'+toolbar+'<div class="home-label">말하기 일기 · 2단계</div>'+
+   '<h1>이제 영어로<br>말해볼까요?</h1><p class="diary-lead">표현을 확인하고 내 목소리로 녹음하세요.</p>'+
+   '<div class="diary-original"><span>내 이야기</span><p>'+esc(diaryKorean)+'</p><button class="mini-link" data-action="diary-edit-korean">한국어 수정</button></div>'+
+   '<label class="diary-input-label" for="diary-english">영어 일기</label><textarea id="diary-english" rows="5" maxlength="2000" placeholder="영어 문장이 여기에 나타나요.">'+esc(diaryEnglish)+'</textarea>'+
+   '<div class="diary-toolbar bottom"><button class="utility" data-action="diary-convert" '+(diaryBusy?"disabled":"")+'>AI 다시 변환</button><button class="utility" data-action="diary-listen" '+(!diaryEnglish.trim()?"disabled":"")+'>🔊 영어 듣기</button></div>'+
+   '<button type="button" class="voice-button '+(recording?"is-recording":"")+'" data-action="diary-record-en" '+(diaryBusy?"disabled":"")+'>'+
+   (recording?"■ 영어 녹음 끝내기":"🎙️ 영어로 말하고 녹음하기")+'</button>'+
+   '<label class="file-label" for="diary-file-en">휴대폰 영어 녹음 파일 선택</label><input class="diary-file" id="diary-file-en" type="file" accept="audio/*,video/mp4" capture="microphone" '+(diaryBusy?"disabled":"")+'>'+
+   (diaryPreviewUrl?'<div class="diary-preview"><span>내 목소리 확인하기</span><audio controls playsinline src="'+esc(diaryPreviewUrl)+'"></audio></div>':
+   '<p class="diary-tip">영어 문장을 읽고 녹음한 뒤 저장할 수 있어요.</p>')+
+   diaryBanner()+button(diaryBusy?"저장 중...":"오늘의 일기 저장하기","diary-save")+
+   '<p class="diary-privacy">영어 녹음 파일은 AI로 보내지 않고 이 브라우저의 저장 공간에 보관합니다.</p></section>';
+  return;
+ }
+ if(diaryStep==="saved"){
+  const latest=diaryEntries[0];
+  app.innerHTML='<section class="diary diary-saved">'+toolbar+
+   '<div class="guide-complete">✓</div><div class="home-label">오늘의 일기 저장 완료</div><h1>내 목소리로<br>영어 일기를 남겼어요!</h1>'+
+   '<div class="diary-original"><span>오늘의 영어</span><p>'+esc(latest?.english||"")+'</p></div>'+
+   button("다음 일기도 쓰기","diary-new")+'<button class="home-link" data-action="diary-list">지난 일기 보기 <span>›</span></button></section>';
+ }
+}
+function renderDiaryList(){
+ app.innerHTML='<section class="diary"><div class="diary-toolbar"><button class="back" data-action="home">‹ 홈</button></div>'+
+ '<div class="home-label">나의 영어 기록</div><h1>지난 말하기 일기</h1>'+
+ (diaryEntries.length?'<div class="diary-list">'+diaryEntries.map((x,i)=>'<article class="diary-entry">'+
+  '<div class="diary-date">'+esc(x.date||"")+'</div><p>'+esc(x.korean)+'</p><strong>'+esc(x.english)+'</strong>'+
+  '<div class="diary-toolbar bottom"><button class="mini-link" data-action="diary-listen-entry" data-index="'+i+'">🔊 영어 듣기</button>'+
+  '<button class="mini-link" data-action="diary-play-entry" data-index="'+i+'">🎙️ 내 녹음</button></div></article>').join("")+'</div>':
+ '<p class="diary-lead">아직 저장된 일기가 없어요.</p>')+
+ button("오늘의 일기 쓰기","diary-new")+'</section>';
+}
+function diaryProblem(message){diaryBusy=false;diaryError=message;renderDiary();}
+function diaryStore(){
+ return new Promise((resolve,reject)=>{
+  if(!window.indexedDB){reject(new Error("INDEXED_DB_UNAVAILABLE"));return;}
+  const req=indexedDB.open("judongmok-diary-audio-v1",1);
+  req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains("clips"))req.result.createObjectStore("clips");};
+  req.onerror=()=>reject(req.error||new Error("DB_OPEN_FAILED"));
+  req.onsuccess=()=>resolve(req.result);
+ });
+}
+async function saveDiaryClip(id,blob){
+ const db=await diaryStore();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction("clips","readwrite");tx.objectStore("clips").put(blob,id);
+  tx.oncomplete=()=>{db.close();resolve();};
+  tx.onerror=()=>{db.close();reject(tx.error||new Error("DB_WRITE_FAILED"));};
+ });
+}
+async function fetchDiaryClip(id){
+ const db=await diaryStore();
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction("clips","readonly"),req=tx.objectStore("clips").get(id);
+  req.onsuccess=()=>{db.close();resolve(req.result||null);};
+  req.onerror=()=>{db.close();reject(req.error||new Error("DB_READ_FAILED"));};
+ });
+}
+function diaryReset(){
+ diaryKorean="";diaryEnglish="";diaryError="";diaryBusy=false;diaryStep="korean";diaryEnglishBlob=null;
+ if(diaryPreviewUrl){URL.revokeObjectURL(diaryPreviewUrl);diaryPreviewUrl=null;}
+ saveDiaryDraft();renderDiary();window.scrollTo(0,0);
+}
+function diaryCaptureFields(){
+ const ko=app.querySelector("#diary-korean"),en=app.querySelector("#diary-english");
+ if(ko)diaryKorean=ko.value;if(en)diaryEnglish=en.value;
+ saveDiaryDraft();
+}
+async function diaryTranscribe(file){
+ if(diaryBusy)return;
+ if(!file||file.size<300||file.size>3000000){diaryProblem("녹음은 3MB 이내의 짧은 음성으로 해주세요.");return;}
+ diaryBusy=true;diaryError="";renderDiary();
+ try{
+  const form=new FormData();form.append("audio",file,file.name||"diary.webm");
+  const response=await fetch("/.netlify/functions/jm-diary-transcribe",{method:"POST",body:form});
+  if(!response.ok)throw new Error(response.status===503?"음성 인식 서버 설정이 아직 필요해요. 지금은 글로 적거나 휴대폰 키보드 마이크를 이용할 수 있어요.":"음성을 인식하지 못했어요. 다시 녹음하거나 글로 적어주세요.");
+  const data=await response.json();
+  diaryKorean=String(data.text||"").slice(0,1600);saveDiaryDraft();diaryError="";
+ }catch(e){diaryError=e.message||"음성 인식에 실패했어요.";}
+ diaryBusy=false;renderDiary();
+}
+async function diaryConvert(){
+ diaryCaptureFields();
+ if(diaryKorean.trim().length<3){diaryProblem("오늘 있었던 일을 먼저 말하거나 적어주세요.");return;}
+ if(diaryBusy)return;
+ diaryBusy=true;diaryError="";renderDiary();
+ try{
+  const response=await fetch("/.netlify/functions/jm-diary-english",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({korean:diaryKorean.trim()})});
+  if(!response.ok)throw new Error(response.status===503?"AI 영어 변환 연결이 아직 필요해요. 영어를 직접 적는 기능은 사용할 수 있어요.":"영어 변환에 실패했어요. 잠시 후 다시 시도해 주세요.");
+  const data=await response.json();
+  diaryEnglish=String(data.english||"").trim().slice(0,2000);
+  diaryError="";
+ }catch(e){diaryError=e.message||"영어 변환을 사용할 수 없어요.";}
+ diaryStep="english";diaryBusy=false;saveDiaryDraft();renderDiary();window.scrollTo(0,0);
+}
+async function diarySave(){
+ diaryCaptureFields();
+ if(!diaryEnglish.trim()){diaryProblem("영어 문장을 먼저 확인해 주세요.");return;}
+ if(!diaryEnglishBlob){diaryProblem("영어 문장을 직접 말하고 녹음한 다음 저장해 주세요.");return;}
+ if(diaryBusy)return;
+ diaryBusy=true;diaryError="";renderDiary();
+ const id=String(Date.now())+"-"+Math.floor(Math.random()*1e6);
+ try{
+  await saveDiaryClip(id,diaryEnglishBlob);
+  const today=new Date();
+  const record={id,date:today.toLocaleDateString("ko-KR"),korean:diaryKorean.trim(),english:diaryEnglish.trim()};
+  diaryEntries.unshift(record);
+  diaryEntries=diaryEntries.slice(0,100);
+  localStorage.setItem(DIARY_KEY,JSON.stringify(diaryEntries));
+  localStorage.removeItem(DIARY_DRAFT_KEY);
+  diaryStep="saved";diaryBusy=false;diaryError="";diaryEnglishBlob=null;
+  renderDiary();
+ }catch(e){
+  diaryProblem("녹음 저장에 실패했어요. 브라우저 저장 공간을 확인하거나 다른 브라우저에서 시도해 주세요.");
+ }
+}
+function diaryStopRecording(){
+ if(diaryRecorder&&diaryRecorder.state==="recording")diaryRecorder.stop();
+}
+async function diaryToggleRecord(kind){
+ if(diaryRecorder&&diaryRecorder.state==="recording"){diaryStopRecording();return;}
+ if(diaryBusy)return;
+ diaryCaptureFields();
+ if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==="undefined"){
+  diaryProblem("이 카카오톡 브라우저에서는 마이크 녹음이 제한될 수 있어요. 다른 브라우저로 열거나 녹음 파일을 선택해 주세요.");return;
+ }
+ try{
+  const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+  const mime=["audio/mp4","audio/webm;codecs=opus","audio/webm"].find(t=>MediaRecorder.isTypeSupported?.(t));
+  const recorder=new MediaRecorder(stream,mime?{mimeType:mime}:{});
+  diaryRecorder=recorder;diaryStream=stream;diaryRecordKind=kind;diaryChunks=[];
+  recorder.ondataavailable=ev=>{if(ev.data&&ev.data.size>0)diaryChunks.push(ev.data);};
+  recorder.onstop=()=>{
+   stream.getTracks().forEach(track=>track.stop());
+   const blob=new Blob(diaryChunks,{type:recorder.mimeType||"audio/webm"});
+   diaryRecorder=null;diaryStream=null;diaryChunks=[];
+   if(kind==="ko"){diaryTranscribe(new File([blob],blob.type.includes("mp4")?"diary.m4a":"diary.webm",{type:blob.type}));}
+   else{
+    diaryEnglishBlob=blob;
+    if(diaryPreviewUrl)URL.revokeObjectURL(diaryPreviewUrl);
+    diaryPreviewUrl=URL.createObjectURL(blob);diaryError="";renderDiary();
+   }
+  };
+  recorder.start();diaryError="";renderDiary();
+  // 45-second maximum, never record indefinitely without an explicit stop.
+  setTimeout(()=>{if(diaryRecorder===recorder&&recorder.state==="recording")recorder.stop();},45000);
+ }catch(e){diaryProblem("마이크 접근이 안 돼요. 휴대폰에서 마이크 권한을 허용하거나 다른 브라우저로 열어주세요.");}
+}
+async function diaryPlaySaved(i,button){
+ const entry=diaryEntries[i];if(!entry)return;
+ try{
+  const blob=await fetchDiaryClip(entry.id);
+  if(!blob){diaryError="녹음 파일을 찾지 못했어요. 다른 기기에서 저장된 기록은 가져올 수 없어요.";return;}
+  const url=URL.createObjectURL(blob);
+  const player=document.createElement("audio");player.controls=true;player.src=url;player.setAttribute("playsinline","");
+  const old=button.parentElement?.parentElement?.querySelector("audio");if(old)old.remove();
+  button.parentElement?.parentElement?.appendChild(player);
+  player.onended=()=>URL.revokeObjectURL(url);
+  try{await player.play();}catch(e){}
+ }catch(e){button.textContent="녹음 확인 불가";}
+}
+async function diaryAction(which,button){
+ if(which==="diary-record-ko")return diaryToggleRecord("ko");
+ if(which==="diary-record-en")return diaryToggleRecord("en");
+ if(which==="diary-convert")return diaryConvert();
+ if(which==="diary-save")return diarySave();
+ if(which==="diary-list"){diaryCaptureFields();scene="diary-library";render();window.scrollTo(0,0);return;}
+ if(which==="diary-new"){diaryReset();scene="diary";render();return;}
+ if(which==="diary-edit-korean"){diaryCaptureFields();diaryStep="korean";diaryError="";renderDiary();return;}
+ if(which==="diary-listen"){diaryCaptureFields();if(diaryEnglish.trim())playEnglish(diaryEnglish.trim(),button);return;}
+ if(which==="diary-listen-entry"){const x=diaryEntries[Number(button.dataset.index)];if(x)playEnglish(x.english,button);return;}
+ if(which==="diary-play-entry")return diaryPlaySaved(Number(button.dataset.index),button);
+}
+
 app.addEventListener("click",e=>{
  const el=e.target.closest("button");if(!el||el.disabled)return;
  if(el.hasAttribute("data-kind"))clickChoice(el.dataset.kind,Number(el.dataset.index),el);
  else if(el.hasAttribute("data-action"))action(el.dataset.action,el);
+});
+app.addEventListener("input",e=>{
+ if(e.target.id==="diary-korean"){diaryKorean=e.target.value;saveDiaryDraft();}
+ if(e.target.id==="diary-english"){diaryEnglish=e.target.value;saveDiaryDraft();}
+});
+app.addEventListener("change",e=>{
+ const id=e.target.id;
+ if(id==="diary-file-ko"||id==="diary-file-en"){
+  const file=e.target.files?.[0];if(!file)return;
+  if(id==="diary-file-ko")diaryTranscribe(file);
+  else{
+   if(diaryPreviewUrl)URL.revokeObjectURL(diaryPreviewUrl);
+   diaryEnglishBlob=file;diaryPreviewUrl=URL.createObjectURL(file);diaryError="";renderDiary();
+  }
+ }
 });
 render();
 })();
