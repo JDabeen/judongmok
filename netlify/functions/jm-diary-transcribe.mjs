@@ -4,7 +4,9 @@ export default async function(request){
  if(request.method!=="POST")return reply({error:"METHOD_NOT_ALLOWED"},405);
  const origin=request.headers.get("origin");
  if(origin&&origin!==new URL(request.url).origin)return reply({error:"ORIGIN_NOT_ALLOWED"},403);
- const key=process.env.OPENAI_API_KEY;
+ const key=process.env.JM_OPENAI_API_KEY||process.env.OPENAI_API_KEY;
+ const base=(process.env.JM_OPENAI_API_KEY?"https://api.openai.com":process.env.OPENAI_BASE_URL||"https://api.openai.com").replace(/\/v1\/?$/,"").replace(/\/$/,"");
+ 
  if(!key)return reply({error:"NOT_CONFIGURED"},503);
  if(Number(request.headers.get("content-length")||0)>3500000)return reply({error:"TOO_LARGE"},413);
  try{
@@ -13,7 +15,7 @@ export default async function(request){
   if(!file||typeof file.size!=="number"||file.size<300||file.size>3000000)return reply({error:"INVALID_AUDIO"},400);
   if(!/^(audio\/|video\/mp4)/.test(file.type||"audio/webm"))return reply({error:"INVALID_FORMAT"},400);
   const payload=new FormData();payload.append("model","gpt-transcribe");payload.append("file",file,file.name||"diary.webm");
-  const res=await fetch("https://api.openai.com/v1/audio/transcriptions",{
+  const res=await fetch(base+"/v1/audio/transcriptions",{
    method:"POST",headers:{Authorization:"Bearer "+key},body:payload,signal:AbortSignal.timeout(28000)
   });
   if(!res.ok)return reply({error:"TRANSCRIPTION_UNAVAILABLE"},502);
