@@ -111,3 +111,10 @@
 ---
 
 *학습 서비스:* [주동목](https://splendorous-mochi-346e26.netlify.app/) · *기록 안내:* [학습 기록 안내](https://splendorous-mochi-346e26.netlify.app/privacy.html)
+
+
+## 일기 AI 공급자 설정 (2026-11-28)
+- 기본값 Gemini: Netlify Functions/Production 환경변수 `JM_GEMINI_API_KEY`에 Google AI Studio의 API 키 등록, 재배포. 모델 기본값 `gemini-3.5-flash-lite`; `JM_GEMINI_MODEL`로 교체 가능.
+- 무료 Gemini는 개인정보 없는 가상 연습 문장만 허용(체크박스 확인, 한국어 음성 API 차단). 실제 개인정보·음성은 무료 API에 제출하지 않는다. 유료 Gemini 프로젝트 및 개인정보 처리 조건을 확인한 경우에만 `JM_GEMINI_DATA_MODE=paid`를 설정한다.
+- OpenAI 전환: `JM_AI_PROVIDER=openai` 및 `JM_OPENAI_API_KEY` 설정(또는 지원되는 Gateway 환경). 자동 유료 전환 없음. `jm-audio` TTS는 기존 브라우저 음성 및 OpenAI 서버 폴백 유지. 공급자 모듈: `netlify/lib/diary-ai.mjs`.
+- API 키는 서버 환경변수에만 저장한다. 공개 앱의 요청별 IP 제한은 남아 있지만, 사용자 인증이나 전체 요청 예산 상한은 아직 없다.
