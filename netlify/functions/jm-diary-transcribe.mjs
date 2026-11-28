@@ -23,3 +23,6 @@ export default async function(request){
   return reply({text});
  }catch(e){return reply({error:"TRANSCRIPTION_FAILED"},502);}
 }
+
+// Per-IP API cost guard (Netlify deployment enforces this limit).
+export const config={path:"/.netlify/functions/jm-diary-transcribe",rateLimit:{windowLimit:6,windowSize:60,aggregateBy:["ip","domain"]}};
