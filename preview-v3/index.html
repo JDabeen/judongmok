@@ -324,6 +324,56 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 .inline-audio{margin:9px 0 10px;width:100%;min-width:0}
 .inline-audio audio{display:block;width:100%;max-width:100%;height:46px}
 .audio-hint{font-size:14px;color:#61728c;line-height:1.5;margin:8px 0 10px;word-break:keep-all}
+
+/* Voice diary: keep recording and review controls large, vertical, and readable in Kakao WebView */
+.diary{padding:25px 0 35px;min-width:0}
+.diary-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:24px}
+.diary-toolbar .back{margin:0}
+.diary-toolbar .mini-link{margin:0}
+.diary-toolbar.bottom{justify-content:stretch;margin:12px 0 18px}
+.diary-toolbar.bottom .utility{flex:1;min-width:0;padding:12px 10px;min-height:50px;font-size:15px}
+.diary h1{font-size:clamp(28px,7vw,35px);line-height:1.34;letter-spacing:-.06em;font-weight:850;margin:0 0 13px;word-break:keep-all}
+.diary-lead{font-size:16px;color:#6F7F99;line-height:1.55;margin:0 0 20px;word-break:keep-all}
+.diary .home-label{margin-bottom:11px}
+.diary .primary{min-height:61px;width:100%;margin:17px 0 12px}
+.voice-button{display:block;width:100%;background:#EFF5FF;border:1.5px solid #C8D9FC;color:#1D52D8;border-radius:13px;padding:18px 14px;font-size:18px;font-weight:850;text-align:center;line-height:1.45;cursor:pointer;min-height:65px}
+.voice-button.is-recording{background:#FFF2F0;border-color:#FEB5B3;color:#CB3833}
+.file-label{display:block;text-align:center;color:#657B9E;font-size:14px;font-weight:750;margin:12px 0 7px}
+.diary-file{display:block;width:100%;max-width:100%;box-sizing:border-box;padding:10px 0 15px;color:#61738F;font-size:13px;overflow-wrap:anywhere}
+.diary-input-label{display:block;font-size:17px;font-weight:800;margin:16px 0 9px;color:#1E2D49}
+.diary textarea{display:block;box-sizing:border-box;width:100%;resize:vertical;min-height:126px;max-width:100%;border:1.5px solid #D7E1F0;border-radius:12px;padding:15px 14px;font:500 17px/1.65 system-ui,-apple-system,sans-serif;color:#20304D;background:#fff;outline-offset:2px}
+.diary textarea:focus{outline:2px solid #235BFA;border-color:#235BFA}
+.diary-alert{background:#FFF8E9;border:1px solid #F2DC9E;color:#755B25;padding:13px 14px;border-radius:10px;font-size:14px;line-height:1.5;word-break:keep-all;margin:13px 0}
+.diary-privacy{font-size:12px;color:#8B98AA;line-height:1.6;margin:13px 0 7px;word-break:keep-all}
+.diary-tip{font-size:13px;color:#71829E;line-height:1.5;margin:8px 0 12px;word-break:keep-all}
+.diary-original{background:#F6F9FE;border:1px solid #E0E8F4;border-radius:12px;padding:17px 16px;margin:16px 0 19px}
+.diary-original span{font-size:13px;color:#65799A;font-weight:750}
+.diary-original p{font-size:17px;line-height:1.65;color:#20304D;overflow-wrap:anywhere;margin:8px 0}
+.diary-original .mini-link{margin-top:2px}
+.diary-preview{padding:15px;background:#F5F8FE;border-radius:12px;margin:15px 0}
+.diary-preview span{display:block;color:#5F7292;font-size:14px;font-weight:750;margin-bottom:10px}
+.diary-preview audio{display:block;width:100%;max-width:100%;height:48px}
+.diary-home-card{border:1px solid #E1E8F4;background:#F8FAFF;border-radius:16px;margin:21px 0 6px;padding:19px}
+.diary-home-card strong{font-size:18px;color:#1E2D49;letter-spacing:-.035em}
+.diary-home-card p{font-size:14px;color:#8190A7;line-height:1.4;margin:7px 0 9px}
+.diary-home-card .primary{width:100%;min-height:56px;margin:9px 0}
+.diary-home-card .mini-link{margin:0}
+.diary-entry{border:1px solid #DDE6F3;border-radius:13px;padding:19px 17px;margin-bottom:13px}
+.diary-entry p{font-size:15px;line-height:1.55;color:#657691;margin:9px 0}
+.diary-entry strong{display:block;font-size:18px;line-height:1.55;color:#152A4B;font-weight:800;overflow-wrap:anywhere}
+.diary-date{font-size:13px;font-weight:850;color:#2458DE}
+.diary-entry .diary-toolbar{margin:17px 0 0}
+.diary-entry .diary-toolbar .mini-link{flex:1;min-height:48px}
+.diary-entry audio{display:block;width:100%;margin:12px 0 0}
+.diary-saved .guide-complete{margin:10px auto 20px}
+@media(max-width:380px){
+ .diary{padding-top:15px}
+ .diary-toolbar{margin-bottom:15px}
+ .diary h1{font-size:29px}
+ .diary textarea{font-size:16px;padding:13px}
+ .diary-entry{padding:15px 13px}
+ .diary-toolbar.bottom .utility{font-size:14px}
+}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app");
