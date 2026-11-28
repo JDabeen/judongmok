@@ -35,12 +35,12 @@ input{display:block;width:100%;border-radius:9px;border:1px solid #cad3e3;backgr
 .empty{padding:28px 22px;color:var(--muted);font-size:14px}.error{border:1px solid #f6c3c6;border-radius:9px;padding:13px 15px;color:#a52632;background:#fff3f5;margin:0 0 15px}
 .footer{padding:21px 1px 0;color:var(--muted);font-size:13px;line-height:1.6}
 @media(max-width:750px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cols{grid-template-columns:1fr}.stat{padding:17px}.stat .num{font-size:30px}.shell{padding:17px 12px 40px}.panel-head,.entry{padding-left:16px;padding-right:16px}.headrow h1{font-size:26px}}
-</style>
+.current-summary{margin:18px 0 24px}.current-summary h2{font-size:22px;margin:0}.current-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.current-panel{margin:0 0 12px}.legacy-section{margin-top:16px}.legacy-section summary{min-height:48px;cursor:pointer;font-size:16px;font-weight:700;padding:12px;background:white;border:1px solid var(--border);border-radius:10px;margin-bottom:12px}.current-stats .name{line-height:1.4}.login a{color:var(--blue)}@media(max-width:450px){.shell{padding:14px 12px 40px}.top-actions .btn{padding:9px 10px;font-size:14px}.current-stats .stat{padding:15px 12px}.current-stats .num{font-size:30px}.entry-top{flex-wrap:wrap}.current-panel .entry strong{font-size:17px}}</style>
 </head>
 <body>
 <div class="shell">
 <header><div class="brand">주동목 <span>ADMIN</span></div><div class="top-actions" id="top-actions" hidden><button type="button" class="btn" id="refresh">새로고침</button><button type="button" class="btn" id="logout">로그아웃</button></div></header>
-<section id="login" class="login"><h1>운영자 로그인</h1><p>주동목의 학습 현황과 피드백은 권한이 있는 계정만 볼 수 있어요.</p><form id="login-form"><label for="email">이메일</label><input type="email" id="email" autocomplete="username" required placeholder="운영자 이메일"><label for="password">비밀번호</label><input type="password" id="password" autocomplete="current-password" required placeholder="운영자 비밀번호"><button class="btn primary" id="login-btn" type="submit">로그인</button></form><div id="login-error" class="alert" role="status"></div><p class="hint">Supabase 대시보드 비밀번호와는 별도로 생성한 주동목 관리자 계정을 사용하세요.</p></section>
+<section id="login" class="login"><h1>운영자 로그인</h1><p>주동목의 학습 현황과 피드백은 권한이 있는 계정만 볼 수 있어요.</p><form id="login-form"><label for="email">이메일</label><input type="email" id="email" autocomplete="username" required placeholder="운영자 이메일"><label for="password">비밀번호</label><input type="password" id="password" autocomplete="current-password" required placeholder="운영자 비밀번호"><button class="btn primary" id="login-btn" type="submit">로그인</button></form><div id="login-error" class="alert" role="status"></div><p><a href="./reset-password.html">비밀번호를 잊으셨나요?</a></p><p class="hint">Supabase 대시보드 비밀번호와는 별도로 생성한 주동목 관리자 계정을 사용하세요.</p></section>
 <section id="dashboard" hidden>
 <div class="headrow"><h1>운영 현황</h1><small id="updated-at">데이터 확인 중</small></div>
 <section id="admin-push" hidden style="background:#fff;border:1px solid #dbe3f0;border-radius:12px;padding:17px 20px;margin:12px 0 20px">
@@ -48,10 +48,10 @@ input{display:block;width:100%;border-radius:9px;border:1px solid #cad3e3;backgr
 <p id="push-status" style="font-size:14px;color:#5a6680;margin:7px 0 14px">설정 확인 중...</p>
 <button type="button" class="btn primary" id="push-enable" disabled>이 기기에서 알림 켜기</button>
 </section>
-<div id="data-error" hidden class="error"></div>
+<div id="data-error" hidden class="error"></div><section class="current-summary"><div class="headrow"><h2>현재 주동목</h2><small>오늘 · 한국시간</small></div><div id="current-error" class="error" hidden></div><div class="stats current-stats"><div class="stat"><div class="num" id="new-basic">—</div><div class="name">초급 완료</div></div><div class="stat"><div class="num" id="new-intermediate">—</div><div class="name">중급 완료</div></div><div class="stat"><div class="num" id="new-diary">—</div><div class="name">일기 저장</div></div><div class="stat"><div class="num" id="new-wrong">—</div><div class="name">오답률 (선택 기준)</div></div></div><section class="panel current-panel"><div class="panel-head"><h2>새 학습 피드백</h2><small>최근 15건</small></div><div id="current-feedback" class="empty">불러오는 중...</div></section><section class="panel current-panel"><div class="panel-head"><h2>최근 학습 활동</h2><small>최근 20건</small></div><div id="current-activity" class="empty">불러오는 중...</div></section></section><details class="legacy-section"><summary>이전 7일 과정 기록</summary>
 <div class="stats"><div class="stat"><div class="num" id="count-records">—</div><div class="name">누적 문장 완료 기록</div></div><div class="stat"><div class="num" id="count-sessions">—</div><div class="name">전체 연습 시도</div></div><div class="stat"><div class="num" id="count-completed">—</div><div class="name">완료된 연습 시도</div></div><div class="stat"><div class="num" id="count-feedback">—</div><div class="name">누적 피드백</div></div></div>
 <div class="cols"><section class="panel"><div class="panel-head"><h2>최근 피드백</h2><small>최신 15건</small></div><div id="feedback-list" class="empty">불러오는 중...</div></section><section class="panel"><div class="panel-head"><h2>최근 연습</h2><small>최신 20건</small></div><div id="sessions-list" class="empty">불러오는 중...</div></section></div>
-<p class="footer">기록된 연습·완료 데이터 기준으로 집계합니다. 단순 방문자는 포함되지 않습니다. 시작만 하고 완료되지 않은 시도가 반드시 학습 포기를 뜻하지는 않습니다. 알림은 관리자 인증 후 이 기기에서 별도로 허용해야 작동합니다.</p>
+</details><p class="footer">기록된 연습·완료 데이터 기준으로 집계합니다. 단순 방문자는 포함되지 않습니다. 시작만 하고 완료되지 않은 시도가 반드시 학습 포기를 뜻하지는 않습니다. 알림은 관리자 인증 후 이 기기에서 별도로 허용해야 작동합니다.</p>
 </section>
 </div>
 <script src="./push-config.js"></script>
@@ -80,7 +80,31 @@ async function authorized(){
  if(policyError)throw new Error('관리자 권한 확인 실패: '+policyError.message);
  return !!data;
 }
+async function loadCurrent(){
+ $('current-error').hidden=true;
+ const base=()=>client.from('jm_learning_events');
+ const today=new Date(Date.now()+9*3600000).toISOString().slice(0,10);
+ const since=new Date(today+'T00:00:00+09:00').toISOString();
+ const count=(type,course)=>{let q=base().select('id',{head:true,count:'exact'}).eq('event_type',type).gte('occurred_at',since);return course?q.eq('course',course):q;};
+ try{
+  const [basic,intermediate,diary,answers,wrong,feedback,activity]=await Promise.all([
+   count('complete','basic'),count('complete','intermediate'),count('saved','diary'),count('answer'),count('answer').eq('correct',false),
+   base().select('lesson_day,rating,comment,occurred_at,user_id').eq('event_type','feedback').order('occurred_at',{ascending:false}).limit(15),
+   base().select('course,event_type,lesson_day,activity,occurred_at,user_id,has_audio').in('event_type',['start','complete','saved','convert_failed']).order('occurred_at',{ascending:false}).limit(20)
+  ]);
+  for(const x of [basic,intermediate,diary,answers,wrong,feedback,activity])if(x.error)throw x.error;
+  setText('new-basic',basic.count||0);setText('new-intermediate',intermediate.count||0);setText('new-diary',diary.count||0);
+  setText('new-wrong',answers.count?Math.round(100*(wrong.count||0)/answers.count)+'%':'—');
+  const f=$('current-feedback');f.replaceChildren();f.className='';
+  if(!feedback.data?.length)empty(f,'아직 새 피드백이 없어요.');
+  else feedback.data.forEach(x=>item(f,'초급 '+x.lesson_day+'일차 · '+String(x.user_id).slice(0,6),dateText(x.occurred_at),labelRating[x.rating]||'자유 의견',x.comment||''));
+  const a=$('current-activity');a.replaceChildren();a.className='';
+  if(!activity.data?.length)empty(a,'아직 새 학습 기록이 없어요.');
+  else activity.data.forEach(x=>item(a,({basic:'초급 '+x.lesson_day+'일차',intermediate:'중급',diary:'일기'})[x.course]+' · '+String(x.user_id).slice(0,6),dateText(x.occurred_at),({start:'학습 시작',complete:'학습 완료',saved:x.has_audio?'일기 저장 · 녹음 있음':'일기 저장',convert_failed:'AI 변환 실패'})[x.event_type]||x.event_type,null,x.event_type==='complete'||x.event_type==='saved'?'completed':null));
+ }catch(e){$('current-error').hidden=false;setText('current-error','현재 과정 기록을 불러오지 못했어요. 새 DB 테이블 설정과 연결 상태를 확인해 주세요. ('+(e.code||e.message)+')');}
+}
 async function loadDashboard(){
+ const currentRequest=loadCurrent();
  $('refresh').disabled=true;$('data-error').hidden=true;
  try{
   const [a,b,c,d,feedback,sessions]=await Promise.all([
@@ -101,7 +125,7 @@ async function loadDashboard(){
   if(!sessions.data?.length)empty(sl,'아직 연습 기록이 없어요.');
   else sessions.data.forEach(x=>item(sl,`Day ${x.lesson_day||'—'} · ${x.lesson_type==='be'?'be동사':'일반동사'}`,dateText(x.last_activity_at),`오답 ${x.mistakes??0}회 · 마지막 ${x.last_step||'—'}`,null,x.status));
  }catch(e){$('data-error').hidden=false;setText('data-error','데이터를 불러오지 못했어요: '+(e.message||e));}
- finally{$('refresh').disabled=false}
+ finally{await currentRequest;$('refresh').disabled=false}
 }
 async function enter(){
  const ok=await authorized();
