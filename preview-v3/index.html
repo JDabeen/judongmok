@@ -427,6 +427,14 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 
 .diary-after{margin-top:12px;text-align:center;display:grid;gap:10px}.diary-after strong{font-size:19px;color:#344764;word-break:keep-all}.diary-after .mini-link{background:transparent;color:#53647d;margin:0}
 .diary .diary-lead{font-size:18px;margin:0 0 16px}.diary .voice-button{font-size:21px;min-height:65px}.diary .primary{font-size:20px}.diary .diary-privacy{font-size:13px;color:#63728a;margin:10px 0}.diary textarea{font-size:18px;min-height:105px}.diary .diary-original{margin:12px 0}.diary .diary-toolbar{margin-bottom:14px}.diary .diary-input-label{margin-top:18px}
+
+/* Both Korean clauses are the actual question, not a title plus a small hint. */
+.demo-lesson .demo-ko{font-size:clamp(24px,6.7vw,31px);font-weight:800;line-height:1.48;letter-spacing:-.055em;word-break:keep-all;overflow-wrap:break-word;margin:0;color:#15294c}
+.demo-ko span{display:block}
+.demo-ko span+span{margin-top:7px}
+.demo-ko mark{color:#1646c8;background:#e8efff;border-radius:5px;padding:1px 4px;font:inherit}
+.demo-lesson~.daily-options h2{font-size:clamp(21px,5.8vw,25px);line-height:1.45;color:#15294c;word-break:keep-all}
+.demo-lesson~.daily-options .answer{min-height:74px}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main><nav id="main-tabs" class="main-tabs" aria-label="주요 메뉴" hidden></nav></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app"),mainTabs=document.querySelector("#main-tabs");
@@ -918,12 +926,14 @@ function renderIntermediate(){
  }
  const d=demoLessons[demoProgress.index];if(!d){demoProgress={index:demoLessons.length,completed:true};demoScreen="done";demoSave();renderIntermediate();return;}
  const guided=d.mode==="guided",solved=demoPart===(guided?2:3);
- const heading='<section class="home lesson-head demo-lesson">'+demoHead()+'<h1>'+esc(guided?d.baseKo:d.fullKo)+'</h1>'+(guided?'<p class="guide-intro">'+esc(d.extraKo)+'</p>':'')+'</section>';
+ const extra=guided?d.extraKo.match(/^(하지만|왜냐하면)\s*(.*)$/):null;
+ const extraHtml=extra?'<mark>'+esc(extra[1])+'</mark> '+esc(extra[2]):esc(d.extraKo||"");
+ const heading='<section class="home lesson-head demo-lesson">'+demoHead()+'<h1 class="demo-ko">'+(guided?'<span>'+esc(d.baseKo)+'</span><span>'+extraHtml+'</span>':esc(d.fullKo))+'</h1></section>';
  const shown=guided?demoPart+1:demoPart;
  const opts=demoOptions(d),order=[d.base+(d.link==="but"?",":""),d.link,d.tail];
  app.innerHTML=heading+demoLine(d,shown)+
  (solved?'<div class="learn-actions"><p class="learn-good">✓ 이야기가 길어졌어요!</p><p class="translation">'+esc(d.fullKo)+'</p><button class="utility" data-action="demo-listen">🔊 문장 듣기</button><p class="home-muted">완성된 문장을 소리 내어 읽어보세요.</p>'+button("다음","demo-next")+'</div>':
- '<section class="question-area daily-options"><h2>'+(guided?(demoPart===0?"어떤 말로 이어갈까요?":"뒤에 어떤 이야기를 붙일까요?"):"영어 순서대로 눌러보세요.")+'</h2><div class="answers">'+opts.map((w,i)=>'<button type="button" class="answer" data-kind="demo" data-index="'+i+'" '+(!guided&&order.slice(0,demoPart).includes(w)?"disabled":"")+'><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("")+'</div><p class="feedback" aria-live="polite"></p></section>');
+ '<section class="question-area daily-options"><h2>'+(guided?(demoPart===0?"두 문장을 무엇으로 연결할까요?":"뒤에 들어갈 영어 문장을 골라보세요."):"영어 문장 순서대로 눌러보세요.")+'</h2><div class="answers">'+opts.map((w,i)=>'<button type="button" class="answer" data-kind="demo" data-index="'+i+'" '+(!guided&&order.slice(0,demoPart).includes(w)?"disabled":"")+'><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("")+'</div><p class="feedback" aria-live="polite"></p></section>');
 }
 function demoChoose(i,el){
  if(scene!=="intermediate-demo"||demoScreen!=="lesson")return;
