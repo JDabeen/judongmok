@@ -424,6 +424,9 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 .demo-complete .result{margin-bottom:12px;overflow:hidden}
 .demo-complete .result .mini-link{position:relative;z-index:1}
 @media(max-width:360px){.home h1.home-title{font-size:clamp(15px,5.5vw,20px)}.home-course{padding:20px 15px}.demo-intro{padding-top:14px}}
+
+.diary-after{margin-top:12px;text-align:center;display:grid;gap:10px}.diary-after strong{font-size:19px;color:#344764;word-break:keep-all}.diary-after .mini-link{background:transparent;color:#53647d;margin:0}
+.diary .diary-lead{font-size:18px;margin:0 0 16px}.diary .voice-button{font-size:21px;min-height:65px}.diary .primary{font-size:20px}.diary .diary-privacy{font-size:13px;color:#63728a;margin:10px 0}.diary textarea{font-size:18px;min-height:105px}.diary .diary-original{margin:12px 0}.diary .diary-toolbar{margin-bottom:14px}.diary .diary-input-label{margin-top:18px}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main><nav id="main-tabs" class="main-tabs" aria-label="주요 메뉴" hidden></nav></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app"),mainTabs=document.querySelector("#main-tabs");
@@ -686,7 +689,7 @@ function render(){
   app.innerHTML='<section class="done"><button type="button" class="success-icon" data-action="replay-celebration" aria-label="축하 효과 다시 보기">✓</button><p class="done-kicker">🎉 잘했어요!</p><h2>'+label+'</h2>'+small+
   '<div class="result"><div class="big-sentence">'+esc(resultSentence)+'</div></div><p class="translation">'+esc(resultKorean)+'</p>'+
   '<div class="done-buttons"><button class="utility" data-action="listen">🔊 듣기</button><button class="utility" data-action="share">↗ 공유</button></div>'+
-  button(stage===3?"앱 사용법 보기":stage===4?"홈으로":"다음 단계","next")+'</section>';return;
+  (stage===4?'<div class="diary-after"><strong>오늘의 이야기도 영어로 남겨볼까요?</strong>'+button("영어 일기 쓰기","diary-open")+'<button class="mini-link" data-action="next">오늘은 여기까지</button></div>':button(stage===3?"앱 사용법 보기":"다음 단계","next"))+'</section>';return;
  }
  if(scene==="guide"){
   app.innerHTML='<section class="guide"><div class="guide-complete" aria-hidden="true">✓</div><p class="guide-kicker">첫 체험 완료!</p><h1>이제 이렇게<br>사용하면 돼요.</h1><p class="guide-intro">오늘부터는 짧은 문장을 만들고, 조금씩 길게 말하는 연습을 해요.</p>'+
@@ -972,33 +975,32 @@ function renderDiary(){
  const toolbar='<div class="diary-toolbar"><button class="back" data-action="home">‹ 홈</button><button class="mini-link" data-action="diary-list">지난 일기</button></div>';
  if(diaryStep==="korean"){
   app.innerHTML='<section class="diary">'+toolbar+'<div class="home-label">말하기 일기 · 1단계</div>'+
-   '<h1>오늘 어떤 일이<br>있었나요?</h1><p class="diary-lead">한국어로 말하고 녹음을 끝내면 바로 영어로 바꿔드려요.</p>'+
+   '<h1>오늘 어떤 일이 있었나요?</h1><p class="diary-lead">한국어로 말하거나 적어보세요.</p>'+
    '<button type="button" class="voice-button '+(recording?"is-recording":"")+'" data-action="diary-record-ko" '+(diaryBusy?"disabled":"")+'>'+
     (recording?"■ 말하기 끝 · 영어로 바꾸기":"<span aria-hidden=\"true\">🎤</span> 한국어로 말하기")+'</button>'+
-   '<label class="diary-input-label" for="diary-korean">오늘의 이야기</label><textarea id="diary-korean" rows="5" maxlength="1600" '+(diaryBusy||recording?"disabled":"")+' placeholder="예: 오늘 오랜만에 친구를 만났어요. 같이 점심을 먹어서 기분이 좋았어요.">'+esc(diaryKorean)+'</textarea>'+
-   diaryBanner()+(diaryBusy||recording?"":button("직접 입력한 글 영어로 바꾸기","diary-convert"))+
-   '<p class="diary-privacy">마이크 권한을 허용해 주세요. 녹음을 끝내면 음성이 AI 서비스로 전송되어 영어로 변환됩니다. 일기 기록은 이 브라우저에만 저장됩니다.</p>'+
-   '<p class="diary-tip">카카오톡에서 녹음이 안 된다면 ⋯ 메뉴에서 다른 브라우저로 열거나, 휴대폰 키보드의 마이크를 이용할 수 있어요.</p></section>';
+   '<label class="diary-input-label" for="diary-korean">또는 직접 적기</label><textarea id="diary-korean" rows="3" maxlength="1600" '+(diaryBusy||recording?"disabled":"")+' placeholder="예: 오늘 친구를 만났어요.">'+esc(diaryKorean)+'</textarea>'+
+   diaryBanner()+(diaryBusy||recording?"":button("영어로 바꾸기","diary-convert"))+
+   '<p class="diary-privacy">변환 시 음성·글이 AI로 전송됩니다. 일기는 이 기기에 저장됩니다.</p></section>';
   return;
  }
  if(diaryStep==="english"){
   app.innerHTML='<section class="diary">'+toolbar+'<div class="home-label">말하기 일기 · 2단계</div>'+
-   '<h1>이제 영어로<br>말해볼까요?</h1><p class="diary-lead">표현을 확인하고 내 목소리로 녹음하세요.</p>'+
-   '<div class="diary-original"><span>내 이야기</span><p>'+esc(diaryKorean)+'</p><button class="mini-link" data-action="diary-edit-korean">한국어 수정</button></div>'+
+   '<h1>영어로 읽어볼까요?</h1>'+
+   '<button class="mini-link" data-action="diary-edit-korean">한국어 수정</button>'+
    '<label class="diary-input-label" for="diary-english">영어 일기</label><textarea id="diary-english" rows="5" maxlength="2000" placeholder="영어 문장이 여기에 나타나요.">'+esc(diaryEnglish)+'</textarea>'+
-   '<div class="diary-toolbar bottom"><button class="utility" data-action="diary-convert" '+(diaryBusy?"disabled":"")+'>AI 다시 변환</button><button class="utility" data-action="diary-listen" '+(!diaryEnglish.trim()?"disabled":"")+'>🔊 영어 듣기</button></div>'+
+   '<div class="diary-toolbar bottom"><button class="utility" data-action="diary-convert" '+(diaryBusy?"disabled":"")+'>다시 변환</button><button class="utility" data-action="diary-listen" '+(!diaryEnglish.trim()?"disabled":"")+'>🔊 영어 듣기</button></div>'+
    '<button type="button" class="voice-button '+(recording?"is-recording":"")+'" data-action="diary-record-en" '+(diaryBusy?"disabled":"")+'>'+
-   (recording?"■ 영어 녹음 끝내기":"🎙️ 영어로 말하고 녹음하기")+'</button>'+
+   (recording?"■ 영어 녹음 끝내기":"🎙️ 영어로 읽기")+'</button>'+
    (diaryPreviewUrl?'<div class="diary-preview"><span>내 목소리 확인하기</span><audio controls playsinline src="'+esc(diaryPreviewUrl)+'"></audio></div>':
-   '<p class="diary-tip">영어 문장을 읽고 녹음한 뒤 저장할 수 있어요.</p>')+
-   diaryBanner()+button(diaryBusy?"저장 중...":"오늘의 일기 저장하기","diary-save")+
-   '<p class="diary-privacy">영어 녹음 파일은 AI로 보내지 않고 이 브라우저의 저장 공간에 보관합니다.</p></section>';
+   "")+
+   diaryBanner()+button(diaryBusy?"저장 중...":"일기 저장하기","diary-save")+
+   '<p class="diary-privacy">녹음 없이도 저장할 수 있어요.</p></section>';
   return;
  }
  if(diaryStep==="saved"){
   const latest=diaryEntries[0];
   app.innerHTML='<section class="diary diary-saved">'+toolbar+
-   '<div class="guide-complete">✓</div><div class="home-label">오늘의 일기 저장 완료</div><h1>내 목소리로<br>영어 일기를 남겼어요!</h1>'+
+   '<div class="guide-complete">✓</div><div class="home-label">오늘의 일기 저장 완료</div><h1>영어 일기를 남겼어요!</h1>'+
    '<div class="diary-original"><span>오늘의 영어</span><p>'+esc(latest?.english||"")+'</p></div>'+
    button("다음 일기도 쓰기","diary-new")+'<button class="home-link" data-action="diary-list">지난 일기 보기 <span>›</span></button></section>';
  }
@@ -1010,7 +1012,7 @@ function renderDiaryList(){
  (diaryEntries.length?'<div class="diary-list">'+diaryEntries.map((x,i)=>'<article class="diary-entry">'+
   '<div class="diary-date">'+esc(x.date||"")+'</div><p>'+esc(x.korean)+'</p><strong>'+esc(x.english)+'</strong>'+
   '<div class="diary-toolbar bottom"><button class="mini-link" data-action="diary-listen-entry" data-index="'+i+'">🔊 영어 듣기</button>'+
-  '<button class="mini-link" data-action="diary-play-entry" data-index="'+i+'">🎙️ 내 녹음</button></div></article>').join("")+'</div>':
+  (x.hasAudio===false?"":'<button class="mini-link" data-action="diary-play-entry" data-index="'+i+'">🎙️ 내 녹음</button>')+'</div></article>').join("")+'</div>':
  '<p class="diary-lead">아직 저장된 일기가 없어요.</p>')+
  button("오늘의 일기 쓰기","diary-new")+'</section>';
 }
@@ -1074,7 +1076,7 @@ async function diaryConvert(fromVoice=false){
  diaryBusy=true;diaryPhase="영어 일기로 바꾸고 있어요…";diaryError="";renderDiary();
  try{
   const response=await fetch("/.netlify/functions/jm-diary-english",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({korean:diaryKorean.trim()})});
-  if(!response.ok)throw new Error(response.status===503?"AI 영어 변환 연결이 아직 필요해요. 영어를 직접 적는 기능은 사용할 수 있어요.":"영어 변환에 실패했어요. 잠시 후 다시 시도해 주세요.");
+  if(!response.ok){let code="";try{code=(await response.json()).error||"";}catch(e){}const messages={NOT_CONFIGURED:"AI 연결 설정이 필요해요.",AI_AUTH:"AI 연결 권한을 확인해 주세요.",AI_LIMIT:"AI 사용 한도에 도달했어요.",AI_MODEL:"AI 모델 연결을 확인해 주세요.",AI_TIMEOUT:"응답이 늦어졌어요. 다시 시도해 주세요."};throw new Error((messages[code]||"영어 변환에 실패했어요. 다시 시도해 주세요.")+" ("+(code||"HTTP "+response.status)+")");}
   const data=await response.json();
   const translated=String(data.english||"").trim().slice(0,2000);
   if(!translated)throw new Error("영어 문장을 만들지 못했어요. 다시 시도해 주세요.");
@@ -1087,14 +1089,14 @@ async function diaryConvert(fromVoice=false){
 async function diarySave(){
  diaryCaptureFields();
  if(!diaryEnglish.trim()){diaryProblem("영어 문장을 먼저 확인해 주세요.");return;}
- if(!diaryEnglishBlob){diaryProblem("영어 문장을 직접 말하고 녹음한 다음 저장해 주세요.");return;}
  if(diaryBusy)return;
  diaryBusy=true;diaryError="";renderDiary();
  const id=String(Date.now())+"-"+Math.floor(Math.random()*1e6);
  try{
-  await saveDiaryClip(id,diaryEnglishBlob);
+  const hasAudio=!!diaryEnglishBlob;
+  if(hasAudio)await saveDiaryClip(id,diaryEnglishBlob);
   const today=new Date();
-  const record={id,date:today.toLocaleDateString("ko-KR"),korean:diaryKorean.trim(),english:diaryEnglish.trim()};
+  const record={id,date:today.toLocaleDateString("ko-KR"),korean:diaryKorean.trim(),english:diaryEnglish.trim(),hasAudio};
   const nextEntries=[record,...diaryEntries].slice(0,100);
   localStorage.setItem(DIARY_KEY,JSON.stringify(nextEntries));
   diaryEntries=nextEntries;
@@ -1121,7 +1123,7 @@ async function diaryToggleRecord(kind){
  if(diaryBusy)return;
  diaryCaptureFields();
  if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==="undefined"){
-  diaryProblem("이 카카오톡 브라우저에서는 마이크 녹음이 제한될 수 있어요. 다른 브라우저로 열거나 직접 적어주세요.");return;
+  diaryProblem("마이크를 사용할 수 없어요. 글로 적거나 다른 브라우저에서 열어주세요.");return;
  }
  try{
   const stream=await navigator.mediaDevices.getUserMedia({audio:true});
@@ -1143,7 +1145,7 @@ async function diaryToggleRecord(kind){
   recorder.start();diaryError="";renderDiary();
   // 45-second maximum, never record indefinitely without an explicit stop.
   setTimeout(()=>{if(diaryRecorder===recorder&&recorder.state==="recording")recorder.stop();},45000);
- }catch(e){diaryProblem("마이크 접근이 안 돼요. 휴대폰에서 마이크 권한을 허용하거나 다른 브라우저로 열어주세요.");}
+ }catch(e){diaryProblem("마이크가 안 되면 글로 적어주세요. 영어 일기는 녹음 없이 저장할 수 있어요.");}
 }
 async function diaryPlaySaved(i,button){
  const entry=diaryEntries[i];if(!entry)return;
