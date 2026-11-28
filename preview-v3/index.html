@@ -436,6 +436,29 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 .demo-lesson~.daily-options h2{font-size:clamp(21px,5.8vw,25px);line-height:1.45;color:#15294c;word-break:keep-all}
 .demo-lesson~.daily-options .answer{min-height:74px}
 .diary-consent{display:flex;gap:10px;align-items:center;font-size:16px;color:#455773;line-height:1.5;margin:15px 0 4px}.diary-consent input{width:22px;height:22px;flex:none;accent-color:var(--blue)}
+
+/* Calm reading hierarchy: legible type, fewer saturated surfaces, one main action. */
+.demo-lesson .demo-ko{font-size:clamp(24px,6.3vw,30px);font-weight:650;letter-spacing:-.035em;line-height:1.65;color:#202936}
+.demo-ko span+span{margin-top:3px}
+.demo-ko mark{background:transparent;color:#2454b7;padding:0;font-weight:750;border-radius:0}
+.demo-lesson+.sentence-board{background:#F6F7F9;border-color:#E5E8ED;padding:19px 17px}
+.demo-lesson+.sentence-board .sentence-line{font-weight:650;color:#202936;letter-spacing:-.025em;line-height:1.55}
+.demo-connector{color:#2454b7;font-weight:750}
+.demo-lesson~.daily-options h2{font-weight:650;font-size:clamp(21px,5.6vw,24px);letter-spacing:-.035em}
+.demo-lesson~.daily-options .answer-name{font-weight:600;letter-spacing:-.015em;color:#202936}
+.demo-lesson~.daily-options .answer-no{background:transparent;border:0;color:#657186;font-weight:600}
+.demo-lesson~.daily-options .answer{border-color:#DCE1E8;min-height:74px;box-shadow:none}
+.diary h1{font-weight:700;letter-spacing:-.04em;line-height:1.4}
+.diary .diary-lead{color:#4B5563;font-weight:400;line-height:1.6;margin-bottom:15px}
+.diary .home-label{font-size:15px;font-weight:650;color:#586578}
+.diary .diary-toolbar .mini-link,.diary .diary-secondary{background:transparent;color:#536075;box-shadow:none;font-weight:600;text-decoration:underline;text-underline-offset:4px}
+.diary .diary-input-label{font-weight:600;color:#364152}
+.diary textarea{border-color:#D1D5DB;letter-spacing:0;font-weight:400}
+.diary .diary-alert{font-size:16px;color:#5F4424;background:#FFF8EE;border-color:#E9D6BD}
+.diary .diary-consent{font-size:16px;color:#384152;line-height:1.55}
+.diary .diary-privacy{font-size:14px;line-height:1.6;color:#4B5563}
+.diary .primary{box-shadow:none;font-weight:700}
+.diary .diary-toolbar{margin-bottom:12px}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main><nav id="main-tabs" class="main-tabs" aria-label="주요 메뉴" hidden></nav></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app"),mainTabs=document.querySelector("#main-tabs");
@@ -998,14 +1021,14 @@ function renderDiary(){
  const practiceOnly=diaryAIStatus?.practiceOnly!==false;
  const toolbar='<div class="diary-toolbar"><button class="back" data-action="home">‹ 홈</button><button class="mini-link" data-action="diary-list">지난 일기</button></div>';
  if(diaryStep==="korean"){
-  app.innerHTML='<section class="diary">'+toolbar+'<div class="home-label">말하기 일기 · 1단계</div>'+
-   '<h1>오늘 어떤 일이 있었나요?</h1><p class="diary-lead">'+(practiceOnly?"한국어 연습 문장을 적어보세요.":"한국어로 말하거나 적어보세요.")+'</p>'+
+  app.innerHTML='<section class="diary">'+toolbar+'<div class="home-label">일기</div>'+
+   '<h1>'+(practiceOnly?"영어로 바꿔볼까요?":"오늘 어떤 일이 있었나요?")+'</h1><p class="diary-lead">'+(practiceOnly?"가상의 연습 문장을 적어보세요.":"한국어로 말하거나 적어보세요.")+'</p>'+
    (practiceOnly?"":'<button type="button" class="voice-button '+(recording?"is-recording":"")+'" data-action="diary-record-ko" '+(diaryBusy?"disabled":"")+'>'+
     (recording?"■ 말하기 끝 · 영어로 바꾸기":"<span aria-hidden=\"true\">🎤</span> 한국어로 말하기")+'</button>')+
-   '<label class="diary-input-label" for="diary-korean">'+(practiceOnly?"한국어":"또는 직접 적기")+'</label><textarea id="diary-korean" rows="3" maxlength="1600" '+(diaryBusy||recording?"disabled":"")+' placeholder="예: 오늘 친구를 만났어요.">'+esc(diaryKorean)+'</textarea>'+
-   diaryBanner()+(practiceOnly?'<label class="diary-consent"><input id="diary-practice" type="checkbox" '+(diaryPracticeConfirmed?"checked":"")+' '+(diaryBusy?"disabled":"")+'> 개인정보 없는 가상의 연습 문장입니다.</label>':"")+
-   (diaryBusy||recording?"":button("영어로 바꾸기","diary-convert")+'<button class="mini-link" data-action="diary-manual">영어 직접 적기</button>')+
-   '<p class="diary-privacy">'+(practiceOnly?"무료 AI에는 실제 개인정보·일기를 보내지 마세요. 입력은 AI 개선에 사용될 수 있어요.":"변환 시 음성·글이 AI로 전송됩니다.")+' 일기는 이 기기에 저장됩니다.</p></section>';
+   '<label class="diary-input-label" for="diary-korean">'+(practiceOnly?"한국어 문장":"또는 직접 적기")+'</label><textarea id="diary-korean" rows="3" maxlength="1600" '+(diaryBusy||recording?"disabled":"")+' placeholder="예: 오늘 친구를 만났어요.">'+esc(diaryKorean)+'</textarea>'+
+   diaryBanner()+(practiceOnly?'<label class="diary-consent"><input id="diary-practice" type="checkbox" '+(diaryPracticeConfirmed?"checked":"")+' '+(diaryBusy?"disabled":"")+'> 개인정보가 없는 가상 문장입니다.</label>':"")+
+   (diaryBusy||recording?"":button("영어로 바꾸기","diary-convert")+'<button class="mini-link diary-secondary" data-action="diary-manual">영어 직접 적기</button>')+
+   '<p class="diary-privacy">'+(practiceOnly?"무료 AI는 연습용입니다. 실제 일기·개인정보는 보내지 마세요. 입력은 AI 개선에 사용될 수 있습니다.":"변환 시 음성·글이 AI로 전송됩니다.")+' 일기는 이 기기에 저장됩니다.</p></section>';
   return;
  }
  if(diaryStep==="english"){
