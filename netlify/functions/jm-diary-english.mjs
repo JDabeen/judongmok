@@ -4,11 +4,13 @@ export default async function(request){
  if(request.method!=="POST")return reply({error:"METHOD_NOT_ALLOWED"},405);
  const origin=request.headers.get("origin");
  if(origin&&origin!==new URL(request.url).origin)return reply({error:"ORIGIN_NOT_ALLOWED"},403);
- const key=process.env.OPENAI_API_KEY;if(!key)return reply({error:"NOT_CONFIGURED"},503);
+ const key=process.env.JM_OPENAI_API_KEY||process.env.OPENAI_API_KEY;
+ const base=(process.env.JM_OPENAI_API_KEY?"https://api.openai.com":process.env.OPENAI_BASE_URL||"https://api.openai.com").replace(/\/v1\/?$/,"").replace(/\/$/,"");
+ if(!key)return reply({error:"NOT_CONFIGURED"},503);
  try{
   const {korean}=await request.json();
   if(typeof korean!=="string"||korean.trim().length<3||korean.length>1600)return reply({error:"INVALID_TEXT"},400);
-  const res=await fetch("https://api.openai.com/v1/chat/completions",{
+  const res=await fetch(base+"/v1/chat/completions",{
    method:"POST",headers:{Authorization:"Bearer "+key,"content-type":"application/json"},
    body:JSON.stringify({model:"gpt-5.4-mini",max_completion_tokens:450,messages:[
     {role:"developer",content:"Convert the user's short Korean personal diary into natural spoken English suitable for an A2 adult learner. Preserve all real events, people, and facts; do not invent details or embellish. Use short, easy sentences, usually 2–4. Write ONLY the English diary sentences, no bullet points, labels, explanations or quotation marks. If the input is inappropriate or unclear, translate only the understandable factual content."},
