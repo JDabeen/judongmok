@@ -641,24 +641,23 @@ function render(){
  if(scene==="diary-library"){renderDiaryList();return;}
  if(scene==="home"){renderHome();return;}
  if(scene==="daily"){renderDaily();return;}
+ if(scene==="intermediate-demo"){renderIntermediate();return;}
  if(scene==="review"){renderReview();return;}
  if(scene==="catalog"){renderCatalog();return;}
 }
 function renderHome(){
  const finished=progress.day>=BASIC_COUNT,day=days[Math.min(progress.day,BASIC_COUNT-1)];
  const percent=Math.round(progress.day/BASIC_COUNT*100);
- const intermediateFinished=progress.intermediate>=INTERMEDIATE_COUNT;
- const advancedDay=days[BASIC_COUNT+Math.min(progress.intermediate,INTERMEDIATE_COUNT-1)];
+ const intermediateFinished=demoProgress.completed;
  app.innerHTML='<section class="home"><div class="home-label">나의 영어 연습</div><h1>오늘도 한 문장<br>만들어볼까요?</h1>'+
   '<div class="home-course"><div class="home-row"><span>초급 · 문장 만들기</span><strong>'+progress.day+' / '+BASIC_COUNT+'일</strong></div>'+
   '<div class="home-progress"><span style="width:'+percent+'%"></span></div>'+
   (finished?'<p class="home-verb">'+BASIC_COUNT+'일 완성 🎉</p><p class="home-muted">배운 문장을 다시 떠올려보세요.</p>':
   '<div class="home-muted">오늘의 핵심 표현 · 8개 활동</div><div class="home-verb">'+esc(day.verb)+'</div><p class="home-muted">'+esc(day.longKo)+'</p>')+
   (showHomeTip?'<p class="home-nudge">↓ 여기를 눌러 첫 연습을 시작하세요.</p>':"")+button(finished?"기초 문장 다시 연습":progress.draft&&progress.draft.day===progress.day?"이어서 연습하기":"오늘의 연습 시작","startDaily")+'</div>'+
-  '<div class="home-course" style="margin-top:16px"><div class="home-row"><span>중급 · 문장 연결하기</span><strong>'+progress.intermediate+' / '+INTERMEDIATE_COUNT+'일</strong></div>'+
-  '<div class="home-progress"><span style="width:'+(progress.intermediate/INTERMEDIATE_COUNT*100)+'%"></span></div>'+
-  (intermediateFinished?'<p class="home-verb">2일 완성 🎉</p>':'<div class="home-muted">오늘의 핵심 표현 · 8개 활동</div><div class="home-verb">'+esc(advancedDay.verb)+'</div><p class="home-muted">'+esc(advancedDay.longKo)+'</p>')+
-  button(intermediateFinished?"중급 다시 연습":progress.intermediateDraft?"이어서 연습하기":"중급 연습 시작","startIntermediate")+'</div>'+
+  '<div class="home-course" style="margin-top:16px"><div class="home-row"><span>중급 · 문장 연결하기</span><strong>데모</strong></div>'+
+  '<div class="home-verb">BUT · BECAUSE</div><p class="home-muted">내 생각에 다른 이야기와 이유를 붙여보세요.</p>'+
+  button(intermediateFinished?"중급 다시 체험하기":"중급으로 들어가기","startIntermediate")+'</div>'+
   '<button class="home-link" data-action="review"><span>지난 문장 복습</span><span>›</span></button>'+
   '<button class="home-link" data-action="catalog"><span>다른 연습 둘러보기</span><span>›</span></button>'+
   '<div class="diary-home-card"><div><strong>🎙️ 오늘의 말하기 일기</strong><p>오늘 있었던 일을 영어로 남겨보세요.</p></div>'+
@@ -730,11 +729,12 @@ function renderReview(){
 function renderCatalog(){
  app.innerHTML='<section class="subpage"><button class="back" data-action="home">‹ 홈</button><h1>연습 둘러보기</h1>'+
   '<div class="catalog-item"><div><div class="home-label">초급</div><strong>기초 동사로 문장 만들기</strong><p>11일 · 짧은 문장부터 길게</p></div>'+button("연습하기","startDaily","small-blue")+'</div>'+
-  '<div class="catalog-item"><div><div class="home-label">중급</div><strong>BUT · BECAUSE</strong><p>2일 · 문장 연결하기</p></div>'+button("연습하기","startIntermediate","small-blue")+'</div>'+
+  '<div class="catalog-item"><div><div class="home-label">중급</div><strong>BUT · BECAUSE</strong><p>데모 · 문장 길게 말하기</p></div>'+button("연습하기","startIntermediate","small-blue")+'</div>'+
   '<div class="catalog-item disabled"><div class="home-label">고급</div><strong>자연스러운 문장 구성</strong><p>준비 중</p></div></section>';
 }
 function clickChoice(kind,i,button){
  if(locked)return;
+ if(kind==="demo"){demoChoose(i,button);return;}
  if(kind==="intro"){locked=true;button.classList.add("correct");showToast("좋아요! 첫 문장을 만들어볼까요?");setTimeout(()=>{mode=i===0?"independent":"guided";scene="learn";step=0;picked={};locked=false;render();window.scrollTo(0,0);},650);return;}
  if(kind==="learn"){
   const q=stage1[step];if(i!==q.correct){feedbackWrong(button);return;}
@@ -783,6 +783,8 @@ function clickChoice(kind,i,button){
 function action(which,el){
  if(scene==="diary"&&diaryBusy)return;
  if(scene==="diary"&&diaryRecorder?.state==="recording"&&!["diary-record-ko","diary-record-en","home"].includes(which))return;
+ if(which==="startIntermediate"){scene="intermediate-demo";demoScreen="intro";locked=false;render();window.scrollTo(0,0);return;}
+ if(which.startsWith("demo-")){demoAction(which,el);return;}
  if(which==="begin2"){scene="challenge";resetStepState();render();}
  if(which==="begin3"){scene="extend";step=0;locked=false;render();}
  if(which==="enter-home"){showHomeTip=true;scene="home";render();window.scrollTo(0,0);}
@@ -794,7 +796,7 @@ function action(which,el){
   else{scene="home";}
   locked=false;render();window.scrollTo(0,0);
  }
- if(which==="startDaily"||which==="startIntermediate"){showHomeTip=false;const advanced=which==="startIntermediate";lessonIndex=advanced?BASIC_COUNT+(progress.intermediate<INTERMEDIATE_COUNT?progress.intermediate:0):(progress.day<BASIC_COUNT?progress.day:0);const draft=advanced?progress.intermediateDraft:progress.draft;dailyTask=draft&&draft.day===lessonIndex&&Number.isInteger(draft.task)&&draft.task>=0&&draft.task<8?draft.task:0;sequence=draft&&draft.day===lessonIndex&&Number.isInteger(draft.sequence)?Math.max(0,draft.sequence):0;const a=dailyCurrent();if(a.order)sequence=Math.min(sequence,a.order.length);else if(a.kind==="learn"||a.kind==="expand")sequence=sequence>0?1:0;else sequence=0;locked=false;scene="daily";rememberDraft();render();window.scrollTo(0,0);}
+ if(which==="startDaily"){showHomeTip=false;lessonIndex=progress.day<BASIC_COUNT?progress.day:0;const draft=progress.draft;dailyTask=draft&&draft.day===lessonIndex&&Number.isInteger(draft.task)&&draft.task>=0&&draft.task<8?draft.task:0;sequence=draft&&draft.day===lessonIndex&&Number.isInteger(draft.sequence)?Math.max(0,draft.sequence):0;const a=dailyCurrent();if(a.order)sequence=Math.min(sequence,a.order.length);else if(a.kind==="learn"||a.kind==="expand")sequence=sequence>0?1:0;else sequence=0;locked=false;scene="daily";rememberDraft();render();window.scrollTo(0,0);}
  if(which==="review"){scene="review";reviewShown.clear();render();window.scrollTo(0,0);}
  if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
  if(which==="home"){diaryCancelRecording();try{currentAudio?.pause();window.speechSynthesis?.cancel();}catch(e){}scene="home";render();window.scrollTo(0,0);}
@@ -807,6 +809,81 @@ function action(which,el){
  if(which==="share"){share();}
  if(which==="reveal"){reviewShown.add(Number(el.dataset.index));render();}
  if(which==="review-speak"){const x=progress.history[Number(el.dataset.index)];if(x)playEnglish(x.en,el);}
+}
+
+
+/* Intermediate demo: a separate, replayable tutorial, with no effect on beginner progress. */
+const DEMO_KEY="judongmok:intermediate-demo:v1";
+const demoLessons=[
+ {mode:"guided",base:"I like to make coffee",baseKo:"나는 커피 만드는 것을 좋아해요.",extraKo:"하지만 아침에는 너무 피곤해요.",link:"but",tail:"I'm too tired in the morning",other:"I love the smell of coffee",fullKo:"나는 커피 만드는 것을 좋아하지만 아침에는 너무 피곤해요."},
+ {mode:"guided",base:"I like to make coffee",baseKo:"나는 커피 만드는 것을 좋아해요.",extraKo:"왜냐하면 커피 향을 좋아하거든요.",link:"because",tail:"I love the smell of coffee",other:"I'm too tired in the morning",fullKo:"나는 커피 향을 좋아해서 커피 만드는 것을 좋아해요."},
+ {mode:"guided",base:"I want to travel",baseKo:"나는 여행하고 싶어요.",extraKo:"하지만 시간이 별로 없어요.",link:"but",tail:"I don't have much time",other:"I have a lot of free time",fullKo:"나는 여행하고 싶지만 시간이 별로 없어요."},
+ {mode:"guided",base:"I study English",baseKo:"나는 영어를 공부해요.",extraKo:"왜냐하면 해외여행을 하고 싶거든요.",link:"because",tail:"I want to travel abroad",other:"I don't like English",fullKo:"나는 해외여행을 하고 싶어서 영어를 공부해요."},
+ {mode:"order",base:"I want to go for a walk",link:"but",tail:"it's raining outside",fullKo:"나는 산책하고 싶지만 밖에 비가 오고 있어요."},
+ {mode:"order",base:"I walk every morning",link:"because",tail:"it makes me feel good",fullKo:"나는 기분이 좋아져서 매일 아침 산책해요."},
+ {mode:"order",base:"I like to cook",link:"but",tail:"I don't have much time",fullKo:"나는 요리하는 것을 좋아하지만 시간이 별로 없어요."},
+ {mode:"order",base:"I love this restaurant",link:"because",tail:"the food is delicious",fullKo:"나는 음식이 맛있어서 이 식당을 정말 좋아해요."}
+];
+function demoLoad(){
+ try{const d=JSON.parse(localStorage.getItem(DEMO_KEY));if(d&&Number.isInteger(d.index)&&d.index>=0&&d.index<=demoLessons.length)return {index:d.index,completed:d.completed===true&&d.index===demoLessons.length};}catch(e){}
+ return {index:0,completed:false};
+}
+let demoProgress=testMode?{index:0,completed:false}:demoLoad(),demoScreen="intro",demoPart=0;
+function demoSave(){if(!testMode)try{localStorage.setItem(DEMO_KEY,JSON.stringify(demoProgress));}catch(e){}}
+function demoSentence(d){return d.base+(d.link==="but"?", ":" ")+d.link+" "+d.tail+".";}
+function demoHead(){return '<div class="lesson-top"><button class="lesson-home" data-action="home" aria-label="홈으로">‹</button><span>중급 · 데모</span><span>'+Math.min(demoProgress.index+1,demoLessons.length)+'/'+demoLessons.length+'</span></div><div class="home-progress lesson-bar"><span style="width:'+(demoProgress.index/demoLessons.length*100)+'%"></span></div>';}
+function demoLine(d,n){return '<div class="board sentence-board"><div class="sentence-line">'+(n>=1?esc(d.base+(n>=2&&d.link==="but"?",":"")):'<span class="unfinished">···</span>')+(n>=2?' <span style="color:#235BFA">'+esc(d.link)+'</span>':n===1?' <span class="unfinished">···</span>':'')+(n>=3?' '+esc(d.tail)+'.':n===2?' <span class="unfinished">···</span>':'')+'</div></div>';}
+function demoOptions(d){
+ if(d.mode==="guided")return demoPart===0?(demoProgress.index%2===0?["because","but"]:["because","but"]):demoProgress.index%2===0?[d.other,d.tail]:[d.tail,d.other];
+ const correct=[d.base+(d.link==="but"?",":""),d.link,d.tail];
+ return demoProgress.index%2===0?[correct[2],correct[0],correct[1]]:[correct[1],correct[2],correct[0]];
+}
+function renderIntermediate(){
+ if(demoScreen==="intro"){
+  app.innerHTML='<section class="intro"><button class="back" data-action="home">‹ 홈</button><div class="home-label">중급 · 데모 버전</div><h1>이제 문장을<br>더 길게 만들어볼까요?</h1><p class="guide-intro">이번에는 BUT과 BECAUSE를 활용해서 문장을 늘리는 연습을 해요.</p><div class="board sentence-board"><div class="sentence-line">I like to make coffee.</div></div><p class="home-muted">한 문장에 또 다른 이야기를 붙이면?</p><div class="board sentence-board"><div class="sentence-line">I like to make coffee <span style="color:#235BFA">because</span> I love the smell of coffee.</div></div>'+button(demoProgress.completed?"다시 체험하기":demoProgress.index>0?"이어서 연습하기":"시작하기","demo-start")+'</section>';return;
+ }
+ if(demoScreen==="done"){
+  app.innerHTML='<section class="done"><button type="button" class="success-icon" data-action="replay-celebration" aria-label="축하 효과 다시 보기">✓</button><p class="done-kicker">🎉 중급 데모 완료!</p><h2>이제 이야기를<br>길게 이어갈 수 있어요!</h2><div class="result"><div class="big-sentence">I like to make coffee, but I’m too tired in the morning.</div><button class="mini-link" data-action="demo-summary-listen" data-index="0">🔊 듣기</button></div><div class="result"><div class="big-sentence">I like to make coffee because I love the smell of coffee.</div><button class="mini-link" data-action="demo-summary-listen" data-index="1">🔊 듣기</button></div><p class="translation">한 문장에 다른 이야기나 이유를 붙여서 말해보세요.</p>'+button("홈으로","home")+'<button class="mini-link" data-action="demo-restart">다시 연습하기</button></section>';return;
+ }
+ if(demoScreen==="handoff"){
+  const reason=demoProgress.index===1;
+  app.innerHTML='<section class="intro">'+demoHead()+'<h1>'+(reason?"이번에는 이유를<br>말해볼까요?":"이번에는 혼자<br>문장을 연결해볼까요?")+'</h1><p class="guide-intro">'+(reason?"같은 문장에 왜 그런지 이유를 붙여봐요.":"한국어 문장을 보고 영어 순서대로 직접 조립해보세요.")+'</p>'+button("시작하기","demo-continue")+'</section>';return;
+ }
+ const d=demoLessons[demoProgress.index];if(!d)return;
+ const guided=d.mode==="guided",solved=demoPart===(guided?2:3);
+ const heading='<section class="home lesson-head">'+demoHead()+'<h1>'+esc(guided?d.baseKo:d.fullKo)+'</h1>'+(guided?'<p class="guide-intro">'+esc(d.extraKo)+'</p>':'')+'</section>';
+ const shown=guided?demoPart+1:demoPart;
+ const opts=demoOptions(d),order=[d.base+(d.link==="but"?",":""),d.link,d.tail];
+ app.innerHTML=heading+demoLine(d,shown)+
+ (solved?'<div class="learn-actions"><p class="learn-good">✓ 이야기가 길어졌어요!</p><p class="translation">'+esc(d.fullKo)+'</p><button class="utility" data-action="demo-listen">🔊 문장 듣기</button><p class="home-muted">완성된 문장을 소리 내어 읽어보세요.</p>'+button("다음","demo-next")+'</div>':
+ '<section class="question-area daily-options"><h2>'+(guided?(demoPart===0?"어떤 말로 이어갈까요?":"뒤에 어떤 이야기를 붙일까요?"):"영어 순서대로 눌러보세요.")+'</h2><div class="answers">'+opts.map((w,i)=>'<button type="button" class="answer" data-kind="demo" data-index="'+i+'" '+(!guided&&order.slice(0,demoPart).includes(w)?"disabled":"")+'><span class="answer-no">'+(i+1)+'</span><span class="answer-content"><span class="answer-name">'+esc(w)+'</span></span></button>').join("")+'</div><p class="feedback" aria-live="polite"></p></section>');
+}
+function demoChoose(i,el){
+ if(scene!=="intermediate-demo"||demoScreen!=="lesson")return;
+ const d=demoLessons[demoProgress.index];if(!d)return;
+ const guided=d.mode==="guided";if(demoPart>=(guided?2:3))return;
+ const expected=guided?(demoPart===0?d.link:d.tail):[d.base+(d.link==="but"?",":""),d.link,d.tail][demoPart];
+ if(demoOptions(d)[i]!==expected){feedbackWrong(el);return;}
+ demoPart++;tapEffect(false);renderIntermediate();
+ const f=app.querySelector(".feedback");if(f)f.textContent="좋아요!";else celebrate(false,true);
+}
+function demoAction(which,el){
+ if(scene!=="intermediate-demo")return;
+ if(which==="demo-start"||which==="demo-restart"){
+  if(demoProgress.completed||which==="demo-restart"){demoProgress={index:0,completed:false};demoSave();}
+  demoPart=0;demoScreen="lesson";
+ }else if(which==="demo-continue"){demoPart=0;demoScreen="lesson";}
+ else if(which==="demo-listen"){const d=demoLessons[demoProgress.index];if(d)playEnglish(demoSentence(d),el);return;}
+ else if(which==="demo-summary-listen"){const d=demoLessons[Number(el.dataset.index)];if(d)playEnglish(demoSentence(d),el);return;}
+ else if(which==="demo-next"){
+  const d=demoLessons[demoProgress.index];if(!d||demoPart!==(d.mode==="guided"?2:3))return;
+  try{currentAudio?.pause();window.speechSynthesis?.cancel();}catch(e){}
+  demoProgress.index++;demoPart=0;
+  if(demoProgress.index===demoLessons.length){demoProgress.completed=true;demoScreen="done";}
+  else demoScreen=[1,4].includes(demoProgress.index)?"handoff":"lesson";
+  demoSave();
+ }else return;
+ render();window.scrollTo(0,0);if(demoScreen==="done")celebrate();
 }
 
 /* Personal voice diary: Korean speech -> automatic transcription and English -> spoken recording.
