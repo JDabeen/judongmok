@@ -22,3 +22,6 @@ export default async function(request){
   return reply({english});
  }catch(e){return reply({error:"TRANSLATION_FAILED"},502);}
 }
+
+// Per-IP API cost guard (Netlify deployment enforces this limit).
+export const config={path:"/.netlify/functions/jm-diary-english",rateLimit:{windowLimit:12,windowSize:60,aggregateBy:["ip","domain"]}};
