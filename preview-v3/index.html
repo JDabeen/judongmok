@@ -788,7 +788,7 @@ function renderHome(){
   (finished?'<p class="home-verb">'+BASIC_COUNT+'일 완성 🎉</p><p class="home-muted">배운 문장을 다시 떠올려보세요.</p>':
   '<div class="home-muted">DAY '+(progress.day+1)+' · 오늘의 동사</div><div class="home-verb">'+esc(day.verb)+'</div><p class="home-muted">'+esc(day.longKo)+'</p>')+
   (showHomeTip?'<p class="home-nudge">↓ 여기를 눌러 첫 연습을 시작하세요.</p>':"")+button(finished?"기초 문장 다시 연습":progress.draft&&progress.draft.day===progress.day?"이어서 연습하기":"오늘의 연습 시작","startDaily")+'</div>'+
-  '<div class="level-note">너무 쉬운가요?<button type="button" data-action="startIntermediate">중급 과정 체험하기 ›</button></div></section>';
+  '<div class="level-note">너무 쉬운가요?<button type="button" data-action="startIntermediate">중급 과정 체험하기 ›</button></div>'+cloudNotice()+'</section>';
 }
 
 const teachPicks=[[{"mask":"I ... water.","opts":["eat","drink"],"correct":"drink"},{"mask":"I drink ...","opts":["water","coffee"],"correct":"coffee"}],[{"mask":"I ... to work.","opts":["go","make"],"correct":"go"},{"mask":"I go ...","opts":["to the park","to school"],"correct":"to the park"}],[{"mask":"I ... a walk.","opts":["make","take"],"correct":"take"},{"mask":"I take ...","opts":["a break","a shower"],"correct":"a break"}],[{"mask":"I ... dinner.","opts":["take","make"],"correct":"make"},{"mask":"I make ...","opts":["breakfast","coffee"],"correct":"breakfast"}],[{"mask":"I ... English.","opts":["read","study"],"correct":"study"},{"mask":"We study ...","opts":["together","at home"],"correct":"together"}],[{"mask":"I ... my friend.","opts":["meet","see"],"correct":"meet"},{"mask":"We meet ...","opts":["at the cafe","at the park"],"correct":"at the cafe"}],[{"mask":"I ... a book.","opts":["read","make"],"correct":"read"},{"mask":"I read ...","opts":["the news","a letter"],"correct":"the news"}],[{"mask":"I ... a question.","opts":["have","make"],"correct":"have"},{"mask":"I have ...","opts":["a dog","a cat"],"correct":"a dog"}],[{"mask":"I ... a message.","opts":["get","do"],"correct":"get"},{"mask":"I get ...","opts":["a call","a gift"],"correct":"a call"}],[{"mask":"I ... the dishes.","opts":["do","get"],"correct":"do"},{"mask":"I do ...","opts":["the laundry","the shopping"],"correct":"the laundry"}],[{"mask":"I ... a diary.","opts":["keep","take"],"correct":"keep"},{"mask":"I keep ...","opts":["the receipt","the ticket"],"correct":"the receipt"}],[{"mask":"I like coffee, ... I drink tea.","opts":["but","because"],"correct":"but"},{"mask":"I am tired, ... I want to walk.","opts":["because","but"],"correct":"but"}],[{"mask":"I study English ... I want to travel.","opts":["but","because"],"correct":"because"},{"mask":"I rest ... I am tired.","opts":["because","but"],"correct":"because"}]];
@@ -1306,7 +1306,7 @@ async function diaryAction(which,button){
 }
 
 
-/* Current-course analytics: no diary contents, audio, or entered sentences leave the device. */
+/* Current-course analytics: never upload diary text or audio to the analytics DB. Translation is a separate API. */
 const SUPABASE_URL='https://plgaumvzuoiiisbzwcei.supabase.co', SUPABASE_PUBLISHABLE_KEY='sb_publishable_xZB3mERXFTB-wl1BRSMhsg_Zc31XeyL';
 const EVENT_QUEUE="judongmok:current-events:v1",EVENT_FEEDBACK="judongmok:daily-feedback:v1";
 let eventQueue=(()=>{try{const q=JSON.parse(localStorage.getItem(EVENT_QUEUE)||"[]");return Array.isArray(q)?q:[]}catch{return []}})();
@@ -1318,7 +1318,7 @@ function saveEventQueue(){try{localStorage.setItem(EVENT_QUEUE,JSON.stringify(ev
 function cloudEvent(course,event_type,fields={},attempt){
  if(testMode||!attempt)return false;
  eventQueue.push({id:cloudId(),attempt_id:attempt,course,event_type,occurred_at:new Date().toISOString(),...fields});
- const durable=saveEventQueue();void flushEvents();return durable;
+ const durable=saveEventQueue();if(!durable&&event_type==="feedback"){eventQueue.pop();return false;}void flushEvents();return durable;
 }
 async function flushEvents(){
  if(testMode||cloudSending||!eventQueue.length||!navigator.onLine||!window.supabase?.createClient)return;
