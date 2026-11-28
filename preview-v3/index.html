@@ -462,6 +462,7 @@ let currentAudio=null;
 async function playEnglish(text,button){
  if(!text||!button)return false;
  const original=button.textContent;
+ button.parentElement?.querySelectorAll(".audio-hint").forEach(x=>x.remove());
  button.disabled=true;button.textContent="🔄 음원 준비 중...";
  try{
   let url=speechFiles.get(text);
@@ -670,6 +671,7 @@ function completeDaily(){
  progress.draft=null;save();finish(4,en,ko);
 }
 function nextDaily(){
+ try{currentAudio?.pause();window.speechSynthesis?.cancel();}catch(e){}
  dailyTask++;sequence=0;
  if(dailyTask>=8){completeDaily();return;}
  rememberDraft();render();window.scrollTo(0,0);
@@ -778,7 +780,7 @@ function action(which,el){
  if(which==="startDaily"){showHomeTip=false;lessonIndex=progress.day<days.length?progress.day:0;const draft=progress.draft;dailyTask=draft&&draft.day===lessonIndex&&Number.isInteger(draft.task)&&draft.task>=0&&draft.task<8?draft.task:0;sequence=draft&&draft.day===lessonIndex&&Number.isInteger(draft.sequence)?Math.max(0,draft.sequence):0;const a=dailyCurrent();if(a.order)sequence=Math.min(sequence,a.order.length);else if(a.kind==="learn"||a.kind==="expand")sequence=sequence>0?1:0;else sequence=0;locked=false;scene="daily";rememberDraft();render();window.scrollTo(0,0);}
  if(which==="review"){scene="review";reviewShown.clear();render();window.scrollTo(0,0);}
  if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
- if(which==="home"){if(diaryRecorder&&diaryRecorder.state==="recording")diaryRecorder.stop();scene="home";render();window.scrollTo(0,0);}
+ if(which==="home"){diaryCancelRecording();try{currentAudio?.pause();window.speechSynthesis?.cancel();}catch(e){}scene="home";render();window.scrollTo(0,0);}
  if(which==="diary-open"){scene="diary";diaryStep="korean";diaryError="";render();window.scrollTo(0,0);}
  if(which.startsWith("diary-")){diaryAction(which,el);return;}
  if(which==="listen"){playEnglish(resultSentence,el);}
@@ -901,7 +903,7 @@ async function diaryTranscribe(file){
   const data=await response.json();
   diaryKorean=String(data.text||"").slice(0,1600);saveDiaryDraft();diaryError="";
  }catch(e){diaryError=e.message||"음성 인식에 실패했어요.";}
- diaryBusy=false;renderDiary();
+ diaryBusy=false;if(scene==="diary")renderDiary();
 }
 async function diaryConvert(){
  diaryCaptureFields();
@@ -915,7 +917,7 @@ async function diaryConvert(){
   diaryEnglish=String(data.english||"").trim().slice(0,2000);
   diaryError="";
  }catch(e){diaryError=e.message||"영어 변환을 사용할 수 없어요.";}
- diaryStep="english";diaryBusy=false;saveDiaryDraft();renderDiary();window.scrollTo(0,0);
+ diaryStep="english";diaryBusy=false;saveDiaryDraft();if(scene==="diary"){renderDiary();window.scrollTo(0,0);}
 }
 async function diarySave(){
  diaryCaptureFields();
@@ -938,6 +940,14 @@ async function diarySave(){
   diaryProblem("녹음 저장에 실패했어요. 브라우저 저장 공간을 확인하거나 다른 브라우저에서 시도해 주세요.");
  }
 }
+function diaryCancelRecording(){
+ if(diaryRecorder&&diaryRecorder.state==="recording"){
+  diaryRecorder.ondataavailable=null;diaryRecorder.onstop=null;
+  try{diaryRecorder.stop();}catch(e){}
+ }
+ try{diaryStream?.getTracks().forEach(track=>track.stop());}catch(e){}
+ diaryRecorder=null;diaryStream=null;diaryChunks=[];
+}
 function diaryStopRecording(){
  if(diaryRecorder&&diaryRecorder.state==="recording")diaryRecorder.stop();
 }
@@ -958,7 +968,7 @@ async function diaryToggleRecord(kind){
    stream.getTracks().forEach(track=>track.stop());
    const blob=new Blob(diaryChunks,{type:recorder.mimeType||"audio/webm"});
    diaryRecorder=null;diaryStream=null;diaryChunks=[];
-   if(kind==="ko"){diaryTranscribe(new File([blob],blob.type.includes("mp4")?"diary.m4a":"diary.webm",{type:blob.type}));}
+   if(kind==="ko"){let upload=blob;try{upload=new File([blob],blob.type.includes("mp4")?"diary.m4a":"diary.webm",{type:blob.type});}catch(e){upload.name=blob.type.includes("mp4")?"diary.m4a":"diary.webm";}diaryTranscribe(upload);}
    else{
     diaryEnglishBlob=blob;
     if(diaryPreviewUrl)URL.revokeObjectURL(diaryPreviewUrl);
