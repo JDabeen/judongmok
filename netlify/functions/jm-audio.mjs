@@ -20,3 +20,6 @@ export default async function(request){
   return new Response(bytes,{status:200,headers:{"content-type":"audio/mpeg","cache-control":"no-store","content-length":String(bytes.byteLength),"x-content-type-options":"nosniff"}});
  }catch(e){return reply("AUDIO_FAILED",502);}
 }
+
+// Per-IP API cost guard (Netlify deployment enforces this limit).
+export const config={path:"/.netlify/functions/jm-audio",rateLimit:{windowLimit:30,windowSize:60,aggregateBy:["ip","domain"]}};
