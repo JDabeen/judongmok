@@ -641,7 +641,7 @@ function renderHome(){
  app.innerHTML='<section class="home"><div class="home-label">나의 영어 연습</div><h1>오늘도 한 문장<br>만들어볼까요?</h1>'+
   '<div class="home-course"><div class="home-row"><span>초급 · 문장 만들기</span><strong>'+progress.day+' / '+days.length+'일</strong></div>'+
   '<div class="home-progress"><span style="width:'+percent+'%"></span></div>'+
-  (finished?'<p class="home-verb">7일 완성 🎉</p><p class="home-muted">배운 문장을 다시 떠올려보세요.</p>':
+  (finished?'<p class="home-verb">'+days.length+'일 완성 🎉</p><p class="home-muted">배운 문장을 다시 떠올려보세요.</p>':
   '<div class="home-muted">오늘의 핵심 표현 · 8개 활동</div><div class="home-verb">'+esc(day.verb)+'</div><p class="home-muted">'+esc(day.longKo)+'</p>')+
   (showHomeTip?'<p class="home-nudge">↓ 여기를 눌러 첫 연습을 시작하세요.</p>':"")+button(finished?"기초 문장 다시 연습":progress.draft&&progress.draft.day===progress.day?"이어서 연습하기":"오늘의 연습 시작","startDaily")+'</div>'+
   '<button class="home-link" data-action="review"><span>지난 문장 복습</span><span>›</span></button>'+
