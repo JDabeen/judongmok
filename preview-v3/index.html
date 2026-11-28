@@ -374,6 +374,10 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
  .diary-entry{padding:15px 13px}
  .diary-toolbar.bottom .utility{font-size:14px}
 }
+
+/* File selection is secondary; a large label opens the native recorder/picker. */
+.diary .file-label{display:flex;align-items:center;justify-content:center;min-height:48px;border:1px solid #DEE6F4;border-radius:10px;background:#fff;padding:9px 12px;box-sizing:border-box;cursor:pointer;color:#5B7192}
+.diary .diary-file{position:absolute!important;width:1px!important;height:1px!important;max-width:1px!important;padding:0!important;margin:0!important;clip-path:inset(50%);opacity:0;overflow:hidden}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app");
