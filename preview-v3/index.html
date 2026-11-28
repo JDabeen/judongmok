@@ -475,7 +475,16 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 .diary-tutorial .voice-button+.diary-lead{margin:14px 0 8px}
 .diary-tutorial .diary-privacy{margin:12px 0 8px;font-size:14px}
 .diary-tutorial .diary-preview{margin-bottom:0}
-</style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main><nav id="main-tabs" class="main-tabs" aria-label="주요 메뉴" hidden></nav></div><script>
+
+.cloud-notice{font-size:14px;line-height:1.6;color:#536074;margin:14px 0}
+.cloud-notice a{color:inherit;text-decoration:underline}
+.daily-feedback{padding:32px 0;text-align:center}.daily-feedback h1{font-size:clamp(25px,7vw,32px);line-height:1.4;margin:0 0 24px}
+.daily-rating{display:grid;grid-template-columns:1fr;gap:9px;margin:0 0 18px}
+.daily-rating button{min-height:54px;background:#fff;border:1px solid #d4dbe7;border-radius:12px;font-size:19px;font-weight:600;color:#202936}
+.daily-rating button[aria-pressed="true"]{background:#eef3ff;border:2px solid #235bfa;color:#1644b8}
+.daily-feedback textarea{width:100%;font:inherit;font-size:18px;line-height:1.6;border:1px solid #d4dbe7;border-radius:12px;padding:12px;resize:vertical;min-height:110px}
+.daily-feedback .primary:disabled{opacity:.5;cursor:default}.daily-feedback .mini-link{display:block;margin:12px auto;min-height:44px}
+</style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main><nav id="main-tabs" class="main-tabs" aria-label="주요 메뉴" hidden></nav></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
 (()=>{'use strict';
 const app=document.querySelector("#app"),mainTabs=document.querySelector("#main-tabs");
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -708,7 +717,9 @@ function feedbackWrong(el){el.classList.add("wrong");const f=app.querySelector("
 function resetStepState(){locked=false;step=0;picked={};sequence=0;}
 function render(){
  syncMainTabs();
- if(scene==="intro"){app.innerHTML='<section class="intro"><h1>영어와 한국어는<br>어순이 다르다는 사실,<br>알고 계셨나요?</h1><div class="answers">'+choices(["알고 있어요","느낌은 알지만 헷갈려요","잘 모르겠어요"],"intro")+'</div></section>';return;}
+ if(scene==="daily-feedback"){renderDailyFeedback();return;}
+ if(scene==="daily-finished"){renderDailyFinished();return;}
+ if(scene==="intro"){app.innerHTML='<section class="intro"><h1>영어와 한국어는<br>어순이 다르다는 사실,<br>알고 계셨나요?</h1><div class="answers">'+choices(["알고 있어요","느낌은 알지만 헷갈려요","잘 모르겠어요"],"intro")+'</div>'+cloudNotice()+'</section>';return;}
  if(scene==="learn"){
   const q=stage1[step],lit=mode==="guided"?q.part:-1,seen=mode==="independent"?[picked.subject?0:-1,picked.verb?2:-1,picked.object?1:-1]:[];
   app.innerHTML='<section class="hero korean-hero"><h1>'+koTokens(base1,lit,seen)+'</h1></section>'+
@@ -737,7 +748,7 @@ function render(){
   app.innerHTML='<section class="done"><button type="button" class="success-icon" data-action="replay-celebration" aria-label="축하 효과 다시 보기">✓</button><p class="done-kicker">🎉 잘했어요!</p><h2>'+label+'</h2>'+small+
   '<div class="result"><div class="big-sentence">'+esc(resultSentence)+'</div></div><p class="translation">'+esc(resultKorean)+'</p>'+
   '<div class="done-buttons"><button class="utility" data-action="listen">🔊 듣기</button><button class="utility" data-action="share">↗ 공유</button></div>'+
-  (stage===4?'<div class="diary-after"><strong>오늘의 이야기도 영어로 남겨볼까요?</strong>'+button("영어 일기 쓰기","diary-open")+'<button class="mini-link" data-action="next">오늘은 여기까지</button></div>':button(stage===3?"앱 사용법 보기":"다음 단계","next"))+'</section>';return;
+  (stage===4?button("오늘 학습 마치기","daily-feedback"):button(stage===3?"앱 사용법 보기":"다음 단계","next"))+'</section>';return;
  }
  if(scene==="guide"){
   app.innerHTML='<section class="guide"><div class="guide-complete" aria-hidden="true">✓</div><p class="guide-kicker">첫 체험 완료!</p><h1>이제 이렇게<br>사용하면 돼요.</h1><p class="guide-intro">오늘부터는 짧은 문장을 만들고, 조금씩 길게 말하는 연습을 해요.</p>'+
@@ -797,10 +808,11 @@ function completeDaily(){
  if(!progress.history.some(x=>x.day===lessonIndex))progress.history.push({day:lessonIndex,ko,en});
  if(lessonIndex>=BASIC_COUNT){progress.intermediate=Math.max(progress.intermediate,lessonIndex-BASIC_COUNT+1);progress.intermediateDraft=null;}
  else{progress.day=Math.max(progress.day,lessonIndex+1);progress.draft=null;}
- save();finish(4,en,ko);
+ save();cloudEvent("basic","complete",{lesson_day:lessonIndex+1},dailyAttempt);finish(4,en,ko);
 }
 function nextDaily(){
  try{currentAudio?.pause();window.speechSynthesis?.cancel();}catch(e){}
+ cloudEvent("basic","activity_done",{lesson_day:lessonIndex+1,activity:dailyTask+1},dailyAttempt);
  dailyTask++;sequence=0;
  if(dailyTask>=8){completeDaily();return;}
  rememberDraft();render();window.scrollTo(0,0);
@@ -870,6 +882,10 @@ function clickChoice(kind,i,button){
  }
  if(kind==="daily"){
   const a=dailyCurrent();
+  if(dailySolved(a))return;
+  const selected=a.kind==="learn"?a.pick.opts[i]:a.options[i];
+  const expected=a.kind==="learn"?a.pick.correct:a.kind==="expand"?a.correct:a.order[sequence];
+  if(selected!==undefined)cloudEvent("basic","answer",{lesson_day:lessonIndex+1,activity:dailyTask+1,question:sequence+1,correct:selected===expected},dailyAttempt);
   if(a.kind==="learn"){
    if(a.pick.opts[i]!==a.pick.correct){feedbackWrong(button);return;}
    locked=true;feedbackRight(button,"좋아요!");tapEffect(false);
@@ -896,6 +912,7 @@ function clickChoice(kind,i,button){
   return;
  }}
 function action(which,el){
+ if(which.startsWith("daily-feedback")||which==="daily-finish-home"||which==="daily-finish-diary"){dailyFeedbackAction(which,el);return;}
  if(scene==="diary"&&diaryBusy)return;
  if(scene==="diary"&&diaryRecorder?.state==="recording"&&!["diary-record-ko","diary-record-en","home"].includes(which))return;
  if(which==="startIntermediate"){scene="intermediate-demo";demoScreen="intro";locked=false;render();window.scrollTo(0,0);return;}
@@ -911,7 +928,7 @@ function action(which,el){
   else{scene="home";}
   locked=false;render();window.scrollTo(0,0);
  }
- if(which==="startDaily"){showHomeTip=false;lessonIndex=progress.day<BASIC_COUNT?progress.day:0;const draft=progress.draft;dailyTask=draft&&draft.day===lessonIndex&&Number.isInteger(draft.task)&&draft.task>=0&&draft.task<8?draft.task:0;sequence=draft&&draft.day===lessonIndex&&Number.isInteger(draft.sequence)?Math.max(0,draft.sequence):0;const a=dailyCurrent();if(a.order)sequence=Math.min(sequence,a.order.length);else if(a.kind==="learn"||a.kind==="expand")sequence=sequence>0?1:0;else sequence=0;locked=false;scene="daily";rememberDraft();render();window.scrollTo(0,0);}
+ if(which==="startDaily"){showHomeTip=false;lessonIndex=progress.day<BASIC_COUNT?progress.day:0;const draft=progress.draft;dailyTask=draft&&draft.day===lessonIndex&&Number.isInteger(draft.task)&&draft.task>=0&&draft.task<8?draft.task:0;sequence=draft&&draft.day===lessonIndex&&Number.isInteger(draft.sequence)?Math.max(0,draft.sequence):0;const a=dailyCurrent();if(a.order)sequence=Math.min(sequence,a.order.length);else if(a.kind==="learn"||a.kind==="expand")sequence=sequence>0?1:0;else sequence=0;locked=false;scene="daily";dailyAttempt=cloudId();cloudEvent("basic","start",{lesson_day:lessonIndex+1,activity:dailyTask+1},dailyAttempt);rememberDraft();render();window.scrollTo(0,0);}
  if(which==="review"){scene="review";reviewShown.clear();render();window.scrollTo(0,0);}
  if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
  if(which==="home"){diaryCancelRecording();try{currentAudio?.pause();window.speechSynthesis?.cancel();}catch(e){}scene="home";render();window.scrollTo(0,0);}
@@ -980,7 +997,8 @@ function demoChoose(i,el){
  const d=demoLessons[demoProgress.index];if(!d)return;
  const guided=d.mode==="guided";if(demoPart>=(guided?2:3))return;
  const expected=guided?(demoPart===0?d.link:d.tail):[d.base+(d.link==="but"?",":""),d.link,d.tail][demoPart];
- if(demoOptions(d)[i]!==expected){feedbackWrong(el);return;}
+ const selected=demoOptions(d)[i];if(selected!==undefined)cloudEvent("intermediate","answer",{activity:demoProgress.index+1,question:demoPart+1,correct:selected===expected},demoAttempt);
+ if(selected!==expected){feedbackWrong(el);return;}
  demoPart++;tapEffect(false);renderIntermediate();
  const f=app.querySelector(".feedback");if(f)f.textContent="좋아요!";else celebrate(false,true);
 }
@@ -988,6 +1006,7 @@ function demoAction(which,el){
  if(scene!=="intermediate-demo")return;
  if(which==="demo-start"||which==="demo-restart"){
   if(demoProgress.completed||which==="demo-restart"){demoProgress={index:0,completed:false};demoSave();}
+  demoAttempt=cloudId();cloudEvent("intermediate","start",{activity:demoProgress.index+1},demoAttempt);
   demoPart=0;demoScreen="lesson";
  }else if(which==="demo-continue"){demoPart=0;demoScreen="lesson";}
  else if(which==="demo-listen"){const d=demoLessons[demoProgress.index];if(d)playEnglish(demoSentence(d),el);return;}
@@ -995,8 +1014,9 @@ function demoAction(which,el){
  else if(which==="demo-next"){
   const d=demoLessons[demoProgress.index];if(!d||demoPart!==(d.mode==="guided"?2:3))return;
   try{currentAudio?.pause();window.speechSynthesis?.cancel();}catch(e){}
+  cloudEvent("intermediate","activity_done",{activity:demoProgress.index+1},demoAttempt);
   demoProgress.index++;demoPart=0;
-  if(demoProgress.index===demoLessons.length){demoProgress.completed=true;demoScreen="done";}
+  if(demoProgress.index===demoLessons.length){demoProgress.completed=true;demoScreen="done";cloudEvent("intermediate","complete",{},demoAttempt);}
   else demoScreen=[1,4].includes(demoProgress.index)?"handoff":"lesson";
   demoSave();
  }else return;
@@ -1171,8 +1191,8 @@ async function diaryConvert(fromVoice=false){
   if(!translated)throw new Error("영어 문장을 만들지 못했어요. 다시 시도해 주세요.");
   diaryEnglish=translated;diaryEnglishBlob=null;
   if(diaryPreviewUrl){URL.revokeObjectURL(diaryPreviewUrl);diaryPreviewUrl=null;}
-  diaryError="";diaryStep="english";diaryEditEnglish=false;
- }catch(e){diaryError=e.message||"영어 변환을 사용할 수 없어요.";}
+  diaryError="";diaryStep="english";diaryEditEnglish=false;cloudEvent("diary","convert_ok",{},diaryAttempt);
+ }catch(e){diaryError=e.message||"영어 변환을 사용할 수 없어요.";cloudEvent("diary","convert_failed",{},diaryAttempt);}
  diaryBusy=false;diaryPhase="";saveDiaryDraft();if(scene==="diary"){renderDiary();window.scrollTo(0,0);}
 }
 async function diarySave(){
@@ -1189,6 +1209,7 @@ async function diarySave(){
   const nextEntries=[record,...diaryEntries].slice(0,100);
   localStorage.setItem(DIARY_KEY,JSON.stringify(nextEntries));
   diaryEntries=nextEntries;
+  cloudEvent("diary","saved",{has_audio:hasAudio},diaryAttempt);
   try{localStorage.removeItem(DIARY_DRAFT_KEY);}catch(e){}
   diaryStep="saved";diaryBusy=false;diaryError="";diaryEnglishBlob=null;
   if(diaryPreviewUrl){URL.revokeObjectURL(diaryPreviewUrl);diaryPreviewUrl=null;}
@@ -1253,8 +1274,8 @@ async function diaryPlaySaved(i,button){
 }
 async function diaryAction(which,button){
  if(which==="diary-retry-ai"){diaryRefreshAI();renderDiary();return;}
- if(which==="diary-start"){if(!diaryAIStatus?.configured)return;diaryManual=false;diaryPracticeConfirmed=false;diaryStep="korean";diaryError="";renderDiary();window.scrollTo(0,0);return;}
- if(which==="diary-manual-start"){diaryManual=true;diaryStep="korean";diaryError="";renderDiary();window.scrollTo(0,0);return;}
+ if(which==="diary-start"){if(!diaryAIStatus?.configured)return;diaryAttempt=cloudId();cloudEvent("diary","start",{},diaryAttempt);diaryManual=false;diaryPracticeConfirmed=false;diaryStep="korean";diaryError="";renderDiary();window.scrollTo(0,0);return;}
+ if(which==="diary-manual-start"){diaryAttempt=cloudId();cloudEvent("diary","start",{},diaryAttempt);diaryManual=true;diaryStep="korean";diaryError="";renderDiary();window.scrollTo(0,0);return;}
  if(which==="diary-manual-next"){diaryCaptureFields();if(!diaryKorean.trim()){diaryProblem("한국어 문장을 적어주세요.");return;}diaryStep="english";diaryEditEnglish=true;diaryError="";renderDiary();window.scrollTo(0,0);return;}
  if(which==="diary-practice-convert"){diaryPracticeConfirmed=true;return diaryConvert();}
  if(which==="diary-back"){
@@ -1284,6 +1305,60 @@ async function diaryAction(which,button){
  if(which==="diary-play-entry")return diaryPlaySaved(Number(button.dataset.index),button);
 }
 
+
+/* Current-course analytics: no diary contents, audio, or entered sentences leave the device. */
+const SUPABASE_URL='https://plgaumvzuoiiisbzwcei.supabase.co', SUPABASE_PUBLISHABLE_KEY='sb_publishable_xZB3mERXFTB-wl1BRSMhsg_Zc31XeyL';
+const EVENT_QUEUE="judongmok:current-events:v1",EVENT_FEEDBACK="judongmok:daily-feedback:v1";
+let eventQueue=(()=>{try{const q=JSON.parse(localStorage.getItem(EVENT_QUEUE)||"[]");return Array.isArray(q)?q:[]}catch{return []}})();
+let cloudClient=null,cloudSending=false,dailyAttempt=null,demoAttempt=null,diaryAttempt=null;
+let dailyFeedbackRating="",dailyFeedbackComment="";
+function cloudId(){if(crypto.randomUUID)return crypto.randomUUID();const a=crypto.getRandomValues(new Uint8Array(16));a[6]=(a[6]&15)|64;a[8]=(a[8]&63)|128;const x=[...a].map(b=>b.toString(16).padStart(2,"0")).join("");return x.slice(0,8)+"-"+x.slice(8,12)+"-"+x.slice(12,16)+"-"+x.slice(16,20)+"-"+x.slice(20);}
+function cloudNotice(){return '<p class="cloud-notice">학습 개선을 위해 익명 학습 기록이 저장돼요. <a href="/privacy.html" target="_blank" rel="noopener">기록 안내</a></p>';}
+function saveEventQueue(){try{localStorage.setItem(EVENT_QUEUE,JSON.stringify(eventQueue));return true;}catch{return false;}}
+function cloudEvent(course,event_type,fields={},attempt){
+ if(testMode||!attempt)return false;
+ eventQueue.push({id:cloudId(),attempt_id:attempt,course,event_type,occurred_at:new Date().toISOString(),...fields});
+ const durable=saveEventQueue();void flushEvents();return durable;
+}
+async function flushEvents(){
+ if(testMode||cloudSending||!eventQueue.length||!navigator.onLine||!window.supabase?.createClient)return;
+ cloudSending=true;
+ try{
+  if(!cloudClient)cloudClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+  let {data,error}=await cloudClient.auth.getSession();if(error)throw error;
+  if(!data.session){({data,error}=await cloudClient.auth.signInAnonymously());if(error)throw error;}
+  const user=data.session?.user;if(!user?.id||user.is_anonymous!==true)throw Error("Anonymous learner session required");
+  while(eventQueue.length){
+   const batch=eventQueue.slice(0,25);
+   const {error}=await cloudClient.from("jm_learning_events").upsert(batch.map(x=>({...x,user_id:user.id})),{onConflict:"id",ignoreDuplicates:true});
+   if(error)throw error;
+   const ids=new Set(batch.map(x=>x.id));eventQueue=eventQueue.filter(x=>!ids.has(x.id));saveEventQueue();
+  }
+ }catch(e){console.warn("주동목 학습 기록 동기화 대기:",e.code||e.message);}
+ finally{cloudSending=false;}
+}
+window.addEventListener("online",()=>void flushEvents());
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)void flushEvents();});
+function renderDailyFeedback(){
+ app.innerHTML='<section class="daily-feedback"><h1>오늘 연습은 어땠나요?</h1><div class="daily-rating" role="group" aria-label="난이도">'+[["easy","쉬웠어요"],["good","적당해요"],["hard","어려웠어요"]].map(([v,l])=>'<button type="button" data-action="daily-feedback-rate" data-rating="'+v+'" aria-pressed="'+(dailyFeedbackRating===v)+'">'+l+'</button>').join("")+'</div><textarea id="daily-feedback-comment" maxlength="200" rows="3" aria-label="선택 의견" placeholder="하고 싶은 말 (선택)">'+esc(dailyFeedbackComment)+'</textarea><p class="cloud-notice">개인정보 없이 적어주세요. 의견은 운영자에게 전달됩니다.</p>'+button("의견 보내기","daily-feedback-send")+'<button class="mini-link" data-action="daily-feedback-skip">건너뛰기</button></section>';
+ app.querySelector('[data-action="daily-feedback-send"]').disabled=!dailyFeedbackRating&&!dailyFeedbackComment.trim();
+}
+function renderDailyFinished(){
+ app.innerHTML='<section class="diary diary-tutorial"><div class="guide-complete">✓</div><h1>오늘도 잘했어요!</h1><p class="diary-lead">오늘의 이야기도 영어로 남겨볼까요?</p>'+button("영어 일기 쓰기","daily-finish-diary")+'<button class="mini-link diary-secondary" data-action="daily-finish-home">오늘은 여기까지</button></section>';
+}
+function dailyFeedbackAction(which,el){
+ if(which==="daily-feedback"&&scene==="done"&&stage===4){dailyFeedbackRating="";dailyFeedbackComment="";scene="daily-feedback";render();window.scrollTo(0,0);return;}
+ if(which==="daily-finish-home"&&scene==="daily-finished"){scene="home";render();window.scrollTo(0,0);return;}
+ if(which==="daily-finish-diary"&&scene==="daily-finished"){diaryOpen();return;}
+ if(scene!=="daily-feedback")return;
+ if(which==="daily-feedback-rate"){dailyFeedbackRating=el.dataset.rating;renderDailyFeedback();return;}
+ if(which==="daily-feedback-send"){
+  if(!dailyFeedbackRating&&!dailyFeedbackComment.trim())return;
+  if(!testMode){const ok=cloudEvent("basic","feedback",{lesson_day:lessonIndex+1,rating:dailyFeedbackRating||null,comment:dailyFeedbackComment.trim()||null},dailyAttempt);if(!ok){const p=app.querySelector(".cloud-notice");p.textContent="기기 저장 공간을 확인해 주세요. 건너뛰기도 가능해요.";return;}}
+ }else if(which!=="daily-feedback-skip")return;
+ scene="daily-finished";dailyFeedbackComment="";dailyFeedbackRating="";render();window.scrollTo(0,0);
+}
+
 mainTabs.addEventListener("click",e=>{const el=e.target.closest("button[data-action]");if(el&&!el.disabled&&el.getAttribute("aria-current")!=="page")action(el.dataset.action,el);});
 app.addEventListener("click",e=>{
  const el=e.target.closest("button");if(!el||el.disabled)return;
@@ -1291,10 +1366,11 @@ app.addEventListener("click",e=>{
  else if(el.hasAttribute("data-action"))action(el.dataset.action,el);
 });
 app.addEventListener("input",e=>{
+ if(e.target.id==="daily-feedback-comment"){dailyFeedbackComment=e.target.value;app.querySelector('[data-action="daily-feedback-send"]').disabled=!dailyFeedbackRating&&!dailyFeedbackComment.trim();return;}
  if(e.target.id==="diary-korean"){diaryKorean=e.target.value;diaryPracticeConfirmed=false;saveDiaryDraft();}
  if(e.target.id==="diary-english"){diaryEnglish=e.target.value;diaryEnglishBlob=null;if(diaryPreviewUrl){URL.revokeObjectURL(diaryPreviewUrl);diaryPreviewUrl=null;}saveDiaryDraft();}
 });
 
-render();
+render();void flushEvents();
 })();
 </script></body></html>
