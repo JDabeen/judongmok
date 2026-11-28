@@ -459,6 +459,22 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
 .diary .diary-privacy{font-size:14px;line-height:1.6;color:#4B5563}
 .diary .primary{box-shadow:none;font-weight:700}
 .diary .diary-toolbar{margin-bottom:12px}
+
+/* Diary tutorial: one task per screen, generous readable type and quiet secondary actions. */
+.diary-tutorial{padding:24px 0 28px;min-width:0}
+.diary-tutorial h1{font-size:clamp(27px,7vw,34px);line-height:1.4;font-weight:700;margin:0 0 24px}
+.diary-tutorial .diary-nav{margin-bottom:12px}
+.diary-tutorial .lesson-bar{margin-bottom:24px}
+.diary-tutorial .diary-example,.diary-english-card{background:#f6f7f9;border:1px solid #e2e6ed;border-radius:14px;padding:22px 18px;font-size:clamp(23px,6vw,29px);font-weight:600;line-height:1.6;letter-spacing:-.025em;overflow-wrap:anywhere;white-space:pre-wrap;margin:0 0 20px}
+.diary-example span{display:block;text-align:center;font-size:22px;color:#64748b;padding:8px}
+.diary-tutorial .diary-quiet{display:block;min-height:46px;border:0;background:transparent;color:#4b5563;font-size:16px;font-weight:600;text-decoration:underline;text-underline-offset:4px;padding:8px 6px;margin:2px auto}
+.diary-tutorial .diary-toolbar .diary-quiet{margin:0}
+.diary-tutorial textarea{min-height:160px;font-size:20px;line-height:1.6}
+.diary-tutorial .primary{margin:16px 0 6px}
+.diary-tutorial .diary-listen-main{width:100%;min-height:60px;font-size:19px}
+.diary-tutorial .voice-button+.diary-lead{margin:14px 0 8px}
+.diary-tutorial .diary-privacy{margin:12px 0 8px;font-size:14px}
+.diary-tutorial .diary-preview{margin-bottom:0}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main><nav id="main-tabs" class="main-tabs" aria-label="주요 메뉴" hidden></nav></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app"),mainTabs=document.querySelector("#main-tabs");
@@ -741,7 +757,7 @@ function render(){
 }
 
 function syncMainTabs(){
- const active=scene==="home"?"home":scene==="review"?"review":scene==="diary-library"?"diary-open":scene==="diary"&&diaryStep==="korean"&&!diaryBusy&&!diaryRecorder?"diary-open":null;
+ const active=scene==="home"?"home":scene==="review"?"review":scene==="diary-library"?"diary-open":scene==="diary"&&diaryStep==="intro"&&!diaryBusy&&!diaryRecorder?"diary-open":null;
  mainTabs.hidden=!active;
  if(!active)return;
  const items=[
@@ -899,7 +915,7 @@ function action(which,el){
  if(which==="review"){scene="review";reviewShown.clear();render();window.scrollTo(0,0);}
  if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
  if(which==="home"){diaryCancelRecording();try{currentAudio?.pause();window.speechSynthesis?.cancel();}catch(e){}scene="home";render();window.scrollTo(0,0);}
- if(which==="diary-open"){scene="diary";diaryStep="korean";diaryError="";diaryAIStatus=null;diaryPracticeConfirmed=false;render();window.scrollTo(0,0);diaryRefreshAI();return;}
+ if(which==="diary-open"){diaryOpen();return;}
  if(which.startsWith("diary-")){diaryAction(which,el);return;}
  if(which==="listen"){playEnglish(resultSentence,el);}
  if(which==="replay-celebration"){tapEffect(true);celebrate(true);}
@@ -998,59 +1014,80 @@ let diaryDraft=diaryRead(DIARY_DRAFT_KEY,{korean:"",english:""});
 let diaryKorean=typeof diaryDraft.korean==="string"?diaryDraft.korean:"";
 let diaryEnglish=typeof diaryDraft.english==="string"?diaryDraft.english:"";
 let diaryAIStatus=null,diaryPracticeConfirmed=false;
-let diaryStep="korean",diaryError="",diaryBusy=false,diaryPhase="",diaryRecorder=null,diaryStream=null,diaryRecordKind="",diaryChunks=[],diaryEnglishBlob=null,diaryPreviewUrl=null;
+let diaryManual=false,diaryEditEnglish=false,diaryRequestId=0;
+let diaryStep="intro",diaryError="",diaryBusy=false,diaryPhase="",diaryRecorder=null,diaryStream=null,diaryRecordKind="",diaryChunks=[],diaryEnglishBlob=null,diaryPreviewUrl=null;
+function diaryOpen(){
+ if(diaryStep==="saved")diaryReset();
+ diaryStep="intro";diaryError="";diaryManual=false;diaryEditEnglish=false;diaryAIStatus=null;diaryPracticeConfirmed=false;
+ scene="diary";render();window.scrollTo(0,0);diaryRefreshAI();
+}
 async function diaryRefreshAI(){
- diaryAIStatus=null;diaryPracticeConfirmed=false;
+ const requestId=++diaryRequestId;diaryAIStatus=null;diaryPracticeConfirmed=false;
  try{
   const res=await fetch("/.netlify/functions/jm-diary-english",{cache:"no-store"});
   if(!res.ok)throw Error("AI_CONFIG");
   const data=await res.json();
   if(typeof data.practiceOnly!=="boolean"||typeof data.configured!=="boolean")throw Error("AI_CONFIG");
+  if(requestId!==diaryRequestId)return;
   diaryAIStatus=data;
- }catch(e){diaryAIStatus=null;}
- if(scene==="diary"&&diaryStep==="korean"&&!diaryBusy&&!diaryRecorder){diaryCaptureFields();renderDiary();}
+ }catch(e){if(requestId!==diaryRequestId)return;diaryAIStatus=null;}
+ if(scene==="diary"&&diaryStep==="intro"){renderDiary();}
 }
 function saveDiaryDraft(){
  try{localStorage.setItem(DIARY_DRAFT_KEY,JSON.stringify({korean:diaryKorean.slice(0,1600),english:diaryEnglish.slice(0,2000)}));}catch(e){}
 }
 function diaryStatus(){return diaryBusy?(diaryPhase||"처리 중이에요."):diaryError;}
 function diaryBanner(){return diaryStatus()?'<p class="diary-alert" role="status">'+esc(diaryStatus())+'</p>':"";}
+function diaryNav(step){
+ return '<div class="lesson-top diary-nav"><button type="button" class="lesson-home" data-action="diary-back" aria-label="이전">‹</button><span>영어 일기</span><span>'+step+' / 3</span></div><div class="home-progress lesson-bar"><span style="width:'+(step/3*100)+'%"></span></div>';
+}
 function renderDiary(){
  syncMainTabs();
  const recording=diaryRecorder&&diaryRecorder.state==="recording";
  const practiceOnly=diaryAIStatus?.practiceOnly!==false;
- const toolbar='<div class="diary-toolbar"><button class="back" data-action="home">‹ 홈</button><button class="mini-link" data-action="diary-list">지난 일기</button></div>';
+ const ready=diaryAIStatus?.configured===true;
+ const secondary=(label,action)=>'<button type="button" class="diary-quiet" data-action="'+action+'">'+esc(label)+'</button>';
+ if(diaryStep==="intro"){
+  app.innerHTML='<section class="diary diary-tutorial"><div class="diary-toolbar"><button class="back" data-action="home">‹ 학습</button>'+secondary("지난 일기","diary-list")+'</div>'+
+   '<h1>영어 일기를<br>써볼까요?</h1><div class="diary-example">오늘 커피를 마셨어요.<span aria-hidden="true">↓</span>I drank coffee today.</div>'+
+   (ready?'<p class="diary-lead">'+(practiceOnly?"가상 문장으로 연습해요.":"내 이야기를 영어로 바꿔보세요.")+'</p>': '<p class="diary-lead">'+(diaryAIStatus?"AI 연결이 필요해요.":"AI 연결을 확인하고 있어요.")+'</p>')+
+   (ready?button("시작하기","diary-start"):"")+
+   (practiceOnly&&ready?'<p class="diary-privacy">무료 AI에는 실제 일기·개인정보를 보내지 마세요. 입력은 AI 개선에 사용될 수 있어요.</p>':'')+
+   secondary("영어 직접 쓰기","diary-manual-start")+
+   '</section>';return;
+ }
  if(diaryStep==="korean"){
-  app.innerHTML='<section class="diary">'+toolbar+'<div class="home-label">일기</div>'+
-   '<h1>'+(practiceOnly?"영어로 바꿔볼까요?":"오늘 어떤 일이 있었나요?")+'</h1><p class="diary-lead">'+(practiceOnly?"가상의 연습 문장을 적어보세요.":"한국어로 말하거나 적어보세요.")+'</p>'+
-   (practiceOnly?"":'<button type="button" class="voice-button '+(recording?"is-recording":"")+'" data-action="diary-record-ko" '+(diaryBusy?"disabled":"")+'>'+
-    (recording?"■ 말하기 끝 · 영어로 바꾸기":"<span aria-hidden=\"true\">🎤</span> 한국어로 말하기")+'</button>')+
-   '<label class="diary-input-label" for="diary-korean">'+(practiceOnly?"한국어 문장":"또는 직접 적기")+'</label><textarea id="diary-korean" rows="3" maxlength="1600" '+(diaryBusy||recording?"disabled":"")+' placeholder="예: 오늘 친구를 만났어요.">'+esc(diaryKorean)+'</textarea>'+
-   diaryBanner()+(practiceOnly?'<label class="diary-consent"><input id="diary-practice" type="checkbox" '+(diaryPracticeConfirmed?"checked":"")+' '+(diaryBusy?"disabled":"")+'> 개인정보가 없는 가상 문장입니다.</label>':"")+
-   (diaryBusy||recording?"":button("영어로 바꾸기","diary-convert")+'<button class="mini-link diary-secondary" data-action="diary-manual">영어 직접 적기</button>')+
-   '<p class="diary-privacy">'+(practiceOnly?"무료 AI는 연습용입니다. 실제 일기·개인정보는 보내지 마세요. 입력은 AI 개선에 사용될 수 있습니다.":"변환 시 음성·글이 AI로 전송됩니다.")+' 일기는 이 기기에 저장됩니다.</p></section>';
-  return;
+  app.innerHTML='<section class="diary diary-tutorial">'+diaryNav(1)+
+   '<h1>'+(practiceOnly&&!diaryManual?"연습 문장을 적어보세요.":"오늘 어떤 일이 있었나요?")+'</h1>'+
+   (!practiceOnly&&!diaryManual?'<button type="button" class="voice-button '+(recording?"is-recording":"")+'" data-action="diary-record-ko" '+(diaryBusy?"disabled":"")+'>'+(recording?"■ 말하기 끝":"🎤 한국어로 말하기")+'</button><p class="diary-lead">또는 직접 적기</p>':"")+
+   '<textarea aria-label="한국어 문장" id="diary-korean" rows="4" maxlength="1600" '+(diaryBusy||recording?"disabled":"")+' placeholder="예: 오늘 커피를 마셨어요.">'+esc(diaryKorean)+'</textarea>'+
+   diaryBanner()+
+   (diaryBusy||recording?"":diaryManual?button("다음","diary-manual-next"):practiceOnly?'<p class="diary-privacy">개인정보 없는 가상 문장만 입력하세요. 입력은 AI 개선에 사용될 수 있어요.</p>'+button("가상 문장 번역하기","diary-practice-convert"):button("영어로 바꾸기","diary-convert")+'<p class="diary-privacy">변환 시 음성·글이 AI로 전송됩니다.</p>')+
+   '</section>';return;
  }
  if(diaryStep==="english"){
-  app.innerHTML='<section class="diary">'+toolbar+'<div class="home-label">말하기 일기 · 2단계</div>'+
-   '<h1>영어로 읽어볼까요?</h1>'+
-   '<button class="mini-link" data-action="diary-edit-korean">한국어 수정</button>'+
-   '<label class="diary-input-label" for="diary-english">영어 일기</label><textarea id="diary-english" rows="5" maxlength="2000" placeholder="영어 문장이 여기에 나타나요.">'+esc(diaryEnglish)+'</textarea>'+
-   '<div class="diary-toolbar bottom"><button class="utility" data-action="diary-convert" '+(diaryBusy?"disabled":"")+'>다시 변환</button><button class="utility" data-action="diary-listen" '+(!diaryEnglish.trim()?"disabled":"")+'>🔊 영어 듣기</button></div>'+
-   '<button type="button" class="voice-button '+(recording?"is-recording":"")+'" data-action="diary-record-en" '+(diaryBusy?"disabled":"")+'>'+
-   (recording?"■ 영어 녹음 끝내기":"🎙️ 영어로 읽기")+'</button>'+
-   (diaryPreviewUrl?'<div class="diary-preview"><span>내 목소리 확인하기</span><audio controls playsinline src="'+esc(diaryPreviewUrl)+'"></audio></div>':
-   "")+
-   diaryBanner()+button(diaryBusy?"저장 중...":"일기 저장하기","diary-save")+
-   '<p class="diary-privacy">녹음 없이도 저장할 수 있어요.</p></section>';
-  return;
+  const edit=diaryManual||diaryEditEnglish;
+  app.innerHTML='<section class="diary diary-tutorial">'+diaryNav(2)+
+   '<h1>'+(edit?"영어 문장을 적어보세요.":"영어로 이렇게 말해요.")+'</h1>'+
+   (edit?'<textarea id="diary-english" aria-label="영어 문장" rows="5" maxlength="2000" placeholder="I drank coffee today.">'+esc(diaryEnglish)+'</textarea>':'<div class="diary-english-card">'+esc(diaryEnglish)+'</div>')+
+   diaryBanner()+
+   (diaryBusy?"":'<button type="button" class="utility diary-listen-main" data-action="diary-listen">🔊 영어 듣기</button>'+button("따라 읽기","diary-read")+(edit?"":secondary("영어 수정","diary-edit-en")))+
+   '</section>';return;
+ }
+ if(diaryStep==="read"){
+  app.innerHTML='<section class="diary diary-tutorial">'+diaryNav(3)+
+   '<h1>소리 내어 읽어보세요.</h1><div class="diary-english-card">'+esc(diaryEnglish)+'</div>'+
+   '<button type="button" class="voice-button '+(recording?"is-recording":"")+'" data-action="diary-record-en" '+(diaryBusy?"disabled":"")+'>'+(recording?"■ 녹음 끝":diaryEnglishBlob?"🎙️ 다시 녹음하기":"🎙️ 내 목소리 녹음하기")+'</button>'+
+   (diaryPreviewUrl?'<div class="diary-preview"><audio controls playsinline src="'+esc(diaryPreviewUrl)+'"></audio></div>':"")+
+   diaryBanner()+
+   (diaryBusy||recording?"":button(diaryEnglishBlob?"일기 저장하기":"일기 저장하기 (녹음 없이)","diary-save"))+
+   '</section>';return;
  }
  if(diaryStep==="saved"){
   const latest=diaryEntries[0];
-  app.innerHTML='<section class="diary diary-saved">'+toolbar+
-   '<div class="guide-complete">✓</div><div class="home-label">오늘의 일기 저장 완료</div><h1>영어 일기를 남겼어요!</h1>'+
-   '<div class="diary-original"><span>오늘의 영어</span><p>'+esc(latest?.english||"")+'</p></div>'+
-   button("다음 일기도 쓰기","diary-new")+'<button class="home-link" data-action="diary-list">지난 일기 보기 <span>›</span></button></section>';
+  app.innerHTML='<section class="diary diary-tutorial diary-saved">'+
+   '<div class="guide-complete">✓</div><h1>오늘의 일기 완성!</h1><div class="diary-english-card">'+esc(latest?.english||"")+'</div>'+
+   button("학습 홈으로","home")+secondary("지난 일기 보기","diary-list")+ '<p class="diary-privacy">이 기기에 저장됐어요.</p></section>';
  }
 }
 function renderDiaryList(){
@@ -1091,7 +1128,7 @@ async function fetchDiaryClip(id){
  });
 }
 function diaryReset(){
- diaryKorean="";diaryEnglish="";diaryError="";diaryBusy=false;diaryStep="korean";diaryEnglishBlob=null;
+ diaryKorean="";diaryEnglish="";diaryError="";diaryBusy=false;diaryStep="intro";diaryEnglishBlob=null;diaryManual=false;diaryEditEnglish=false;diaryPracticeConfirmed=false;
  if(diaryPreviewUrl){URL.revokeObjectURL(diaryPreviewUrl);diaryPreviewUrl=null;}
  saveDiaryDraft();renderDiary();window.scrollTo(0,0);
 }
@@ -1133,7 +1170,7 @@ async function diaryConvert(fromVoice=false){
   if(!translated)throw new Error("영어 문장을 만들지 못했어요. 다시 시도해 주세요.");
   diaryEnglish=translated;diaryEnglishBlob=null;
   if(diaryPreviewUrl){URL.revokeObjectURL(diaryPreviewUrl);diaryPreviewUrl=null;}
-  diaryError="";diaryStep="english";
+  diaryError="";diaryStep="english";diaryEditEnglish=false;
  }catch(e){diaryError=e.message||"영어 변환을 사용할 수 없어요.";}
  diaryBusy=false;diaryPhase="";saveDiaryDraft();if(scene==="diary"){renderDiary();window.scrollTo(0,0);}
 }
@@ -1153,6 +1190,7 @@ async function diarySave(){
   diaryEntries=nextEntries;
   try{localStorage.removeItem(DIARY_DRAFT_KEY);}catch(e){}
   diaryStep="saved";diaryBusy=false;diaryError="";diaryEnglishBlob=null;
+  if(diaryPreviewUrl){URL.revokeObjectURL(diaryPreviewUrl);diaryPreviewUrl=null;}
   renderDiary();
  }catch(e){
   diaryProblem("녹음 저장에 실패했어요. 브라우저 저장 공간을 확인하거나 다른 브라우저에서 시도해 주세요.");
@@ -1213,12 +1251,30 @@ async function diaryPlaySaved(i,button){
  }catch(e){button.textContent="녹음 확인 불가";}
 }
 async function diaryAction(which,button){
+ if(which==="diary-start"){if(!diaryAIStatus?.configured)return;diaryManual=false;diaryPracticeConfirmed=false;diaryStep="korean";diaryError="";renderDiary();window.scrollTo(0,0);return;}
+ if(which==="diary-manual-start"){diaryManual=true;diaryStep="korean";diaryError="";renderDiary();window.scrollTo(0,0);return;}
+ if(which==="diary-manual-next"){diaryCaptureFields();if(!diaryKorean.trim()){diaryProblem("한국어 문장을 적어주세요.");return;}diaryStep="english";diaryEditEnglish=true;diaryError="";renderDiary();window.scrollTo(0,0);return;}
+ if(which==="diary-practice-convert"){diaryPracticeConfirmed=true;return diaryConvert();}
+ if(which==="diary-back"){
+  diaryCaptureFields();diaryError="";
+  if(diaryStep==="korean"){diaryStep="intro";diaryPracticeConfirmed=false;}
+  else if(diaryStep==="english"){diaryStep="korean";diaryPracticeConfirmed=false;}
+  else if(diaryStep==="read"){diaryStep="english";}
+  else{scene="home";render();return;}
+  renderDiary();window.scrollTo(0,0);return;
+ }
+ if(which==="diary-edit-en"){diaryCaptureFields();diaryEditEnglish=true;renderDiary();return;}
+ if(which==="diary-read"){
+  diaryCaptureFields();if(!diaryEnglish.trim()){diaryProblem("영어 문장을 적어주세요.");return;}
+  try{currentAudio?.pause();window.speechSynthesis?.cancel();}catch(e){}
+  diaryStep="read";diaryError="";renderDiary();window.scrollTo(0,0);return;
+ }
  if(which==="diary-record-ko")return diaryToggleRecord("ko");
  if(which==="diary-record-en")return diaryToggleRecord("en");
  if(which==="diary-convert")return diaryConvert();
  if(which==="diary-save")return diarySave();
  if(which==="diary-list"){diaryCaptureFields();scene="diary-library";render();window.scrollTo(0,0);return;}
- if(which==="diary-new"){diaryAIStatus=null;diaryPracticeConfirmed=false;diaryReset();scene="diary";render();diaryRefreshAI();return;}
+ if(which==="diary-new"){diaryReset();diaryOpen();return;}
  if(which==="diary-edit-korean"){diaryCaptureFields();diaryPracticeConfirmed=false;diaryStep="korean";diaryError="";renderDiary();return;}
  if(which==="diary-manual"){diaryCaptureFields();diaryStep="english";diaryError="";renderDiary();return;}
  if(which==="diary-listen"){diaryCaptureFields();if(diaryEnglish.trim())playEnglish(diaryEnglish.trim(),button);return;}
@@ -1233,8 +1289,7 @@ app.addEventListener("click",e=>{
  else if(el.hasAttribute("data-action"))action(el.dataset.action,el);
 });
 app.addEventListener("input",e=>{
- if(e.target.id==="diary-practice"){diaryPracticeConfirmed=e.target.checked;return;}
- if(e.target.id==="diary-korean"){diaryKorean=e.target.value;diaryPracticeConfirmed=false;const c=app.querySelector("#diary-practice");if(c)c.checked=false;saveDiaryDraft();}
+ if(e.target.id==="diary-korean"){diaryKorean=e.target.value;diaryPracticeConfirmed=false;saveDiaryDraft();}
  if(e.target.id==="diary-english"){diaryEnglish=e.target.value;saveDiaryDraft();}
 });
 
