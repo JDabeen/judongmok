@@ -492,13 +492,13 @@ async function playEnglish(text,button){
    return true;
   }
   // Without a server API key, use browser speech if the mobile browser supports it.
-  if(speak(text))return true;
+  if(!/kakaotalk/i.test(navigator.userAgent||"")&&speak(text))return true;
   const hint=document.createElement("p");hint.className="audio-hint";
   hint.textContent="카카오톡에서 음성이 안 나오면 ⋯ → 다른 브라우저로 열기를 선택해 주세요.";
   button.insertAdjacentElement("afterend",hint);
   return false;
  }catch(e){
-  if(speak(text))return true;
+  if(!/kakaotalk/i.test(navigator.userAgent||"")&&speak(text))return true;
   const hint=document.createElement("p");hint.className="audio-hint";
   hint.textContent="음원을 불러올 수 없어요. 잠시 후 다시 시도하거나 다른 브라우저에서 열어주세요.";
   button.insertAdjacentElement("afterend",hint);
