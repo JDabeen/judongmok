@@ -4,12 +4,14 @@ export default async function(request){
  if(request.method!=="POST")return reply("METHOD_NOT_ALLOWED",405);
  const origin=request.headers.get("origin");
  if(origin&&origin!==new URL(request.url).origin)return reply("ORIGIN_NOT_ALLOWED",403);
- const key=process.env.OPENAI_API_KEY;if(!key)return reply("NOT_CONFIGURED",503);
+ const key=process.env.JM_OPENAI_API_KEY||process.env.OPENAI_API_KEY;
+ const base=(process.env.JM_OPENAI_API_KEY?"https://api.openai.com":process.env.OPENAI_BASE_URL||"https://api.openai.com").replace(/\/v1\/?$/,"").replace(/\/$/,"");
+ if(!key)return reply("NOT_CONFIGURED",503);
  try{
   const {text}=await request.json();
   if(typeof text!=="string"||text.trim().length<2||text.length>650)return reply("INVALID_TEXT",400);
   // Keep outputs strictly bounded; do not log or persist personal text.
-  const res=await fetch("https://api.openai.com/v1/audio/speech",{
+  const res=await fetch(base+"/v1/audio/speech",{
    method:"POST",headers:{"Authorization":"Bearer "+key,"content-type":"application/json"},
    body:JSON.stringify({model:"gpt-4o-mini-tts",voice:"alloy",input:text.trim(),response_format:"mp3"}),
    signal:AbortSignal.timeout(25000)
