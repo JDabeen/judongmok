@@ -1014,7 +1014,7 @@ let diaryDraft=diaryRead(DIARY_DRAFT_KEY,{korean:"",english:""});
 let diaryKorean=typeof diaryDraft.korean==="string"?diaryDraft.korean:"";
 let diaryEnglish=typeof diaryDraft.english==="string"?diaryDraft.english:"";
 let diaryAIStatus=null,diaryPracticeConfirmed=false;
-let diaryManual=false,diaryEditEnglish=false,diaryRequestId=0;
+let diaryManual=false,diaryEditEnglish=false,diaryRequestId=0,diaryAIChecking=false;
 let diaryStep="intro",diaryError="",diaryBusy=false,diaryPhase="",diaryRecorder=null,diaryStream=null,diaryRecordKind="",diaryChunks=[],diaryEnglishBlob=null,diaryPreviewUrl=null;
 function diaryOpen(){
  if(diaryStep==="saved")diaryReset();
@@ -1022,7 +1022,7 @@ function diaryOpen(){
  scene="diary";render();window.scrollTo(0,0);diaryRefreshAI();
 }
 async function diaryRefreshAI(){
- const requestId=++diaryRequestId;diaryAIStatus=null;diaryPracticeConfirmed=false;
+ const requestId=++diaryRequestId;diaryAIStatus=null;diaryPracticeConfirmed=false;diaryAIChecking=true;
  try{
   const res=await fetch("/.netlify/functions/jm-diary-english",{cache:"no-store"});
   if(!res.ok)throw Error("AI_CONFIG");
@@ -1031,6 +1031,7 @@ async function diaryRefreshAI(){
   if(requestId!==diaryRequestId)return;
   diaryAIStatus=data;
  }catch(e){if(requestId!==diaryRequestId)return;diaryAIStatus=null;}
+ diaryAIChecking=false;
  if(scene==="diary"&&diaryStep==="intro"){renderDiary();}
 }
 function saveDiaryDraft(){
@@ -1050,8 +1051,8 @@ function renderDiary(){
  if(diaryStep==="intro"){
   app.innerHTML='<section class="diary diary-tutorial"><div class="diary-toolbar"><button class="back" data-action="home">‹ 학습</button>'+secondary("지난 일기","diary-list")+'</div>'+
    '<h1>영어 일기를<br>써볼까요?</h1><div class="diary-example">오늘 커피를 마셨어요.<span aria-hidden="true">↓</span>I drank coffee today.</div>'+
-   (ready?'<p class="diary-lead">'+(practiceOnly?"가상 문장으로 연습해요.":"내 이야기를 영어로 바꿔보세요.")+'</p>': '<p class="diary-lead">'+(diaryAIStatus?"AI 연결이 필요해요.":"AI 연결을 확인하고 있어요.")+'</p>')+
-   (ready?button("시작하기","diary-start"):"")+
+   (ready?'<p class="diary-lead">'+(practiceOnly?"가상 문장으로 연습해요.":"내 이야기를 영어로 바꿔보세요.")+'</p>': '<p class="diary-lead">'+(diaryAIChecking?"AI 연결을 확인하고 있어요.":"AI 연결을 확인해 주세요.")+'</p>')+
+   (ready?button("시작하기","diary-start"):diaryAIChecking?"":button("다시 연결하기","diary-retry-ai"))+
    (practiceOnly&&ready?'<p class="diary-privacy">무료 AI에는 실제 일기·개인정보를 보내지 마세요. 입력은 AI 개선에 사용될 수 있어요.</p>':'')+
    secondary("영어 직접 쓰기","diary-manual-start")+
    '</section>';return;
@@ -1135,7 +1136,7 @@ function diaryReset(){
 function diaryCaptureFields(){
  const ko=app.querySelector("#diary-korean"),en=app.querySelector("#diary-english");
  if(ko)diaryKorean=ko.value;if(en)diaryEnglish=en.value;
- saveDiaryDraft();
+ if(ko||en)saveDiaryDraft();
 }
 async function diaryTranscribe(file){
  if(diaryBusy)return;
@@ -1251,6 +1252,7 @@ async function diaryPlaySaved(i,button){
  }catch(e){button.textContent="녹음 확인 불가";}
 }
 async function diaryAction(which,button){
+ if(which==="diary-retry-ai"){diaryRefreshAI();renderDiary();return;}
  if(which==="diary-start"){if(!diaryAIStatus?.configured)return;diaryManual=false;diaryPracticeConfirmed=false;diaryStep="korean";diaryError="";renderDiary();window.scrollTo(0,0);return;}
  if(which==="diary-manual-start"){diaryManual=true;diaryStep="korean";diaryError="";renderDiary();window.scrollTo(0,0);return;}
  if(which==="diary-manual-next"){diaryCaptureFields();if(!diaryKorean.trim()){diaryProblem("한국어 문장을 적어주세요.");return;}diaryStep="english";diaryEditEnglish=true;diaryError="";renderDiary();window.scrollTo(0,0);return;}
@@ -1290,7 +1292,7 @@ app.addEventListener("click",e=>{
 });
 app.addEventListener("input",e=>{
  if(e.target.id==="diary-korean"){diaryKorean=e.target.value;diaryPracticeConfirmed=false;saveDiaryDraft();}
- if(e.target.id==="diary-english"){diaryEnglish=e.target.value;saveDiaryDraft();}
+ if(e.target.id==="diary-english"){diaryEnglish=e.target.value;diaryEnglishBlob=null;if(diaryPreviewUrl){URL.revokeObjectURL(diaryPreviewUrl);diaryPreviewUrl=null;}saveDiaryDraft();}
 });
 
 render();
