@@ -319,6 +319,11 @@ main{flex:1;display:flex;flex-direction:column;padding:0 30px 34px;min-width:0}
  .done h2{font-size:26px;margin-bottom:14px}
  .done .result{padding:15px 13px}
 }
+
+/* Kakao WebView: native HTML audio controls stay available when .play() is blocked. */
+.inline-audio{margin:9px 0 10px;width:100%;min-width:0}
+.inline-audio audio{display:block;width:100%;max-width:100%;height:46px}
+.audio-hint{font-size:14px;color:#61728c;line-height:1.5;margin:8px 0 10px;word-break:keep-all}
 </style></head><body><div class="screen"><header class="header"><div class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>주동목</div></header><main id="app"></main></div><script>
 (()=>{'use strict';
 const app=document.querySelector("#app");
@@ -400,6 +405,50 @@ function speak(text){
   synth.speak(utterance);
   return true;
  }catch(e){return false;}
+}
+
+const speechFiles=new Map();
+let currentAudio=null;
+async function playEnglish(text,button){
+ if(!text||!button)return false;
+ const original=button.textContent;
+ button.disabled=true;button.textContent="🔄 음원 준비 중...";
+ try{
+  let url=speechFiles.get(text);
+  if(!url){
+   const response=await fetch("/.netlify/functions/jm-audio",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text})});
+   if(response.ok){
+    url=URL.createObjectURL(await response.blob());
+    speechFiles.set(text,url);
+    if(speechFiles.size>16){const [oldKey,oldUrl]=speechFiles.entries().next().value;speechFiles.delete(oldKey);URL.revokeObjectURL(oldUrl);}
+   }
+  }
+  if(url){
+   try{currentAudio?.pause();}catch(e){}
+   const holder=document.createElement("div");holder.className="inline-audio";
+   const audio=document.createElement("audio");audio.controls=true;audio.preload="metadata";audio.setAttribute("playsinline","");
+   audio.src=url;holder.appendChild(audio);
+   const previous=button.parentElement?.querySelector(".inline-audio");if(previous)previous.remove();
+   button.insertAdjacentElement("afterend",holder);currentAudio=audio;
+   try{await audio.play();}catch(e){
+    const hint=document.createElement("p");hint.className="audio-hint";
+    hint.textContent="음원이 준비됐어요. ▶ 버튼을 눌러주세요.";holder.appendChild(hint);
+   }
+   return true;
+  }
+  // Without a server API key, use browser speech if the mobile browser supports it.
+  if(speak(text))return true;
+  const hint=document.createElement("p");hint.className="audio-hint";
+  hint.textContent="카카오톡에서 음성이 안 나오면 ⋯ → 다른 브라우저로 열기를 선택해 주세요.";
+  button.insertAdjacentElement("afterend",hint);
+  return false;
+ }catch(e){
+  if(speak(text))return true;
+  const hint=document.createElement("p");hint.className="audio-hint";
+  hint.textContent="음원을 불러올 수 없어요. 잠시 후 다시 시도하거나 다른 브라우저에서 열어주세요.";
+  button.insertAdjacentElement("afterend",hint);
+  return false;
+ }finally{button.disabled=false;button.textContent=original;}
 }
 function showVoiceUnavailable(button){
  if(!button)return;
@@ -675,13 +724,13 @@ function action(which,el){
  if(which==="review"){scene="review";reviewShown.clear();render();window.scrollTo(0,0);}
  if(which==="catalog"){scene="catalog";render();window.scrollTo(0,0);}
  if(which==="home"){scene="home";render();window.scrollTo(0,0);}
- if(which==="listen"){if(!speak(resultSentence))showVoiceUnavailable(el);}
+ if(which==="listen"){playEnglish(resultSentence,el);}
  if(which==="replay-celebration"){tapEffect(true);celebrate(true);}
- if(which==="listen-daily"){if(scene==="daily"){const a=dailyCurrent();if(dailySolved(a)&&!speak(dailyEnglish(a)))showVoiceUnavailable(el);}}
+ if(which==="listen-daily"){if(scene==="daily"){const a=dailyCurrent();if(dailySolved(a))playEnglish(dailyEnglish(a),el);}}
  if(which==="next-daily"){if(scene==="daily"&&dailySolved(dailyCurrent())){tapEffect(false);nextDaily();}}
  if(which==="share"){share();}
  if(which==="reveal"){reviewShown.add(Number(el.dataset.index));render();}
- if(which==="review-speak"){const x=progress.history[Number(el.dataset.index)];if(x&&!speak(x.en))showVoiceUnavailable(el);}
+ if(which==="review-speak"){const x=progress.history[Number(el.dataset.index)];if(x)playEnglish(x.en,el);}
 }
 app.addEventListener("click",e=>{
  const el=e.target.closest("button");if(!el||el.disabled)return;
